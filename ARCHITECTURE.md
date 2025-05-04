@@ -9,7 +9,7 @@
 | /api/games/{gameId}/move | POST   | La mossa eseguita nel client viene mandata al backend per essere validata | `{ "from": "a2", "to": "a4", "player": "white" }` | `{ "valid": true }` |
 | /api/games/{id}/board    | GET    | Ritorna JSON che mostra la scacchiera della partita in corso     | - | `{ "board": [...] }` |
 
-## PYTHON(?) REST API
+### PYTHON(?) REST API
 
 | Endpoint          | Method | Description                                              | Input | Output |
 |-------------------|--------|----------------------------------------------------------|-------|--------|
@@ -17,10 +17,10 @@
 
 ## Case conventions
 
-camelCase - nomi di metodi, funzioni e variabili
+**camelCase** - nomi di metodi, funzioni e variabili
 
-PascalCase - nomi di classi e interfacce
+**PascalCase** - nomi di classi e interfacce
 
-SNAKE_CASE maiuscolo - per costanti
+**SNAKE_CASE** maiuscolo - per costanti
 
 *nomi preferibilmente in inglese*
