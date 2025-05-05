@@ -16,9 +16,8 @@ public class SessionGame extends BaseEntity
 	@Convert(converter = StringMatrixConverter.class)
 	private String[][] board = new String[8][8];
 
-	@Enumerated(EnumType.STRING)
-	private Team team;
-	private int turno;
+
+	private Team turno;
 	private int pedineW;
 	private int pedineB;
 	private int damaW;
@@ -26,4 +25,23 @@ public class SessionGame extends BaseEntity
 	private boolean partitaTerminata;
 	@Enumerated(EnumType.STRING)
 	private Team vincitore;
+
+
+	@Transient
+	private final String[][] BOARDINIT = {
+			{"", "b", "", "b", "", "b", "", "b"},
+			{"b", "", "b", "", "b", "", "b", ""},
+			{"", "b", "", "b", "", "b", "", "b"},
+			{"", "", "", "", "", "", "", ""},
+			{"", "", "", "", "", "", "", ""},
+			{"w", "", "w", "", "w", "", "w", ""},
+			{"", "w", "", "w", "", "w", "", "w"},
+			{"w", "", "w", "", "w", "", "w", ""}
+	};
+
+
+
+
+
+
 }
