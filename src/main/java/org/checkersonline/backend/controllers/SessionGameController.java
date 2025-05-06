@@ -25,8 +25,6 @@ public class SessionGameController {
     @Autowired
     PlayerDao pDao;
 
-    @Autowired
-    GameService gameService;
 
     @Autowired
     GameMapper gameMapper;
@@ -56,17 +54,26 @@ public class SessionGameController {
     }
 
     @PostMapping("/join/{id}")
-    public GameDto joinGame(@PathVariable String id, @RequestBody PlayerDto player) {
+    public boolean joinGame(@PathVariable String id, @RequestBody PlayerDto player) {
 
+        boolean success = true;
         Game g = gameDao.findById(id).orElse(null);
         if (g == null) {
+            success = false;
             throw new SessionGameNotFoundException("Game not found");
         }
 
+
         g.addPlayer(pDao.findByNickname(player.nickname()));
         gameDao.save(g);
-        return gameMapper.toDto(g);
+        return success;
+    }
 
+    @GetMapping("/{id}/board")
+    public GameDto getGame(@PathVariable String id) {
+        Game g = gameDao.findById(id).orElseThrow(() -> new SessionGameNotFoundException(id));
+        GameDto gdto = gameMapper.toDto(g);
+        return gdto;
     }
 
 
