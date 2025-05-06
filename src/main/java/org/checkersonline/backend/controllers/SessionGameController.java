@@ -52,6 +52,7 @@ public class SessionGameController {
         game.setPartitaTerminata(false);
         game.setVincitore(Team.NONE);
         Player p = pDao.findByNickname(player.nickname());
+        p.setTeam(Team.WHITE);
         game.addPlayer(p);
         gameDao.save(game);
 
@@ -67,7 +68,9 @@ public class SessionGameController {
             return success;
         }
 
-        g.addPlayer(pDao.findByNickname(player.nickname()));
+        Player p = pDao.findByNickname(player.nickname());
+        p.setTeam(Team.BLACK);
+        g.addPlayer(p);
         gameDao.save(g);
         return success;
     }
