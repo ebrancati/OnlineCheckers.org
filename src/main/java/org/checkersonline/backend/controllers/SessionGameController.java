@@ -5,9 +5,11 @@ import org.checkersonline.backend.exceptions.SessionGameNotFoundException;
 import org.checkersonline.backend.model.daos.GameDao;
 import org.checkersonline.backend.model.daos.PlayerDao;
 import org.checkersonline.backend.model.dtos.GameDto;
+import org.checkersonline.backend.model.dtos.MoveDto;
 import org.checkersonline.backend.model.dtos.PlayerDto;
 import org.checkersonline.backend.model.dtos.mappers.GameMapper;
 import org.checkersonline.backend.model.dtos.services.GameService;
+import org.checkersonline.backend.model.dtos.services.MoveService;
 import org.checkersonline.backend.model.entities.Game;
 import org.checkersonline.backend.model.entities.Player;
 import org.checkersonline.backend.model.entities.SessionGame;
@@ -28,6 +30,9 @@ public class SessionGameController {
 
     @Autowired
     GameMapper gameMapper;
+
+    @Autowired
+    private MoveService moveService;
 
 
     @GetMapping("/{id}")
@@ -55,14 +60,12 @@ public class SessionGameController {
 
     @PostMapping("/join/{id}")
     public boolean joinGame(@PathVariable String id, @RequestBody PlayerDto player) {
-
         boolean success = true;
         Game g = gameDao.findById(id).orElse(null);
         if (g == null) {
             success = false;
-            throw new SessionGameNotFoundException("Game not found");
+            return success;
         }
-
 
         g.addPlayer(pDao.findByNickname(player.nickname()));
         gameDao.save(g);
@@ -74,6 +77,12 @@ public class SessionGameController {
         Game g = gameDao.findById(id).orElseThrow(() -> new SessionGameNotFoundException(id));
         GameDto gdto = gameMapper.toDto(g);
         return gdto;
+    }
+
+    @PostMapping("/{id}/move")
+    public GameDto makeMove(@PathVariable String id, @RequestBody MoveDto move) {
+        Game updated = moveService.makeMove(id, move);
+        return gameMapper.toDto(updated);
     }
 
 
