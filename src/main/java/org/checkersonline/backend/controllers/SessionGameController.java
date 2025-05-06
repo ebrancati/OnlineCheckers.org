@@ -4,6 +4,7 @@ package org.checkersonline.backend.controllers;
 import org.checkersonline.backend.exceptions.SessionGameNotFoundException;
 import org.checkersonline.backend.model.daos.GameDao;
 import org.checkersonline.backend.model.daos.PlayerDao;
+import org.checkersonline.backend.model.dtos.PlayerDto;
 import org.checkersonline.backend.model.entities.Game;
 import org.checkersonline.backend.model.entities.Player;
 import org.checkersonline.backend.model.entities.enums.Team;
@@ -26,7 +27,7 @@ public class SessionGameController {
     }
 
     @PostMapping("/create")
-    public Game createGame(@RequestBody String nickname) {
+    public Game createGame(@RequestBody PlayerDto player) {
         Game game = new Game();
         game.setBoard(game.getBOARDINIT());
         game.setTurno(Team.WHITE);
@@ -36,10 +37,8 @@ public class SessionGameController {
         game.setDamaB(0);
         game.setPartitaTerminata(false);
         game.setVincitore(Team.NONE);
-        Player p = pDao.findByNickname(nickname);
-        p.setGame(game);
+        Player p = pDao.findByNickname(player.nickname());
         game.addPlayer(p);
-        pDao.save(p);
         gameDao.save(game);
 
         return game;

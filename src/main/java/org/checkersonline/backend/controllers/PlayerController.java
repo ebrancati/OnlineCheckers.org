@@ -2,6 +2,8 @@ package org.checkersonline.backend.controllers;
 
 
 import org.checkersonline.backend.model.daos.PlayerDao;
+import org.checkersonline.backend.model.dtos.PlayerDto;
+import org.checkersonline.backend.model.dtos.services.PlayerService;
 import org.checkersonline.backend.model.entities.Player;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -13,15 +15,19 @@ public class PlayerController {
     @Autowired
     PlayerDao pDao;
 
+    @Autowired
+    PlayerService pService;
+
     @GetMapping("/{id}")
-    public Player getPlayer(@PathVariable("id") String id) {
-        Player p = pDao.findById(id).orElse(null);
-        return p;
+    public PlayerDto getPlayer(@PathVariable("id") String id) {
+
+        return pDao.findById(id)
+                .map(p -> pService.getPlayer(p.getNickname())).orElse(null);
     }
 
     @PostMapping("/create")
-    public Player createPlayer(@RequestBody Player p) {
-        return pDao.save(p);
+    public Player createPlayer(@RequestBody PlayerDto p) {
+        return pService.createPlayer(p);
     }
 
 

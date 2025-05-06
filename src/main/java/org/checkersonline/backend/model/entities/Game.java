@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -15,7 +16,7 @@ public class Game extends SessionGame
 {
 
 	@OneToMany(mappedBy = "game")
-	List<Player> players;
+	List<Player> players = new ArrayList<>();
 
 
 	public void addPlayer(Player p) {
