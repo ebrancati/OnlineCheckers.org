@@ -1,7 +1,7 @@
 package org.checkersonline.backend.controllers;
 
 
-import org.checkersonline.backend.model.dao.PlayerDao;
+import org.checkersonline.backend.model.daos.PlayerDao;
 import org.checkersonline.backend.model.entities.Player;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

@@ -1,10 +1,9 @@
 package org.checkersonline.backend.controllers;
 
 
-import org.checkersonline.backend.exceptions.SessionGameNotFound;
-import org.checkersonline.backend.model.dao.GameDao;
-import org.checkersonline.backend.model.dao.PlayerDao;
-import org.checkersonline.backend.model.dao.SessionGameDao;
+import org.checkersonline.backend.exceptions.SessionGameNotFoundException;
+import org.checkersonline.backend.model.daos.GameDao;
+import org.checkersonline.backend.model.daos.PlayerDao;
 import org.checkersonline.backend.model.entities.Game;
 import org.checkersonline.backend.model.entities.Player;
 import org.checkersonline.backend.model.entities.enums.Team;
@@ -21,6 +20,11 @@ public class SessionGameController {
     @Autowired
     PlayerDao pDao;
 
+    @GetMapping("/{id}")
+    public Game stateGame(@PathVariable String id) {
+        return gameDao.findById(id).orElseThrow(() -> new SessionGameNotFoundException(id));
+    }
+
     @PostMapping("/create")
     public Game createGame(@RequestBody String nickname) {
         Game game = new Game();
@@ -32,7 +36,10 @@ public class SessionGameController {
         game.setDamaB(0);
         game.setPartitaTerminata(false);
         game.setVincitore(Team.NONE);
-        game.addPlayer(pDao.findByNickname(nickname));
+        Player p = pDao.findByNickname(nickname);
+        p.setGame(game);
+        game.addPlayer(p);
+        pDao.save(p);
         gameDao.save(game);
 
         return game;
@@ -43,7 +50,7 @@ public class SessionGameController {
 
         Game g = gameDao.findById(id).orElse(null);
         if (g == null) {
-            throw new SessionGameNotFound("Game not found");
+            throw new SessionGameNotFoundException("Game not found");
         }
 
         g.addPlayer(pDao.findByNickname(nickname));

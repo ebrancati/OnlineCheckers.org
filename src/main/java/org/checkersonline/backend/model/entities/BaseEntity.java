@@ -15,5 +15,5 @@ public class BaseEntity
 {
 	@Id
 	@GeneratedValue(strategy = GenerationType.UUID)
-	protected Long id;
+	protected String id;
 }
