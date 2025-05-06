@@ -4,9 +4,13 @@ package org.checkersonline.backend.controllers;
 import org.checkersonline.backend.exceptions.SessionGameNotFoundException;
 import org.checkersonline.backend.model.daos.GameDao;
 import org.checkersonline.backend.model.daos.PlayerDao;
+import org.checkersonline.backend.model.dtos.GameDto;
 import org.checkersonline.backend.model.dtos.PlayerDto;
+import org.checkersonline.backend.model.dtos.mappers.GameMapper;
+import org.checkersonline.backend.model.dtos.services.GameService;
 import org.checkersonline.backend.model.entities.Game;
 import org.checkersonline.backend.model.entities.Player;
+import org.checkersonline.backend.model.entities.SessionGame;
 import org.checkersonline.backend.model.entities.enums.Team;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -21,13 +25,20 @@ public class SessionGameController {
     @Autowired
     PlayerDao pDao;
 
+    @Autowired
+    GameService gameService;
+
+    @Autowired
+    GameMapper gameMapper;
+
+
     @GetMapping("/{id}")
     public Game stateGame(@PathVariable String id) {
         return gameDao.findById(id).orElseThrow(() -> new SessionGameNotFoundException(id));
     }
 
     @PostMapping("/create")
-    public Game createGame(@RequestBody PlayerDto player) {
+    public GameDto createGame(@RequestBody PlayerDto player) {
         Game game = new Game();
         game.setBoard(game.getBOARDINIT());
         game.setTurno(Team.WHITE);
@@ -41,20 +52,20 @@ public class SessionGameController {
         game.addPlayer(p);
         gameDao.save(game);
 
-        return game;
+        return gameMapper.toDto(game);
     }
 
     @PostMapping("/join/{id}")
-    public Game joinGame(@PathVariable String id, @RequestBody String nickname) {
+    public GameDto joinGame(@PathVariable String id, @RequestBody PlayerDto player) {
 
         Game g = gameDao.findById(id).orElse(null);
         if (g == null) {
             throw new SessionGameNotFoundException("Game not found");
         }
 
-        g.addPlayer(pDao.findByNickname(nickname));
+        g.addPlayer(pDao.findByNickname(player.nickname()));
         gameDao.save(g);
-        return g;
+        return gameMapper.toDto(g);
 
     }
 

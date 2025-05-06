@@ -15,6 +15,7 @@ import java.util.List;
 public class Game extends SessionGame
 {
 
+
 	@OneToMany(mappedBy = "game")
 	List<Player> players = new ArrayList<>();
 
