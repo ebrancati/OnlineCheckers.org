@@ -26,20 +26,16 @@ public class MoveService {
         Game game = gameDao.findById(gameId)
                 .orElseThrow(() -> new SessionGameNotFoundException(gameId));
 
-        // Validazione campo player
+        // Validazione player
         if (dto.getPlayer() == null) {
             throw new InvalidMoveException("Player field is required");
         }
-
-        // Parsing team dal DTO
         Team player;
         try {
             player = Team.valueOf(dto.getPlayer().toUpperCase());
         } catch (IllegalArgumentException ex) {
             throw new InvalidMoveException("Invalid player: " + dto.getPlayer());
         }
-
-        // Controllo turno
         if (!player.equals(game.getTurno())) {
             throw new InvalidMoveException("Not " + player + "'s turn.");
         }
@@ -47,9 +43,8 @@ public class MoveService {
         String[][] board = game.getBoard();
         int fromR = Character.getNumericValue(dto.getFrom().charAt(0));
         int fromC = Character.getNumericValue(dto.getFrom().charAt(1));
-        int toR = Character.getNumericValue(dto.getTo().charAt(0));
-        int toC = Character.getNumericValue(dto.getTo().charAt(1));
-
+        int toR   = Character.getNumericValue(dto.getTo().charAt(0));
+        int toC   = Character.getNumericValue(dto.getTo().charAt(1));
         validateCoordinates(fromR, fromC);
         validateCoordinates(toR, toC);
 
@@ -67,60 +62,74 @@ public class MoveService {
 
         int dr = toR - fromR;
         int dc = toC - fromC;
-        boolean isCapture = Math.abs(dr) > 1;
+
+        // 1) Proviamo a trovare un percorso di cattura (anche multipla, anche con cambi di direzione)
+        List<int[]> captured = findCapturePath(board, fromR, fromC, toR, toC, piece);
+        boolean isCapture = captured != null && !captured.isEmpty();
+
         if (isCapture) {
-            List<int[]> captured = findCapturePath(board, fromR, fromC, toR, toC, piece);
-            if (captured == null) {
-                throw new InvalidMoveException("Invalid capture path.");
-            }
-            // Rimuove pedine catturate
+            // Rimuovo tutte le pedine intercettate
             for (int[] pos : captured) {
                 int r = pos[0], c = pos[1];
                 String cap = board[r][c];
                 board[r][c] = "";
                 if (cap.equalsIgnoreCase("w")) {
                     if (cap.equals("w")) game.setPedineW(game.getPedineW() - 1);
-                    else game.setDamaW(game.getDamaW() - 1);
+                    else                game.setDamaW(game.getDamaW() - 1);
                 } else {
                     if (cap.equals("b")) game.setPedineB(game.getPedineB() - 1);
-                    else game.setDamaB(game.getDamaB() - 1);
+                    else                game.setDamaB(game.getDamaB() - 1);
                 }
             }
         } else {
             // Mossa semplice
-            if (Math.abs(dr) != 1 || Math.abs(dc) != 1) {
-                throw new InvalidMoveException("Invalid simple move.");
-            }
-            // Uomo muove solo avanti
-            if (piece.equals("w") && dr != -1) {
-                throw new InvalidMoveException("White man can only move forward.");
-            }
-            if (piece.equals("b") && dr != 1) {
-                throw new InvalidMoveException("Black man can only move forward.");
+            if (Character.isUpperCase(piece.charAt(0))) {
+                // Dama: può muoversi di qualsiasi lunghezza lungo la diagonale
+                if (Math.abs(dr) != Math.abs(dc) || dr == 0) {
+                    throw new InvalidMoveException("Invalid simple move for king.");
+                }
+                // Verifica che non ci siano pedine intermedie
+                int stepR = dr / Math.abs(dr);
+                int stepC = dc / Math.abs(dc);
+                for (int i = 1; i < Math.abs(dr); i++) {
+                    if (!board[fromR + i*stepR][fromC + i*stepC].isEmpty()) {
+                        throw new InvalidMoveException("Path is blocked for king move.");
+                    }
+                }
+            } else {
+                // Uomo: salto di un passo solo
+                if (Math.abs(dr) != 1 || Math.abs(dc) != 1) {
+                    throw new InvalidMoveException("Invalid simple move.");
+                }
+                // Uomo muove solo avanti
+                if (piece.equals("w") && dr != -1) {
+                    throw new InvalidMoveException("White man can only move forward.");
+                }
+                if (piece.equals("b") && dr != 1) {
+                    throw new InvalidMoveException("Black man can only move forward.");
+                }
             }
         }
 
-        // Sposta la pedina
+        // 2) Sposta la pedina
         board[fromR][fromC] = "";
         boolean promoted = false;
         if (piece.equals("w") && toR == 0) {
-            piece = "W";
-            promoted = true;
+            piece = "W"; promoted = true;
             game.setPedineW(game.getPedineW() - 1);
             game.setDamaW(game.getDamaW() + 1);
         }
         if (piece.equals("b") && toR == 7) {
-            piece = "B";
-            promoted = true;
+            piece = "B"; promoted = true;
             game.setPedineB(game.getPedineB() - 1);
             game.setDamaB(game.getDamaB() + 1);
         }
         board[toR][toC] = piece;
 
-        // Cambia turno
+        // 3) Cambio turno
         game.setTurno(player == Team.WHITE ? Team.BLACK : Team.WHITE);
 
-        // Controllo fine partita
+        // 4) Check fine partita
         if (game.getPedineW() + game.getDamaW() == 0) {
             game.setPartitaTerminata(true);
             game.setVincitore(Team.BLACK);
