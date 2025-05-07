@@ -22,9 +22,24 @@ public class MoveService {
     private GameDao gameDao;
 
     public Game makeMove(String gameId, MoveDto dto) {
+        // Carica partita
         Game game = gameDao.findById(gameId)
                 .orElseThrow(() -> new SessionGameNotFoundException(gameId));
-        Team player = Team.valueOf(dto.getPlayer().toUpperCase());
+
+        // Validazione campo player
+        if (dto.getPlayer() == null) {
+            throw new InvalidMoveException("Player field is required");
+        }
+
+        // Parsing team dal DTO
+        Team player;
+        try {
+            player = Team.valueOf(dto.getPlayer().toUpperCase());
+        } catch (IllegalArgumentException ex) {
+            throw new InvalidMoveException("Invalid player: " + dto.getPlayer());
+        }
+
+        // Controllo turno
         if (!player.equals(game.getTurno())) {
             throw new InvalidMoveException("Not " + player + "'s turn.");
         }
@@ -32,8 +47,8 @@ public class MoveService {
         String[][] board = game.getBoard();
         int fromR = Character.getNumericValue(dto.getFrom().charAt(0));
         int fromC = Character.getNumericValue(dto.getFrom().charAt(1));
-        int toR   = Character.getNumericValue(dto.getTo().charAt(0));
-        int toC   = Character.getNumericValue(dto.getTo().charAt(1));
+        int toR = Character.getNumericValue(dto.getTo().charAt(0));
+        int toC = Character.getNumericValue(dto.getTo().charAt(1));
 
         validateCoordinates(fromR, fromC);
         validateCoordinates(toR, toC);
@@ -58,25 +73,25 @@ public class MoveService {
             if (captured == null) {
                 throw new InvalidMoveException("Invalid capture path.");
             }
-            // Remove captured pieces
+            // Rimuove pedine catturate
             for (int[] pos : captured) {
                 int r = pos[0], c = pos[1];
                 String cap = board[r][c];
                 board[r][c] = "";
                 if (cap.equalsIgnoreCase("w")) {
                     if (cap.equals("w")) game.setPedineW(game.getPedineW() - 1);
-                    else                game.setDamaW(game.getDamaW() - 1);
+                    else game.setDamaW(game.getDamaW() - 1);
                 } else {
                     if (cap.equals("b")) game.setPedineB(game.getPedineB() - 1);
-                    else                game.setDamaB(game.getDamaB() - 1);
+                    else game.setDamaB(game.getDamaB() - 1);
                 }
             }
         } else {
-            // Simple move
+            // Mossa semplice
             if (Math.abs(dr) != 1 || Math.abs(dc) != 1) {
                 throw new InvalidMoveException("Invalid simple move.");
             }
-            // Men move only forward
+            // Uomo muove solo avanti
             if (piece.equals("w") && dr != -1) {
                 throw new InvalidMoveException("White man can only move forward.");
             }
@@ -85,9 +100,8 @@ public class MoveService {
             }
         }
 
-        // Perform move
+        // Sposta la pedina
         board[fromR][fromC] = "";
-        // Promotion
         boolean promoted = false;
         if (piece.equals("w") && toR == 0) {
             piece = "W";
@@ -103,10 +117,10 @@ public class MoveService {
         }
         board[toR][toC] = piece;
 
-        // Switch turn
+        // Cambia turno
         game.setTurno(player == Team.WHITE ? Team.BLACK : Team.WHITE);
 
-        // Check game end
+        // Controllo fine partita
         if (game.getPedineW() + game.getDamaW() == 0) {
             game.setPartitaTerminata(true);
             game.setVincitore(Team.BLACK);
@@ -137,32 +151,65 @@ public class MoveService {
             return new ArrayList<>();
         }
         char pchar = piece.charAt(0);
-        int[][] dirs;
-        if (Character.isUpperCase(pchar)) {
-            dirs = new int[][] {{1,1},{1,-1},{-1,1},{-1,-1}};
-        } else if (piece.equals("w")) {
-            dirs = new int[][] {{-1,-1},{-1,1}};
-        } else {
-            dirs = new int[][] {{1,-1},{1,1}};
-        }
+        // Directions: four diagonals
+        int[][] dirs = new int[][]{{1, 1}, {1, -1}, {-1, 1}, {-1, -1}};
+
         for (int[] d : dirs) {
-            int midR = r + d[0], midC = c + d[1];
-            int landR = r + 2*d[0], landC = c + 2*d[1];
-            if (landR < 0 || landR > 7 || landC < 0 || landC > 7) continue;
-            String cap = board[midR][midC];
-            if (cap.isEmpty() || cap.equalsIgnoreCase(piece)) continue;
-            if (!board[landR][landC].isEmpty()) continue;
-            String key = midR+","+midC+"->"+landR+","+landC;
-            if (used.contains(key)) continue;
-            used.add(key);
-            List<int[]> path = dfs(board, landR, landC, destR, destC, piece, used);
-            if (path != null) {
-                List<int[]> full = new ArrayList<>();
-                full.add(new int[]{midR, midC});
-                full.addAll(path);
-                return full;
+            int dr = d[0], dc = d[1];
+            if (Character.isUpperCase(pchar)) {
+                // King: can capture at any distance
+                // scan for opponent piece along direction
+                for (int step = 1; ; step++) {
+                    int midR = r + step * dr;
+                    int midC = c + step * dc;
+                    if (midR < 0 || midR > 7 || midC < 0 || midC > 7) break;
+                    String cap = board[midR][midC];
+                    if (cap.isEmpty()) continue;
+                    if (cap.equalsIgnoreCase(piece)) break; // own piece
+                    // opponent piece found
+                    // try landing positions beyond
+                    for (int landStep = 1; ; landStep++) {
+                        int landR = midR + landStep * dr;
+                        int landC = midC + landStep * dc;
+                        if (landR < 0 || landR > 7 || landC < 0 || landC > 7) break;
+                        if (!board[landR][landC].isEmpty()) break; // blocked
+                        String key = midR + "," + midC + "->" + landR + "," + landC;
+                        if (used.contains(key)) continue;
+                        used.add(key);
+                        List<int[]> path = dfs(board, landR, landC, destR, destC, piece, used);
+                        if (path != null) {
+                            List<int[]> full = new ArrayList<>();
+                            full.add(new int[]{midR, midC});
+                            full.addAll(path);
+                            return full;
+                        }
+                        used.remove(key);
+                    }
+                    // only first opponent can be captured
+                    break;
+                }
+            } else {
+                // Man: only adjacent capture
+                int midR = r + dr;
+                int midC = c + dc;
+                int landR = r + 2 * dr;
+                int landC = c + 2 * dc;
+                if (landR < 0 || landR > 7 || landC < 0 || landC > 7) continue;
+                String cap = board[midR][midC];
+                if (cap.isEmpty() || cap.equalsIgnoreCase(piece)) continue;
+                if (!board[landR][landC].isEmpty()) continue;
+                String key = midR + "," + midC + "->" + landR + "," + landC;
+                if (used.contains(key)) continue;
+                used.add(key);
+                List<int[]> path = dfs(board, landR, landC, destR, destC, piece, used);
+                if (path != null) {
+                    List<int[]> full = new ArrayList<>();
+                    full.add(new int[]{midR, midC});
+                    full.addAll(path);
+                    return full;
+                }
+                used.remove(key);
             }
-            used.remove(key);
         }
         return null;
     }

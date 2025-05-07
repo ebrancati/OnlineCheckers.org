@@ -1,6 +1,7 @@
 package org.checkersonline.backend.controllers;
 
 
+import org.checkersonline.backend.exceptions.PlayerNotFoundException;
 import org.checkersonline.backend.exceptions.SessionGameNotFoundException;
 import org.checkersonline.backend.model.daos.GameDao;
 import org.checkersonline.backend.model.daos.PlayerDao;
@@ -86,6 +87,25 @@ public class SessionGameController {
     public GameDto makeMove(@PathVariable String id, @RequestBody MoveDto move) {
         Game updated = moveService.makeMove(id, move);
         return gameMapper.toDto(updated);
+    }
+
+    @DeleteMapping("/{id}/delete")
+    public boolean deleteGame(@PathVariable String id) {
+        try{
+            pDao.deleteAllByGameId(id);
+        }catch (PlayerNotFoundException e) {
+            System.out.println("Players not found on session game " +id);
+            return false;
+        }
+
+        try{
+            gameDao.deleteById(id);
+        }catch (SessionGameNotFoundException e) {
+            System.out.println("Session with id " + id + " not found, is not possible delete it");
+            return false;
+        }
+
+        return true;
     }
 
 
