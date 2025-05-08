@@ -143,7 +143,7 @@ public class MoveService {
         }
 
 
-        game.getCronologiaMosse().add(""+fromR + fromC + "-" + toR + toC + "-" + dto.getPlayer());
+        game.getCronologiaMosse().add(dto.getFrom() + "-" + dto.getTo() + "-" + dto.getPlayer());
         return gameDao.save(game);
     }
 

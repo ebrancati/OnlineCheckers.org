@@ -4,8 +4,6 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.checkersonline.backend.model.dtos.MoveDto;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,6 +22,7 @@ public class Game extends SessionGame
 	private String chat;
 
 
+	@Convert(converter = StringListConverter.class)
 	private List<String> cronologiaMosse = new ArrayList<>();
 
 
