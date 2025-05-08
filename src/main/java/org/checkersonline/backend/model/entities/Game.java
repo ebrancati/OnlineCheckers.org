@@ -20,7 +20,7 @@ public class Game extends SessionGame
 
 
 	@Column(columnDefinition = "TEXT")
-	private String chat;
+	private String chat = "Chat:\n";
 
 
 	@Column(columnDefinition = "TEXT")
