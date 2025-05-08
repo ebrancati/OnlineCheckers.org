@@ -19,9 +19,11 @@ public class Game extends SessionGame
 	List<Player> players = new ArrayList<>();
 
 
+	@Column(columnDefinition = "TEXT")
 	private String chat;
 
 
+	@Column(columnDefinition = "TEXT")
 	@Convert(converter = StringListConverter.class)
 	private List<String> cronologiaMosse = new ArrayList<>();
 
