@@ -20,7 +20,9 @@ public class Game extends SessionGame
 	@OneToMany(mappedBy = "game")
 	List<Player> players = new ArrayList<>();
 
+
 	private String chat;
+
 
 	private List<String> cronologiaMosse = new ArrayList<>();
 
