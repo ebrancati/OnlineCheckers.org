@@ -7,7 +7,9 @@ import java.util.List;
 
 public interface PlayerDao extends JpaRepository<Player, String>
 {
-    Player findByNickname(String nickname);
+    List<Player> findByNickname(String nickname);
 
-    List<Player> deleteAllByGameId(String gameId);
+    void deleteAllByGameId(String gameId);
+
+
 }

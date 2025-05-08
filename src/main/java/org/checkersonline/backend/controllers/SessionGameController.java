@@ -16,7 +16,10 @@ import org.checkersonline.backend.model.entities.Player;
 import org.checkersonline.backend.model.entities.SessionGame;
 import org.checkersonline.backend.model.entities.enums.Team;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/games")
@@ -52,9 +55,15 @@ public class SessionGameController {
         game.setDamaB(0);
         game.setPartitaTerminata(false);
         game.setVincitore(Team.NONE);
-        Player p = pDao.findByNickname(player.nickname());
-        p.setTeam(Team.WHITE);
-        game.addPlayer(p);
+        List<Player> p = pDao.findByNickname(player.nickname());
+        for (Player p1 : p) {
+            if (p1.getGame() == null){
+                p1.setTeam(Team.WHITE);
+                game.addPlayer(p1);
+                break;
+            }
+        }
+
         gameDao.save(game);
 
         return gameMapper.toDto(game);
@@ -69,9 +78,15 @@ public class SessionGameController {
             return success;
         }
 
-        Player p = pDao.findByNickname(player.nickname());
-        p.setTeam(Team.BLACK);
-        g.addPlayer(p);
+        List<Player> p = pDao.findByNickname(player.nickname());
+        for (Player p1 : p) {
+            if (p1.getGame() == null) {
+                p1.setTeam(Team.BLACK);
+                g.addPlayer(p1);
+                break;
+            }
+        }
+
         gameDao.save(g);
         return success;
     }
@@ -89,23 +104,15 @@ public class SessionGameController {
         return gameMapper.toDto(updated);
     }
 
-    @DeleteMapping("/{id}/delete")
-    public boolean deleteGame(@PathVariable String id) {
+    @DeleteMapping("/{id}")
+    @Transactional
+    public void deleteGame(@PathVariable String id) {
         try{
             pDao.deleteAllByGameId(id);
-        }catch (PlayerNotFoundException e) {
-            System.out.println("Players not found on session game " +id);
-            return false;
-        }
-
-        try{
             gameDao.deleteById(id);
         }catch (SessionGameNotFoundException e) {
-            System.out.println("Session with id " + id + " not found, is not possible delete it");
-            return false;
+            System.out.println("Players or session not found on session id: " +id);
         }
-
-        return true;
     }
 
 
