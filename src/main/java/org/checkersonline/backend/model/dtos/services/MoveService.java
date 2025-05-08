@@ -63,7 +63,7 @@ public class MoveService {
         int dr = toR - fromR;
         int dc = toC - fromC;
 
-        // 1) Proviamo a trovare un percorso di cattura (anche multipla, anche con cambi di direzione)
+        // 1) Verifica cattura (anche multipla, anche con cambi di direzione)
         List<int[]> captured = findCapturePath(board, fromR, fromC, toR, toC, piece);
         boolean isCapture = captured != null && !captured.isEmpty();
 
@@ -82,26 +82,23 @@ public class MoveService {
                 }
             }
         } else {
-            // Mossa semplice
+            // 2) Mossa semplice
             if (Character.isUpperCase(piece.charAt(0))) {
-                // Dama: può muoversi di qualsiasi lunghezza lungo la diagonale
+                // Dama: diagonale libera, lunghezza qualsiasi
                 if (Math.abs(dr) != Math.abs(dc) || dr == 0) {
                     throw new InvalidMoveException("Invalid simple move for king.");
                 }
-                // Verifica che non ci siano pedine intermedie
-                int stepR = dr / Math.abs(dr);
-                int stepC = dc / Math.abs(dc);
+                int stepR = dr / Math.abs(dr), stepC = dc / Math.abs(dc);
                 for (int i = 1; i < Math.abs(dr); i++) {
                     if (!board[fromR + i*stepR][fromC + i*stepC].isEmpty()) {
                         throw new InvalidMoveException("Path is blocked for king move.");
                     }
                 }
             } else {
-                // Uomo: salto di un passo solo
+                // Uomo: una sola diagonale avanti
                 if (Math.abs(dr) != 1 || Math.abs(dc) != 1) {
                     throw new InvalidMoveException("Invalid simple move.");
                 }
-                // Uomo muove solo avanti
                 if (piece.equals("w") && dr != -1) {
                     throw new InvalidMoveException("White man can only move forward.");
                 }
@@ -111,25 +108,25 @@ public class MoveService {
             }
         }
 
-        // 2) Sposta la pedina
+        // 3) Sposta la pedina
         board[fromR][fromC] = "";
-        boolean promoted = false;
         if (piece.equals("w") && toR == 0) {
-            piece = "W"; promoted = true;
+            piece = "W";
             game.setPedineW(game.getPedineW() - 1);
             game.setDamaW(game.getDamaW() + 1);
         }
         if (piece.equals("b") && toR == 7) {
-            piece = "B"; promoted = true;
+            piece = "B";
             game.setPedineB(game.getPedineB() - 1);
             game.setDamaB(game.getDamaB() + 1);
         }
         board[toR][toC] = piece;
 
-        // 3) Cambio turno
-        game.setTurno(player == Team.WHITE ? Team.BLACK : Team.WHITE);
+        // 4) Cambio turno
+        Team opponent = (player == Team.WHITE ? Team.BLACK : Team.WHITE);
+        game.setTurno(opponent);
 
-        // 4) Check fine partita
+        // 5) Controllo fine partita per mancanza pedine
         if (game.getPedineW() + game.getDamaW() == 0) {
             game.setPartitaTerminata(true);
             game.setVincitore(Team.BLACK);
@@ -139,6 +136,14 @@ public class MoveService {
             game.setVincitore(Team.WHITE);
         }
 
+        // 6) **Nuovo**: controllo se l’opponente ha mosse valide
+        if (!game.isPartitaTerminata() && !hasAnyMoves(board, opponent)) {
+            game.setPartitaTerminata(true);
+            game.setVincitore(player);
+        }
+
+
+        game.getCronologiaMosse().add(""+fromR + fromC + "-" + toR + toC + "-" + dto.getPlayer());
         return gameDao.save(game);
     }
 
@@ -221,5 +226,44 @@ public class MoveService {
             }
         }
         return null;
+    }
+
+    /**
+     * Controlla se il team ha almeno una mossa (semplice o cattura).
+     */
+    private boolean hasAnyMoves(String[][] board, Team team) {
+        for (int r = 0; r < 8; r++) {
+            for (int c = 0; c < 8; c++) {
+                String cell = board[r][c];
+                if (cell.isEmpty()) continue;
+                boolean isWhite = cell.equalsIgnoreCase("w");
+                if ((team == Team.WHITE) != isWhite) continue;
+                // Cattura possibile?
+                if (findCapturePath(board, r, c, r, c, cell) != null
+                        && !findCapturePath(board, r, c, r, c, cell).isEmpty()) {
+                    return true;
+                }
+                // Mossa semplice possibile?
+                if (Character.isUpperCase(cell.charAt(0))) {
+                    // Dama: diagonale libera di almeno 1 passo
+                    int[][] dirs = {{1,1},{1,-1},{-1,1},{-1,-1}};
+                    for (int[] d: dirs) {
+                        int nr = r + d[0], nc = c + d[1];
+                        if (nr<0||nr>7||nc<0||nc>7) continue;
+                        if (board[nr][nc].isEmpty()) return true;
+                    }
+                } else {
+                    // Uomo: una mossa avanti
+                    int dr = isWhite ? -1 : 1;
+                    int[][] forward = {{dr,1},{dr,-1}};
+                    for (int[] d: forward) {
+                        int nr = r + d[0], nc = c + d[1];
+                        if (nr<0||nr>7||nc<0||nc>7) continue;
+                        if (board[nr][nc].isEmpty()) return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 }
