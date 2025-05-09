@@ -18,13 +18,6 @@ public class PlayerService {
     @Autowired
     PlayerDao pdao;
 
-    public PlayerDto getPlayer(String nickname) {
-        Player p = pdao.findByNickname(nickname);
-        if (p == null) {
-            throw new PlayerNotFoundException(nickname + " not found");
-        }
-        return pmapper.toDto(p);
-    }
 
     public Player createPlayer(PlayerDto playerDto) {
         Player p = new Player();

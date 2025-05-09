@@ -1,10 +1,12 @@
 package org.checkersonline.backend.controllers;
 
 
+import org.checkersonline.backend.exceptions.PlayerNotFoundException;
 import org.checkersonline.backend.exceptions.SessionGameNotFoundException;
 import org.checkersonline.backend.model.daos.GameDao;
 import org.checkersonline.backend.model.daos.PlayerDao;
 import org.checkersonline.backend.model.dtos.GameDto;
+import org.checkersonline.backend.model.dtos.MessageDto;
 import org.checkersonline.backend.model.dtos.MoveDto;
 import org.checkersonline.backend.model.dtos.PlayerDto;
 import org.checkersonline.backend.model.dtos.mappers.GameMapper;
@@ -15,7 +17,10 @@ import org.checkersonline.backend.model.entities.Player;
 import org.checkersonline.backend.model.entities.SessionGame;
 import org.checkersonline.backend.model.entities.enums.Team;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/games")
@@ -51,8 +56,15 @@ public class SessionGameController {
         game.setDamaB(0);
         game.setPartitaTerminata(false);
         game.setVincitore(Team.NONE);
-        Player p = pDao.findByNickname(player.nickname());
-        game.addPlayer(p);
+        List<Player> p = pDao.findByNickname(player.nickname());
+        for (Player p1 : p) {
+            if (p1.getGame() == null){
+                p1.setTeam(Team.WHITE);
+                game.addPlayer(p1);
+                break;
+            }
+        }
+
         gameDao.save(game);
 
         return gameMapper.toDto(game);
@@ -67,7 +79,15 @@ public class SessionGameController {
             return success;
         }
 
-        g.addPlayer(pDao.findByNickname(player.nickname()));
+        List<Player> p = pDao.findByNickname(player.nickname());
+        for (Player p1 : p) {
+            if (p1.getGame() == null) {
+                p1.setTeam(Team.BLACK);
+                g.addPlayer(p1);
+                break;
+            }
+        }
+
         gameDao.save(g);
         return success;
     }
@@ -84,6 +104,26 @@ public class SessionGameController {
         Game updated = moveService.makeMove(id, move);
         return gameMapper.toDto(updated);
     }
+
+    @DeleteMapping("/{id}")
+    @Transactional
+    public void deleteGame(@PathVariable String id) {
+        try{
+            pDao.deleteAllByGameId(id);
+            gameDao.deleteById(id);
+        }catch (SessionGameNotFoundException e) {
+            System.out.println("Players or session not found on session id: " +id);
+        }
+    }
+
+
+    @PostMapping("/{id}/chat")
+    public void chat(@PathVariable String id, @RequestBody MessageDto message) {
+        Game g = gameDao.findById(id).orElseThrow(() -> new SessionGameNotFoundException(id));
+        g.setChat(g.getChat() + "<b>" + message.player() + "</b>" + ": " + message.text() + "\n");
+        gameDao.save(g);
+    }
+
 
 
 }

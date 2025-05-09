@@ -19,6 +19,7 @@ public class SessionGame extends BaseEntity
 	private String[][] board = new String[8][8];
 
 
+	@Enumerated(EnumType.STRING)
 	private Team turno;
 	private int pedineW;
 	private int pedineB;

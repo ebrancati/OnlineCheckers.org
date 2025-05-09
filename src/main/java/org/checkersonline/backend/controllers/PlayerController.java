@@ -18,12 +18,6 @@ public class PlayerController {
     @Autowired
     PlayerService pService;
 
-    @GetMapping("/{id}")
-    public PlayerDto getPlayer(@PathVariable("id") String id) {
-
-        return pDao.findById(id)
-                .map(p -> pService.getPlayer(p.getNickname())).orElse(null);
-    }
 
     @PostMapping("/create")
     public Player createPlayer(@RequestBody PlayerDto p) {
