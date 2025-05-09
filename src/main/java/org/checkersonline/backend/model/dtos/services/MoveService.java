@@ -142,8 +142,37 @@ public class MoveService {
             game.setVincitore(player);
         }
 
+        // Se la mossa include una cattura e include un percorso di cattura (quindi fa più di una mossa)
+        if (captured != null && !captured.isEmpty()) {
 
-        game.getCronologiaMosse().add(dto.getFrom() + "-" + dto.getTo() + "-" + dto.getPlayer());
+            // Posizione iniziale
+            int currentR = fromR;
+            int currentC = fromC;
+
+            // Per ogni pedina catturata nella sequenza
+            for (int[] capturedPos : captured) {
+                int capturedR = capturedPos[0];
+                int capturedC = capturedPos[1];
+
+                // Calcola la posizione dopo aver saltato questa pedina
+                int nextR = capturedR + (capturedR - currentR);
+                int nextC = capturedC + (capturedC - currentC);
+
+                // Aggiungi alla cronologia
+                game.getCronologiaMosse().add(currentR + "" + currentC + "-" +
+                        nextR + "" + nextC + "-" +
+                        dto.getPlayer());
+
+                // Aggiorna la posizione corrente per la prossima riga e colonna
+                currentR = nextR;
+                currentC = nextC;
+            }
+        }
+        else {
+            // Per mosse normali o catture singole
+            game.getCronologiaMosse().add(dto.getFrom() + "-" + dto.getTo() + "-" + dto.getPlayer());
+        }
+
         return gameDao.save(game);
     }
 
