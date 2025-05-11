@@ -15,6 +15,6 @@ public record GameDto(
         int damaB,
         boolean partitaTerminata,
         Team vincitore,
-        List<Player> players
-) {
-}
+        List<Player> players,
+        List<String> lastMultiCapturePath
+) {}

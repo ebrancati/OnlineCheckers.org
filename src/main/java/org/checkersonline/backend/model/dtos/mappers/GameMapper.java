@@ -9,7 +9,8 @@ import org.springframework.stereotype.Service;
 public class GameMapper {
 
     public GameDto toDto(Game game) {
-        return new GameDto(game.getId(),
+        return new GameDto(
+                game.getId(),
                 game.getBoard(),
                 game.getTurno(),
                 game.getPedineW(),
@@ -18,6 +19,8 @@ public class GameMapper {
                 game.getDamaB(),
                 game.isPartitaTerminata(),
                 game.getVincitore(),
-                game.getPlayers());
+                game.getPlayers(),
+                game.getLastMultiCapturePath()
+        );
     }
 }
