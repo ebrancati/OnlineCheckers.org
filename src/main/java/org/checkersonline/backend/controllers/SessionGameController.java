@@ -125,5 +125,19 @@ public class SessionGameController {
     }
 
 
+    @PostMapping("/{id}/reset")
+    public void resetGame(@PathVariable String id) {
+        Game g = gameDao.findById(id).orElseThrow(() -> new SessionGameNotFoundException(id));
+        g.setBoard(g.getBOARDINIT());
+        g.setTurno(Team.WHITE);
+        g.setPedineB(12);
+        g.setPedineW(12);
+        g.setDamaW(0);
+        g.setDamaB(0);
+        g.setPartitaTerminata(false);
+        g.setVincitore(Team.NONE);
+        gameDao.save(g);
+    }
+
 
 }
