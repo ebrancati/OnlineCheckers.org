@@ -49,24 +49,39 @@ public class SessionGameController {
     public GameDto createGame(@RequestBody PlayerDto player) {
         Game game = new Game();
         game.setBoard(game.getBOARDINIT());
-        game.setTurno(Team.WHITE);
+        game.setTurno(Team.WHITE); // Il turno iniziale è sempre del bianco
         game.setPedineB(12);
         game.setPedineW(12);
         game.setDamaW(0);
         game.setDamaB(0);
         game.setPartitaTerminata(false);
         game.setVincitore(Team.NONE);
+
         List<Player> p = pDao.findByNickname(player.nickname());
         for (Player p1 : p) {
             if (p1.getGame() == null){
-                p1.setTeam(Team.WHITE);
+                // Assegna il team in base alla preferenza
+                Team preferredTeam = Team.WHITE; // Default
+                if (player.preferredTeam() != null) {
+                    try {
+                        preferredTeam = Team.valueOf(player.preferredTeam().toUpperCase());
+                        // Se è specificato NONE, usa comunque WHITE come default
+                        if (preferredTeam == Team.NONE) {
+                            preferredTeam = Team.WHITE;
+                        }
+                    } catch (IllegalArgumentException e) {
+                        // Se la preferenza non è valida, usa WHITE
+                        preferredTeam = Team.WHITE;
+                    }
+                }
+
+                p1.setTeam(preferredTeam);
                 game.addPlayer(p1);
                 break;
             }
         }
 
         gameDao.save(game);
-
         return gameMapper.toDto(game);
     }
 
@@ -79,10 +94,14 @@ public class SessionGameController {
             return success;
         }
 
+        // Determina il team dell'avversario
+        Team creatorTeam = g.getPlayers().isEmpty() ? Team.WHITE : g.getPlayers().get(0).getTeam();
+        Team joinerTeam = (creatorTeam == Team.WHITE) ? Team.BLACK : Team.WHITE;
+
         List<Player> p = pDao.findByNickname(player.nickname());
         for (Player p1 : p) {
             if (p1.getGame() == null) {
-                p1.setTeam(Team.BLACK);
+                p1.setTeam(joinerTeam);
                 g.addPlayer(p1);
                 break;
             }
