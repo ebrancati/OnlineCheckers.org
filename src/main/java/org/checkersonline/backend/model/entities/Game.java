@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.checkersonline.backend.model.dtos.PlayerRestartDto;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,7 +28,8 @@ public class Game extends SessionGame
 	@Column(columnDefinition = "TEXT")
 	@Convert(converter = StringListConverter.class)
 	private List<String> lastMultiCapturePath = new ArrayList<>();
-	
+
+
 	public void addPlayer(Player p) {
 		if (players.size() >= 2) {
 			throw new IllegalStateException("La partita ha già 2 giocatori");}

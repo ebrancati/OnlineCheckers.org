@@ -5,10 +5,8 @@ import org.checkersonline.backend.exceptions.PlayerNotFoundException;
 import org.checkersonline.backend.exceptions.SessionGameNotFoundException;
 import org.checkersonline.backend.model.daos.GameDao;
 import org.checkersonline.backend.model.daos.PlayerDao;
-import org.checkersonline.backend.model.dtos.GameDto;
-import org.checkersonline.backend.model.dtos.MessageDto;
-import org.checkersonline.backend.model.dtos.MoveDto;
-import org.checkersonline.backend.model.dtos.PlayerDto;
+import org.checkersonline.backend.model.daos.PlayerRestartDao;
+import org.checkersonline.backend.model.dtos.*;
 import org.checkersonline.backend.model.dtos.mappers.GameMapper;
 import org.checkersonline.backend.model.dtos.services.GameService;
 import org.checkersonline.backend.model.dtos.services.MoveService;
@@ -38,6 +36,9 @@ public class SessionGameController {
 
     @Autowired
     private MoveService moveService;
+
+    @Autowired
+    PlayerRestartDao prdao;
 
 
     @GetMapping("/{id}")
@@ -107,6 +108,11 @@ public class SessionGameController {
             }
         }
 
+        String nicknameB = g.getPlayers().get(0).getTeam() == Team.BLACK ? g.getPlayers().get(0).getNickname() : g.getPlayers().get(1).getNickname();
+        String nicknameW = g.getPlayers().get(0).getTeam() == Team.WHITE ? g.getPlayers().get(0).getNickname() : g.getPlayers().get(1).getNickname();
+        PlayerRestartDto pRestart = new PlayerRestartDto(id,nicknameB,nicknameW,false,false);
+        prdao.save(pRestart);
+
         gameDao.save(g);
         return success;
     }
@@ -156,6 +162,7 @@ public class SessionGameController {
         g.setPartitaTerminata(false);
         g.setVincitore(Team.NONE);
         gameDao.save(g);
+        prdao.deleteById(id);
     }
 
 
