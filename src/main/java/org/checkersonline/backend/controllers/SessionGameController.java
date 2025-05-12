@@ -135,6 +135,7 @@ public class SessionGameController {
     public void deleteGame(@PathVariable String id) {
         try{
             pDao.deleteAllByGameId(id);
+            prdao.deleteById(id);
             gameDao.deleteById(id);
         }catch (SessionGameNotFoundException e) {
             System.out.println("Players or session not found on session id: " +id);
@@ -162,7 +163,10 @@ public class SessionGameController {
         g.setPartitaTerminata(false);
         g.setVincitore(Team.NONE);
         gameDao.save(g);
-        prdao.deleteById(id);
+        PlayerRestartDto pRestart = prdao.findById(id).orElseThrow(() -> new SessionGameNotFoundException(id));
+        pRestart.setRestartB(false);
+        pRestart.setRestartW(false);
+        prdao.save(pRestart);
     }
 
 
