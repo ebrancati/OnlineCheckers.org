@@ -127,6 +127,10 @@ public class SessionGameController {
     @PostMapping("/{id}/move")
     public GameDto makeMove(@PathVariable String id, @RequestBody MoveDto move) {
         Game updated = moveService.makeMove(id, move);
+        PlayerRestartDto pRestart = prdao.findById(id).orElseThrow(() -> new SessionGameNotFoundException(id));
+        pRestart.setRestartB(false);
+        pRestart.setRestartW(false);
+        prdao.save(pRestart);
         return gameMapper.toDto(updated);
     }
 
@@ -162,11 +166,9 @@ public class SessionGameController {
         g.setDamaB(0);
         g.setPartitaTerminata(false);
         g.setVincitore(Team.NONE);
+        g.getCronologiaMosse().clear();
         gameDao.save(g);
-        PlayerRestartDto pRestart = prdao.findById(id).orElseThrow(() -> new SessionGameNotFoundException(id));
-        pRestart.setRestartB(false);
-        pRestart.setRestartW(false);
-        prdao.save(pRestart);
+
     }
 
 
