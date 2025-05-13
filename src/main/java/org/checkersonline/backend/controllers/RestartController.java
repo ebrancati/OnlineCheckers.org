@@ -32,4 +32,13 @@ public class RestartController {
     public void statusRestartUpdate(@PathVariable String id, @RequestBody PlayerRestartDto playerStatus) {
         prdao.save(playerStatus);
     }
+
+    @PostMapping("/{id}/restart")
+    public PlayerRestartDto restart(@PathVariable String id) {
+        PlayerRestartDto pRestart = prdao.findById(id).orElseThrow(() -> new SessionGameNotFoundException(id));
+        pRestart.setRestartB(false);
+        pRestart.setRestartW(false);
+        return prdao.save(pRestart);
+    }
+
 }
