@@ -1,6 +1,5 @@
 package org.checkersonline.backend.controllers;
 
-
 import org.checkersonline.backend.exceptions.PlayerNotFoundException;
 import org.checkersonline.backend.exceptions.SessionGameNotFoundException;
 import org.checkersonline.backend.model.daos.GameDao;
@@ -19,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/games")
@@ -29,7 +29,6 @@ public class SessionGameController {
 
     @Autowired
     PlayerDao pDao;
-
 
     @Autowired
     GameMapper gameMapper;
@@ -99,9 +98,28 @@ public class SessionGameController {
         Team creatorTeam = g.getPlayers().isEmpty() ? Team.WHITE : g.getPlayers().get(0).getTeam();
         Team joinerTeam = (creatorTeam == Team.WHITE) ? Team.BLACK : Team.WHITE;
 
+        // Verifica se il nickname è già in uso e rendilo unico se necessario
+        String nickname = player.nickname();
+        List<String> existingNicknames = g.getPlayers().stream()
+                .map(Player::getNickname)
+                .toList();
+
+        // Se il nickname esiste già, aggiungi un suffisso "2"
+        if (existingNicknames.contains(nickname)) {
+            nickname = nickname + "2";
+
+            // Se anche nickname+2 esiste, continua ad aumentare il numero
+            int suffix = 3;
+            while (existingNicknames.contains(nickname)) {
+                nickname = player.nickname() + suffix;
+                suffix++;
+            }
+        }
+
         List<Player> p = pDao.findByNickname(player.nickname());
         for (Player p1 : p) {
             if (p1.getGame() == null) {
+                p1.setNickname(nickname);
                 p1.setTeam(joinerTeam);
                 g.addPlayer(p1);
                 break;
@@ -146,14 +164,12 @@ public class SessionGameController {
         }
     }
 
-
     @PostMapping("/{id}/chat")
     public void chat(@PathVariable String id, @RequestBody MessageDto message) {
         Game g = gameDao.findById(id).orElseThrow(() -> new SessionGameNotFoundException(id));
         g.setChat(g.getChat() + "<b>" + message.player() + "</b>" + ": " + message.text() + "\n");
         gameDao.save(g);
     }
-
 
     @PostMapping("/{id}/reset")
     public void resetGame(@PathVariable String id) {
@@ -170,6 +186,4 @@ public class SessionGameController {
         gameDao.save(g);
 
     }
-
-
 }
