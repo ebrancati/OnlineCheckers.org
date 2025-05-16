@@ -1,0 +1,122 @@
+{
+  "COMMON": {
+    "PLAY": "🎮 Gioca",
+    "RULES": "📖 Regole",
+    "LOGIN": "Accedi",
+    "WELCOME": "Benvenuto",
+    "COPY": "Copia",
+    "COPY_SUCCESS": "Link copiato negli appunti!",
+    "SHARE_GAME": "Condividi questa partita",
+    "SHARE_LINK": "Condividi questo link con il tuo avversario:",
+    "LOADING": "Caricamento..."
+  },
+  "LOGIN": {
+    "YOUR_NICKNAME": "Il tuo Nickname:",
+    "ENTER_NICKNAME": "Inserisci il tuo nickname",
+    "CHOOSE_TEAM": "Scegli il tuo team",
+    "PLAY": "Gioca"
+  },
+  "GAME": {
+    "YOUR_TURN": "È il tuo turno!",
+    "WAITING": "In attesa...",
+    "MOVE_PIECE": "Muovi una pedina per continuare.",
+    "OPPONENT_TURN": "Turno di",
+    "CONNECTING": "Connessione in corso",
+    "ROLE_DETERMINING": "Determinazione del ruolo nella partita...",
+    "WHITE_PLAYER": "Giocatore Bianco",
+    "BLACK_PLAYER": "Giocatore Nero",
+    "PIECES": "Pedine",
+    "TURN": "Turno",
+    "WAITING_STATUS": "Attesa",
+    "RECENT_MOVES": "Mosse Recenti",
+    "WHITE_TURN_ERROR": "È il turno del Bianco!",
+    "BLACK_TURN_ERROR": "È il turno del Nero!"
+  },
+  "BOT": {
+    "OPTIONS": "Opzioni Bot",
+    "DIFFICULTY": "Livello di Difficoltà",
+    "EASY": "Facile",
+    "MEDIUM": "Medio",
+    "HARD": "Difficile",
+    "YOUR_COLOR": "Il Tuo Colore",
+    "PLAY_WHITE": "Gioca come Bianco",
+    "PLAY_BLACK": "Gioca come Nero",
+    "NEW_GAME": "Nuova Partita",
+    "THINKING": "Il bot sta pensando...",
+    "CAPTURING": "Catturando...",
+    "YOU_WON": "Hai vinto la partita!",
+    "BOT_WON": "Il bot ha vinto la partita!",
+    "YOUR_TURN_ERROR": "È il tuo turno!",
+    "BOT_TURN_ERROR": "È il turno del bot! Attendere la sua mossa..."
+  },
+  "MENU": {
+    "SELECT_MODE": "Seleziona Modalità di Gioco",
+    "ONLINE": "Gioca Online",
+    "LOCAL": "Gioca in Locale",
+    "VS_COMPUTER": "Gioca contro il Computer"
+  },
+  "GAME_OVER": {
+    "TITLE": "Partita Terminata!",
+    "WINNER": "Ha vinto il giocatore",
+    "WHITE": "Bianco",
+    "BLACK": "Nero",
+    "NEW_GAME": "Nuova Partita",
+    "REQUEST_REMATCH": "Richiedi Rivincita",
+    "CANCEL_REQUEST": "Annulla Richiesta",
+    "BACK_TO_MENU": "Torna al Menu",
+    "RESTART_REQUESTED": "Richiesta di rivincita inviata!",
+    "WAITING_FOR_OPPONENT_RESTART": "In attesa che l'avversario accetti la rivincita...",
+    "OPPONENT_WANTS_RESTART": "L'avversario ha richiesto una rivincita!"
+  },
+  "JOIN": {
+    "JOIN_GAME": "Partecipa alla Partita",
+    "NICKNAME": "Il tuo nickname",
+    "REQUIRED": "Obbligatorio",
+    "MIN_LENGTH": "Minimo 3 caratteri",
+    "NEXT": "Avanti",
+    "GAME_ID": "ID Partita",
+    "JOIN_AS": "Unisciti come",
+    "WAITING_FOR_OPPONENT": "La partita inizierà quando un altro giocatore si unirà."
+  },
+  "CHAT": {
+    "PLACEHOLDER": "Scrivi un messaggio...",
+    "CHAT_TITLE": "Chat:"
+  },
+  "FOOTER": {
+    "COPYRIGHT": "© {{year}} OnlineCheckers.org",
+    "OUR_TEAM": "Contatti",
+    "TAGLINE": "Gioca a dama online con amici o contro il computer."
+  },
+  "RULES": {
+    "TITLE": "Dama Inglese - Regole e Come Giocare",
+    "INTRODUCTION": "La Dama Inglese è un gioco da tavolo tradizionale giocato su una scacchiera 8x8 con 12 pedine per giocatore. È una delle varianti di dama più diffuse al mondo.",
+    "INTRO_TEXT": "Facile da imparare ma ricca di strategie, la Dama Inglese è un passatempo amato nei paesi anglofoni da generazioni.",
+    "HISTORY_TITLE": "Storia della Dama Inglese",
+    "HISTORY_TEXT_1": "La Dama Inglese ha una lunga storia che risale al periodo medievale in Inghilterra e in altre parti d'Europa.",
+    "HISTORY_TEXT_2": "Il primo libro sul gioco fu pubblicato nel 1756 da William Payne, intitolato 'An Introduction to the Game of Draughts'.",
+    "HISTORY_TEXT_3": "La popolarità del gioco si diffuse in tutto l'Impero Britannico e si stabilì particolarmente negli Stati Uniti, dove è comunemente conosciuto come 'Checkers'.",
+    "HISTORY_TEXT_4": "Nel 1847 si tenne il primo campionato mondiale di dama, stabilendo il gioco come un'attività competitiva seria.",
+    "BOARD_TITLE": "La Scacchiera",
+    "BOARD_TEXT_1": "La Dama Inglese si gioca su una scacchiera standard 8x8 con 64 caselle, utilizzando solo le 32 caselle scure.",
+    "BOARD_TEXT_2": "Ogni giocatore inizia con 12 pedine posizionate sulle caselle scure delle prime tre file più vicine a loro.",
+    "MOVEMENT_TITLE": "Movimento e Cattura",
+    "MOVEMENT_TEXT_1": "Le pedine si muovono in diagonale avanti di una casella alla volta. Non possono muoversi all'indietro fino a quando non diventano dame.",
+    "MOVEMENT_TEXT_2": "La cattura avviene saltando sopra una pedina avversaria verso una casella vuota direttamente oltre. La pedina saltata viene rimossa dalla scacchiera.",
+    "MOVEMENT_TEXT_3": "Se dopo una cattura è possibile effettuarne altre, il giocatore deve continuare la sequenza con la stessa pedina fino a quando non sono più possibili ulteriori catture (salti multipli).",
+    "MOVEMENT_TEXT_4": "Se un giocatore ha l'opportunità di catturare, deve farlo. Se sono disponibili più sequenze di cattura, il giocatore può scegliere qualsiasi sequenza valida, indipendentemente da quante pedine vengono catturate.",
+    "KINGS_TITLE": "Le Dame",
+    "KINGS_TEXT_1": "Una pedina diventa dama quando raggiunge l'ultima fila sul lato avversario della scacchiera. Di solito viene incoronata posizionando una seconda pedina sopra di essa.",
+    "KINGS_TEXT_2": "Una dama può muoversi in diagonale sia avanti che indietro, ma si muove comunque di una sola casella alla volta tranne quando cattura.",
+    "KINGS_TEXT_3": "Le dame catturano nello stesso modo delle pedine normali, ma possono farlo in tutte e quattro le direzioni diagonali. Come le pedine normali, le dame devono effettuare tutte le catture disponibili."
+  },
+  "ERRORS": {
+    "GAME_NOT_FOUND": "La partita che stai cercando di unire non esiste.",
+    "GAME_FULL": "Questa partita ha già due giocatori e non può accettare altri partecipanti.",
+    "SELF_PLAY_NOT_ALLOWED": "Non puoi giocare contro te stesso nella modalità online. Utilizza l'opzione 'Gioca in Locale' dal menu principale.",
+    "SERVER_ERROR": "Si è verificato un errore durante la connessione al server. Riprova più tardi.",
+    "JOIN_FAILED": "Impossibile unirsi alla partita. Riprova.",
+    "UNKNOWN_ERROR": "Si è verificato un errore sconosciuto. Riprova più tardi.",
+    "GO_TO_LOCAL_MODE": "Vai alla Modalità Locale",
+    "CREATE_NEW_GAME": "Crea Nuova Partita"
+  }
+}

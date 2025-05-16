@@ -1,0 +1,72 @@
+<div class="container-fluid d-flex flex-column justify-content-center align-items-center mt-5">
+  <div class="row justify-content-center">
+    <div class="col-12 text-center">
+      <h1 class="display-4 mb-5">{{ 'LOGIN.YOUR_NICKNAME' | translate }}</h1>
+
+      <form #newGameForm="ngForm" (ngSubmit)="newGame()">
+        <div class="mb-4">
+          <input
+            id="nickname"
+            name="nickname"
+            [(ngModel)]="nickname"
+            #nick="ngModel"
+            required
+            class="form-control form-control-lg"
+            placeholder="{{ 'LOGIN.ENTER_NICKNAME' | translate }}"
+            style="min-width: 300px;"
+          />
+        </div>
+
+        <!-- Selezione del team -->
+        <div class="mb-4">
+          <label class="form-label">{{ 'LOGIN.CHOOSE_TEAM' | translate }}</label>
+          <div class="d-flex justify-content-center gap-3">
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="preferredTeam"
+                id="teamWhite"
+                value="WHITE"
+                [(ngModel)]="preferredTeam"
+              />
+              <label class="form-check-label" for="teamWhite">
+                {{ 'GAME.WHITE_PLAYER' | translate }}
+              </label>
+            </div>
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="preferredTeam"
+                id="teamBlack"
+                value="BLACK"
+                [(ngModel)]="preferredTeam"
+              />
+              <label class="form-check-label" for="teamBlack">
+                {{ 'GAME.BLACK_PLAYER' | translate }}
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="d-grid gap-2 col-6 mx-auto">
+          <button
+            type="submit"
+            class="btn btn-primary btn-lg"
+            [disabled]="newGameForm.invalid"
+          >
+            {{ 'LOGIN.PLAY' | translate }}
+
+                        
+            <!-- Spinner di caricamento -->
+            <span *ngIf="isLoading" class="d-flex align-items-center justify-content-center">
+              <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+              {{ 'COMMON.LOADING' | translate }}
+            </span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

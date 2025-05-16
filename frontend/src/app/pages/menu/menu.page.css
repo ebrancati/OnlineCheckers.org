@@ -1,0 +1,63 @@
+.menu-container h2 {
+  color: #ffb347;
+  font-size: 2rem;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 2rem;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.btn-group-custom {
+  gap: 1rem;
+  justify-content: center;
+  width: 100%;
+}
+
+.menu-button-custom {
+  padding: 1.2rem 2rem;
+  margin-bottom: 1rem;
+  background: rgba(100, 100, 100, 0.1); /* grigio trasparente */
+  border: 1px solid rgba(120, 120, 120, 0.2);
+  border-radius: 1rem;
+  color: #2c2c2c; /* testo grigio scuro leggibile */
+  font-weight: 500;
+  font-size: 1.1rem;
+  text-align: center;
+  position: relative;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  background-color: rgba(230, 230, 230, 0.5);
+}
+
+.menu-button-custom::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, #b0b0b066, transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 0;
+}
+
+.menu-button-custom:hover::before {
+  opacity: 1;
+}
+
+.menu-button-custom:hover {
+  transform: scale(1.02);
+  border-color: #a0a0a0;
+  background-color: rgba(210, 210, 210, 0.7);
+}
+
+.menu-button-custom.selected {
+  background: linear-gradient(135deg, #9e9e9e, #bcbcbc);
+  color: #1a1a1a;
+  font-weight: 600;
+  border-color: #8c8c8c;
+}

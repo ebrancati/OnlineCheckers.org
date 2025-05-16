@@ -1,0 +1,38 @@
+<div class="moves">
+  <h4>{{ 'GAME.RECENT_MOVES' | translate }}</h4>
+  <table class="moves-table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>{{ 'GAME_OVER.WHITE' | translate }}</th>
+        <th>{{ 'GAME_OVER.BLACK' | translate }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      <ng-container *ngFor="let turn of displayMoves">
+        <!-- Prima riga del turno (numero turno + prima mossa di ciascun colore) -->
+        <tr>
+          <td class="turn-number" [attr.rowspan]="getRowSpan(turn)">{{ turn.number }}.</td>
+          <td class="move-cell">{{ turn.white.length > 0 ? turn.white[0].notation : '' }}</td>
+          <td class="move-cell">{{ turn.black.length > 0 ? turn.black[0].notation : '' }}</td>
+        </tr>
+
+        <!-- Righe aggiuntive per catture multiple (bianco) -->
+        <ng-container *ngIf="turn.white.length > 1">
+          <tr *ngFor="let move of turn.white | slice:1">
+            <td class="move-cell move-continuation">{{ move.notation }}</td>
+            <td *ngIf="turn.black.length <= 1"></td>
+          </tr>
+        </ng-container>
+
+        <!-- Righe aggiuntive per catture multiple (nero) -->
+        <ng-container *ngIf="turn.black.length > 1">
+          <tr *ngFor="let move of turn.black | slice:1">
+            <td *ngIf="turn.white.length <= 1"></td>
+            <td class="move-cell move-continuation">{{ move.notation }}</td>
+          </tr>
+        </ng-container>
+      </ng-container>
+    </tbody>
+  </table>
+</div>

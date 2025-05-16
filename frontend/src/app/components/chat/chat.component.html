@@ -1,0 +1,14 @@
+<div class="chat">
+  <div class="chat-header">
+    <h5>{{ 'CHAT.CHAT_TITLE' | translate }}</h5>
+  </div>
+  <div class="chat-messages">
+    <div *ngFor="let line of chatHistory.split('\n')">
+      <div [innerHTML]="line"></div>
+    </div>
+  </div>
+  <div class="chat-input">
+    <input [(ngModel)]="messageInput" placeholder="{{ 'CHAT.PLACEHOLDER' | translate }}" (keydown)="onKeyDown($event)"/>
+    <button (click)="sendMessage()">➥</button>
+  </div>
+</div>

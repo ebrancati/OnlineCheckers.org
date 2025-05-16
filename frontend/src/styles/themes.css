@@ -1,0 +1,251 @@
+/* Light Theme */
+.light-theme {
+  --bg-color: #f8f9fa;
+  --text-color: #212529;
+  --navbar-bg: linear-gradient(135deg, #333 0%, #111 100%);
+  --navbar-text: #f8f9fa;
+  --navbar-hover: #d18b47;
+  --dropdown-bg: #222;
+  --dropdown-border: #333;
+  --dropdown-text: #e0e0e0;
+  --dropdown-hover-bg: #333;
+  --dropdown-hover-text: #fff;
+  --dropdown-active-bg: #444;
+  --link-color: #0d6efd;
+  --link-hover-color: #0a58ca;
+  --alert-success-bg: #d4edda;
+  --alert-success-text: #155724;
+  --alert-success-border: #c3e6cb;
+
+  /* Board Colors - Light Theme */
+  --board-light: #f0d9b5;
+  --board-dark: #b58863;
+  --board-border: #5d4037;
+  --board-highlight: rgba(255, 255, 0, 0.7);
+  --board-selected: rgba(255, 215, 0, 0.6);
+  --board-shadow: rgba(0, 0, 0, 0.2);
+
+  /* Piece Colors - Light Theme */
+  --piece-white: #fff;
+  --piece-black: #000;
+  --piece-white-border: #d0d0d0;
+  --piece-black-border: #333;
+  --piece-white-shadow: rgba(0, 0, 0, 0.2);
+  --piece-black-shadow: rgba(0, 0, 0, 0.4);
+  --piece-crown-color: #ffd700;
+  --piece-crown-shadow: rgba(0, 0, 0, 0.3);
+
+  /* Player Info - Light Theme */
+  --player-white-bg: rgba(255, 255, 255, 0.8);
+  --player-black-bg: rgba(0, 0, 0, 0.1);
+  --player-white-border: #ddd;
+  --player-black-border: #333;
+  --player-text-color: #333;
+  --player-secondary-text: #666;
+
+  /* Turn Status - Light Theme */
+  --turn-active-bg: #d1e7dd;
+  --turn-active-border: #198754;
+  --turn-active-icon: #198754;
+  --turn-waiting-bg: #fff3cd;
+  --turn-waiting-border: #ffc107;
+  --turn-waiting-icon: #856404;
+  --turn-loading-bg: #cff4fc;
+  --turn-loading-border: #0dcaf0;
+  --turn-loading-icon: #055160;
+
+  /* Game Over Modal - Light Theme */
+  --modal-bg: #fff;
+  --modal-text: #333;
+  --modal-shadow: rgba(0, 0, 0, 0.5);
+  --modal-winner-text: #d4af37;
+  --modal-button-bg: #4CAF50;
+  --modal-button-hover: #45a049;
+  --modal-button-text: #fff;
+
+  /* UI Elements */
+  --button-primary-bg: #0d6efd;
+  --button-primary-text: #fff;
+  --button-secondary-bg: #6c757d;
+  --button-secondary-text: #fff;
+  --card-bg: #fff;
+  --card-border: rgba(0, 0, 0, 0.125);
+  --card-text: #212529;
+  --card-header-bg: #f8f9fa;
+  --card-header-text: #212529;
+  --input-bg: #fff;
+  --input-border: #ced4da;
+  --input-text: #212529;
+  --footer-bg: #f8f9fa;
+  --footer-text: #6c757d;
+}
+
+/* Dark Theme */
+.dark-theme {
+  --bg-color: #121212;
+  --text-color: #e0e0e0;
+  --navbar-bg: linear-gradient(135deg, #000 0%, #111 100%);
+  --navbar-text: #f8f9fa;
+  --navbar-hover: #d18b47;
+  --dropdown-bg: #1e1e1e;
+  --dropdown-border: #333;
+  --dropdown-text: #e0e0e0;
+  --dropdown-hover-bg: #333;
+  --dropdown-hover-text: #fff;
+  --dropdown-active-bg: #444;
+  --link-color: #64b5f6;
+  --link-hover-color: #90caf9;
+  --alert-success-bg: #1e3a2f;
+  --alert-success-text: #4caf50;
+  --alert-success-border: #2e7d32;
+
+  /* Board Colors - Dark Theme */
+  --board-light: #6b6b6b;
+  --board-dark: #4a4a4a;
+  --board-border: #2a2a2a;
+  --board-highlight: rgba(255, 215, 0, 0.7);
+  --board-selected: rgba(255, 165, 0, 0.7);
+  --board-shadow: rgba(0, 0, 0, 0.4);
+
+  /* Piece Colors - Dark Theme */
+  --piece-white: #e0e0e0;
+  --piece-black: #1a1a1a;
+  --piece-white-border: #aaaaaa;
+  --piece-black-border: #000;
+  --piece-white-shadow: rgba(0, 0, 0, 0.4);
+  --piece-black-shadow: rgba(0, 0, 0, 0.6);
+  --piece-crown-color: #ffd700;
+  --piece-crown-shadow: rgba(0, 0, 0, 0.5);
+
+  /* Player Info - Dark Theme */
+  --player-white-bg: rgba(255, 255, 255, 0.15);
+  --player-black-bg: rgba(0, 0, 0, 0.4);
+  --player-white-border: #555;
+  --player-black-border: #333;
+  --player-text-color: #ffffff;
+  --player-secondary-text: #d0d0d0;
+
+  /* Turn Status - Dark Theme */
+  --turn-active-bg: #2a4a3f;
+  --turn-active-border: #3cb371;
+  --turn-active-icon: #4caf50;
+  --turn-waiting-bg: #4a4020;
+  --turn-waiting-border: #ffd54f;
+  --turn-waiting-icon: #ffd54f;
+  --turn-loading-bg: #2a4a52;
+  --turn-loading-border: #4dd0e1;
+  --turn-loading-icon: #4dd0e1;
+
+  /* Game Over Modal - Dark Theme */
+  --modal-bg: #2d2d2d;
+  --modal-text: #e0e0e0;
+  --modal-shadow: rgba(0, 0, 0, 0.7);
+  --modal-winner-text: #ffd700;
+  --modal-button-bg: #28a745;
+  --modal-button-hover: #218838;
+  --modal-button-text: #fff;
+
+  /* UI Elements */
+  --button-primary-bg: #2196f3;
+  --button-primary-text: #ffffff;
+  --button-secondary-bg: #757575;
+  --button-secondary-text: #ffffff;
+  --card-bg: #2d2d2d;
+  --card-border: rgba(255, 255, 255, 0.2);
+  --card-text: #e0e0e0;
+  --card-header-bg: #3d3d3d;
+  --card-header-text: #ffffff;
+  --input-bg: #3d3d3d;
+  --input-border: #555;
+  --input-text: #ffffff;
+  --footer-bg: #1a1a1a;
+  --footer-text: #bbbbbb;
+}
+
+/* Apply theme variables to elements */
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.navbar {
+  background: var(--navbar-bg);
+}
+
+.navbar-nav .nav-link {
+  color: var(--navbar-text) !important;
+}
+
+.navbar-nav .nav-link:hover,
+.navbar-nav .nav-link:focus {
+  color: var(--navbar-hover) !important;
+}
+
+.dropdown-menu {
+  background-color: var(--dropdown-bg);
+  border-color: var(--dropdown-border);
+}
+
+.dropdown-item {
+  color: var(--dropdown-text);
+}
+
+.dropdown-item:hover {
+  background-color: var(--dropdown-hover-bg);
+  color: var(--dropdown-hover-text);
+}
+
+.card {
+  background-color: var(--card-bg);
+  border-color: var(--card-border);
+  color: var(--card-text);
+}
+
+.card-header {
+  background-color: var(--card-header-bg);
+  color: var(--card-header-text);
+}
+
+.card-body {
+  color: var(--card-text);
+}
+
+.card-text {
+  color: var(--card-text);
+}
+
+.form-control {
+  background-color: var(--input-bg);
+  border-color: var(--input-border);
+  color: var(--input-text);
+}
+
+.btn-primary {
+  background-color: var(--button-primary-bg);
+  color: var(--button-primary-text);
+}
+
+.btn-secondary {
+  background-color: var(--button-secondary-bg);
+  color: var(--button-secondary-text);
+}
+
+a {
+  color: var(--link-color);
+}
+
+a:hover {
+  color: var(--link-hover-color);
+}
+
+footer {
+  background-color: var(--footer-bg);
+  color: var(--footer-text);
+}
+
+.alert-success {
+  background-color: var(--alert-success-bg);
+  color: var(--alert-success-text);
+  border-color: var(--alert-success-border);
+}

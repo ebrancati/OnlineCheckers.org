@@ -1,0 +1,122 @@
+{
+  "COMMON": {
+    "PLAY": "🎮 Play",
+    "RULES": "📖 Rules",
+    "LOGIN": "Login",
+    "WELCOME": "Welcome",
+    "COPY": "Copy",
+    "COPY_SUCCESS": "Link copied to clipboard!",
+    "SHARE_GAME": "Share this game",
+    "SHARE_LINK": "Share this link with your opponent:",
+    "LOADING": "Loading..."
+  },
+  "LOGIN": {
+    "YOUR_NICKNAME": "Your Nickname:",
+    "ENTER_NICKNAME": "Enter your nickname",
+    "CHOOSE_TEAM": "Choose your team",
+    "PLAY": "Play"
+  },
+  "GAME": {
+    "YOUR_TURN": "It's your turn!",
+    "WAITING": "Waiting...",
+    "MOVE_PIECE": "Move a piece to continue.",
+    "OPPONENT_TURN": "Turn of",
+    "CONNECTING": "Connecting",
+    "ROLE_DETERMINING": "Determining role in the game...",
+    "WHITE_PLAYER": "White Player",
+    "BLACK_PLAYER": "Black Player",
+    "PIECES": "Pieces",
+    "TURN": "Turn",
+    "WAITING_STATUS": "Waiting",
+    "RECENT_MOVES": "Recent Moves",
+    "WHITE_TURN_ERROR": "It's White's turn!",
+    "BLACK_TURN_ERROR": "It's Black's turn!"
+  },
+  "BOT": {
+    "OPTIONS": "Bot Options",
+    "DIFFICULTY": "Difficulty Level",
+    "EASY": "Easy",
+    "MEDIUM": "Medium",
+    "HARD": "Hard",
+    "YOUR_COLOR": "Your Color",
+    "PLAY_WHITE": "Play as White",
+    "PLAY_BLACK": "Play as Black",
+    "NEW_GAME": "New Game",
+    "THINKING": "Bot is thinking...",
+    "CAPTURING": "Capturing...",
+    "YOU_WON": "You won the game!",
+    "BOT_WON": "The bot won the game!",
+    "YOUR_TURN_ERROR": "It's your turn!",
+    "BOT_TURN_ERROR": "It's the bot's turn! Please wait for its move..."
+  },
+  "MENU": {
+    "SELECT_MODE": "Select Game Mode",
+    "ONLINE": "Play Online",
+    "LOCAL": "Play Locally",
+    "VS_COMPUTER": "Play against Computer"
+  },
+  "GAME_OVER": {
+    "TITLE": "Game Over!",
+    "WINNER": "The winner is",
+    "WHITE": "White",
+    "BLACK": "Black",
+    "NEW_GAME": "New Game",
+    "REQUEST_REMATCH": "Request Rematch",
+    "CANCEL_REQUEST": "Cancel Request",
+    "BACK_TO_MENU": "Back to Menu",
+    "RESTART_REQUESTED": "Rematch request sent!",
+    "WAITING_FOR_OPPONENT_RESTART": "Waiting for opponent to accept rematch...",
+    "OPPONENT_WANTS_RESTART": "Opponent has requested a rematch!"
+  },
+  "JOIN": {
+    "JOIN_GAME": "Join Game",
+    "NICKNAME": "Your nickname",
+    "REQUIRED": "Required",
+    "MIN_LENGTH": "Minimum 3 characters",
+    "NEXT": "Next",
+    "GAME_ID": "Game ID",
+    "JOIN_AS": "Join as",
+    "WAITING_FOR_OPPONENT": "The game will start when another player joins."
+  },
+  "CHAT": {
+    "PLACEHOLDER": "Write a message...",
+    "CHAT_TITLE": "Chat:"
+  },
+  "FOOTER": {
+    "COPYRIGHT": "© {{year}} OnlineCheckers.org",
+    "OUR_TEAM": "Contacts",
+    "TAGLINE": "Play checkers online with friends or against the computer."
+  },
+  "RULES": {
+    "TITLE": "English Checkers - Rules and How to Play",
+    "INTRODUCTION": "English Checkers is a traditional board game played on an 8x8 board with 12 pieces per player. It is one of the most widely played variants of checkers around the world.",
+    "INTRO_TEXT": "Simple to learn but full of strategy, English Checkers has been a beloved pastime in English-speaking countries for generations.",
+    "HISTORY_TITLE": "History of English Checkers",
+    "HISTORY_TEXT_1": "English Checkers has a long history dating back to medieval times in England and other parts of Europe.",
+    "HISTORY_TEXT_2": "The first book on the game was published in 1756 by William Payne, titled 'An Introduction to the Game of Draughts'.",
+    "HISTORY_TEXT_3": "The game's popularity spread throughout the British Empire and became particularly established in the United States, where it is commonly known as 'Checkers'.",
+    "HISTORY_TEXT_4": "In 1847, the first world championship of checkers was held, establishing the game as a serious competitive pursuit.",
+    "BOARD_TITLE": "The Board",
+    "BOARD_TEXT_1": "English Checkers is played on a standard 8x8 chessboard with 64 squares, using only the 32 dark squares.",
+    "BOARD_TEXT_2": "Each player begins with 12 pieces placed on the dark squares of the first three rows closest to them.",
+    "MOVEMENT_TITLE": "Movement and Capture",
+    "MOVEMENT_TEXT_1": "Pieces move diagonally forward one square at a time. They cannot move backward until they become kings.",
+    "MOVEMENT_TEXT_2": "Capture occurs by jumping over an opponent's piece to an empty square directly beyond. The jumped piece is removed from the board.",
+    "MOVEMENT_TEXT_3": "If after a capture it is possible to make further captures, the player must continue the sequence with the same piece until no further captures are possible (multiple jumps).",
+    "MOVEMENT_TEXT_4": "If a player has the opportunity to capture, they must do so. If multiple capture sequences are available, the player may choose any valid capture sequence, regardless of how many pieces are captured.",
+    "KINGS_TITLE": "The Kings",
+    "KINGS_TEXT_1": "A piece becomes a king when it reaches the last row on the opponent's side of the board. It is usually crowned by placing a second piece on top of it.",
+    "KINGS_TEXT_2": "A king can move diagonally both forward and backward, but still moves only one square at a time except when capturing.",
+    "KINGS_TEXT_3": "Kings capture in the same way as regular pieces, but can do so in all four diagonal directions. Like regular pieces, kings must make all available captures."
+  },
+  "ERRORS": {
+    "GAME_NOT_FOUND": "The game you're trying to join doesn't exist.",
+    "GAME_FULL": "This game already has two players and cannot accept more participants.",
+    "SELF_PLAY_NOT_ALLOWED": "You cannot play against yourself in online mode. Please use the 'Play Locally' option from the main menu.",
+    "SERVER_ERROR": "An error occurred while connecting to the server. Please try again later.",
+    "JOIN_FAILED": "Failed to join the game. Please try again.",
+    "UNKNOWN_ERROR": "An unknown error occurred. Please try again later.",
+    "GO_TO_LOCAL_MODE": "Go to Local Mode",
+    "CREATE_NEW_GAME": "Create New Game"
+  }
+}

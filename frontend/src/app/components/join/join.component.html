@@ -1,0 +1,70 @@
+<div class="card p-4 mx-auto mt-5" style="max-width:360px">
+  <h4 class="mb-3">Partecipa alla Partita</h4>
+
+  <!-- Messaggi di errore -->
+  <div *ngIf="showError" class="alert alert-danger mb-3">
+    <button class="btn btn-secondary btn-sm me-2" (click)="closeError()">
+      ✖
+    </button>
+    <div [ngSwitch]="errorCode">
+      <p *ngSwitchCase="'GAME_NOT_FOUND'">
+        {{ 'ERRORS.GAME_NOT_FOUND' | translate }}
+      </p>
+      <p *ngSwitchCase="'GAME_FULL'">
+        {{ 'ERRORS.GAME_FULL' | translate }}
+      </p>
+      <p *ngSwitchCase="'SELF_PLAY'">
+        {{ 'ERRORS.SELF_PLAY_NOT_ALLOWED' | translate }}
+      </p>
+      <p *ngSwitchCase="'SERVER_ERROR'">
+        {{ 'ERRORS.SERVER_ERROR' | translate }}
+      </p>
+      <p *ngSwitchCase="'JOIN_FAILED'">
+        {{ 'ERRORS.JOIN_FAILED' | translate }}
+      </p>
+      <p *ngSwitchDefault>
+        {{ 'ERRORS.UNKNOWN_ERROR' | translate }}
+      </p>
+    </div>
+    
+    <div class="mt-2">
+      <button *ngIf="errorCode === 'SELF_PLAY'" class="btn btn-primary btn-sm" (click)="goToLocalMode()">
+        {{ 'ERRORS.GO_TO_LOCAL_MODE' | translate }}
+      </button>
+      <button *ngIf="errorCode === 'GAME_FULL'" class="btn btn-primary btn-sm" (click)="goToNewGame()">
+        {{ 'ERRORS.CREATE_NEW_GAME' | translate }}
+      </button>
+    </div>
+  </div>
+
+  <!-- 1) Scegli nickname -->
+  <form *ngIf="step===1" #nickForm="ngForm" (ngSubmit)="onNickname()">
+    <div class="mb-3">
+        <label class="form-label">Il tuo nickname</label>
+        <input name="nick" class="form-control"
+            required minlength="3"
+            [(ngModel)]="nickname" #nick="ngModel"
+        />
+
+        <div *ngIf="nick.invalid && nick.touched" class="text-danger">
+          {{ nick.errors?.['required'] ? 'Obbligatorio' : '' }}
+          {{ nick.errors?.['minlength'] ? 'Minimo 3 caratteri' : '' }}
+        </div>
+    </div>
+    <button class="btn btn-primary" [disabled]="nickForm.invalid">
+      Avanti
+    </button>
+  </form>
+
+  <!-- 2) Conferma ID partita e join -->
+  <form *ngIf="step===2" #joinForm="ngForm" (ngSubmit)="onJoin()">
+    <div class="mb-3">
+      <label class="form-label">ID Partita</label>
+      <input name="gameId" class="form-control"
+             [value]="gameId" readonly>
+    </div>
+    <button class="btn btn-success">
+      Unisciti come {{ nickname }}
+    </button>
+  </form>
+</div>
