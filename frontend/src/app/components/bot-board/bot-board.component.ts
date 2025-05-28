@@ -1,4 +1,3 @@
-// src/app/components/bot-board/bot-board.component.ts
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { OfflineBoardComponent } from '../offline-board/offline-board.component';
 import { BotService } from '../../../services/bot.service';
@@ -21,16 +20,20 @@ import { OfflineMovesComponent } from '../offline-moves/offline-moves.component'
 export class BotBoardComponent extends OfflineBoardComponent implements OnInit, OnDestroy {
   botColor: 'black' | 'white' = 'black';
   playerColor: 'black' | 'white' = 'white';
-  difficulty: number = 2; // Default: media difficoltà
+  difficulty: number = 2; // Default: medium difficulty
   isThinking: boolean = false;
 
-  // Proprietà per l'animazione della cattura
+  // BOARD HISTORY TRACKING FOR ANTI-LOOP
+  private boardHistory: string[] = []; // Complete board state history
+  private readonly MAX_HISTORY_SIZE = 50; // Keep last 50 positions
+
+  // Animation properties for captures
   isAnimatingCapture: boolean = false;
   captureAnimationPath: { row: number, col: number }[] = [];
   captureAnimationStep: number = 0;
   captureAnimationInterval: any = null;
 
-  // Proprietà per il drag and drop
+  // Drag and drop properties
   override draggedPiece: { row: number, col: number } | null = null;
   override dragOverCell: { row: number, col: number } | null = null;
 
@@ -45,45 +48,62 @@ export class BotBoardComponent extends OfflineBoardComponent implements OnInit, 
   override ngOnInit() {
     super.ngOnInit();
 
-    // Se il bot inizia, fagli fare la prima mossa
+    // If bot starts first, make its first move
     if (this.currentPlayer === this.botColor) {
       this.getBotMove();
     }
   }
 
   override ngOnDestroy() {
-    // Pulisci eventuali interval quando il componente viene distrutto
+    // Clean up any running intervals when component is destroyed
     if (this.captureAnimationInterval) {
       clearInterval(this.captureAnimationInterval);
       this.captureAnimationInterval = null;
     }
     
-    // Chiama il metodo della classe base
+    // Call parent destroy method
     super.ngOnDestroy();
   }
 
   /**
-   * Override del metodo makeMove per aggiungere la logica del bot
+   * Enhanced makeMove method that includes bot logic and board history tracking
    */
   override makeMove(fromRow: number, fromCol: number, toRow: number, toCol: number): void {
+    // Record board state before player move
+    const beforeMoveHash = this.createBoardHash();
+    this.addBoardToHistory(beforeMoveHash);
 
-    // Poi esegui la mossa normalmente
+    console.log('Player making move from', fromRow + ',' + fromCol, 'to', toRow + ',' + toCol);
+
+    // Execute move normally using parent method
     super.makeMove(fromRow, fromCol, toRow, toCol);
 
-    // Se dopo la mossa del giocatore è il turno del bot e la partita non è finita
+    // Record board state after player move
+    setTimeout(() => {
+      const afterMoveHash = this.createBoardHash();
+      this.addBoardToHistory(afterMoveHash);
+      console.log('Player move completed. New board hash:', afterMoveHash);
+    }, 100);
+
+    // If after player's move it's bot's turn and game is not over
     if (!this.gameOver && this.currentPlayer === this.botColor) {
-      // Aggiungi un piccolo ritardo per dare l'illusione che il bot stia "pensando"
+      // Add small delay to give illusion that bot is "thinking"
       setTimeout(() => {
         this.getBotMove();
       }, 500);
     }
   }
 
-  // Metodo per ottenere la mossa del bot dall'API
+  /**
+   * Enhanced getBotMove method that sends board history to backend
+   */
   getBotMove() {
     this.isThinking = true;
 
-    // Prepara la richiesta per l'API
+    // Create current board hash
+    const currentBoardHash = this.createBoardHash();
+    
+    // Prepare request with board history
     const request = {
       board: this.board.map(row => row.map(cell => {
         if (!cell.hasPiece) return '';
@@ -92,23 +112,33 @@ export class BotBoardComponent extends OfflineBoardComponent implements OnInit, 
           : (cell.pieceColor === 'white' ? 'w' : 'b');
       })),
       playerColor: this.botColor,
-      difficulty: this.difficulty
+      difficulty: this.difficulty,
+      boardHistory: [...this.boardHistory] // Send complete board history to prevent loops
     };
+
+    console.log('Sending to bot:');
+    console.log('- Current board hash:', currentBoardHash);
+    console.log('- Board history length:', this.boardHistory.length);
+    console.log('- Repetitions of current position:', this.countRepetitions(currentBoardHash));
 
     this.botService.calculateMove(request).subscribe({
       next: (response) => {
-        // Nascondi l'indicatore di "pensiero" del bot
         this.isThinking = false;
 
-        // Converti le coordinate dalla notazione dell'API
+        // Add current position to history BEFORE making the move
+        this.addBoardToHistory(currentBoardHash);
+
+        // Convert coordinates from API notation
         const fromRow = parseInt(response.from.charAt(0));
         const fromCol = parseInt(response.from.charAt(1));
         const toRow = parseInt(response.to.charAt(0));
         const toCol = parseInt(response.to.charAt(1));
 
-        // Esegui la mossa del bot
+        console.log('Bot chose move:', response.from + ' -> ' + response.to);
+
+        // Execute bot move
         if (response.path && response.path.length > 0) {
-          // Gestisci cattura multipla con animazione
+          // Handle multiple capture with animation
           this.moves = [...this.moves, {
             from: { row: fromRow, col: fromCol },
             to: { row: toRow, col: toCol },
@@ -116,20 +146,76 @@ export class BotBoardComponent extends OfflineBoardComponent implements OnInit, 
           }];
           this.animateBotCapturePath(fromRow, fromCol, response.path);
         } else {
-          // Mossa semplice
+          // Simple move
           super.makeMove(fromRow, fromCol, toRow, toCol);
         }
+
+        // Add the new board state after bot's move to history
+        setTimeout(() => {
+          const afterMoveHash = this.createBoardHash();
+          this.addBoardToHistory(afterMoveHash);
+          console.log('Bot move completed. New board hash:', afterMoveHash);
+        }, 100);
       },
       error: (err) => {
-        console.error('Errore durante il calcolo della mossa del bot:', err);
+        console.error('Error calculating bot move:', err);
         this.isThinking = false;
       }
     });
   }
 
-  // Metodo per animare un percorso di cattura multipla
+  /**
+   * Creates a hash of the current board position
+   */
+  private createBoardHash(): string {
+    let hash = '';
+    
+    // Create hash from board state
+    for (let r = 0; r < 8; r++) {
+      for (let c = 0; c < 8; c++) {
+        const cell = this.board[r][c];
+        if (!cell.hasPiece) {
+          hash += '.';
+        } else {
+          hash += cell.isKing 
+            ? (cell.pieceColor === 'white' ? 'W' : 'B')
+            : (cell.pieceColor === 'white' ? 'w' : 'b');
+        }
+      }
+    }
+    
+    // Include current player to distinguish identical positions with different turns
+    hash += '_' + this.currentPlayer;
+    
+    return hash;
+  }
+
+  /**
+   * Adds a board state to the history
+   */
+  private addBoardToHistory(boardHash: string): void {
+    this.boardHistory.push(boardHash);
+    
+    // Keep only the last MAX_HISTORY_SIZE positions to avoid memory issues
+    if (this.boardHistory.length > this.MAX_HISTORY_SIZE) {
+      this.boardHistory.shift(); // Remove oldest position
+    }
+    
+    console.log('Board history updated. Size:', this.boardHistory.length);
+  }
+
+  /**
+   * Counts how many times a position appears in history
+   */
+  private countRepetitions(boardHash: string): number {
+    return this.boardHistory.filter(hash => hash === boardHash).length;
+  }
+
+  /**
+   * Animates a multiple capture path for the bot
+   */
   animateBotCapturePath(startRow: number, startCol: number, path: string[]) {
-    // Interrompi eventuali animazioni in corso
+    // Stop any running animations
     if (this.captureAnimationInterval) {
       clearInterval(this.captureAnimationInterval);
       this.captureAnimationInterval = null;
@@ -137,10 +223,10 @@ export class BotBoardComponent extends OfflineBoardComponent implements OnInit, 
 
     this.isAnimatingCapture = true;
 
-    // Costruisci il percorso completo includendo la posizione iniziale
+    // Build complete path including starting position
     this.captureAnimationPath = [{ row: startRow, col: startCol }];
 
-    // Aggiungi ogni posizione nel percorso
+    // Add each position in the path
     for (const pos of path) {
       const row = parseInt(pos.charAt(0));
       const col = parseInt(pos.charAt(1));
@@ -149,104 +235,106 @@ export class BotBoardComponent extends OfflineBoardComponent implements OnInit, 
 
     this.captureAnimationStep = 0;
 
-    // Salva il colore e lo stato della dama della pedina
+    // Save the color and king status of the moving piece
     const movingPiece = { ...this.board[startRow][startCol] };
 
-    // Intervallo per l'animazione (sposta il pezzo ogni 500ms)
+    // Animation interval (move piece every 500ms)
     this.captureAnimationInterval = setInterval(() => {
       if (this.captureAnimationStep < this.captureAnimationPath.length - 1) {
-        // Posizione corrente
+        // Current position
         const current = this.captureAnimationPath[this.captureAnimationStep];
-        // Prossima posizione
+        // Next position
         const next = this.captureAnimationPath[this.captureAnimationStep + 1];
 
-        // Calcola la posizione del pezzo catturato
+        // Calculate captured piece position
         const capturedRow = (current.row + next.row) / 2;
         const capturedCol = (current.col + next.col) / 2;
 
-        // Applica l'animazione di movimento al pezzo corrente
+        // Apply movement animation to current piece
         const currentPieceElement = this.getPieceElement(current.row, current.col);
         if (currentPieceElement) {
           currentPieceElement.classList.add('moving');
         }
 
-        // Applica l'animazione di cattura al pezzo catturato
+        // Apply capture animation to captured piece
         const capturedPieceElement = this.getPieceElement(capturedRow, capturedCol);
         if (capturedPieceElement) {
           capturedPieceElement.classList.add('captured');
         }
 
-        // Attendi che l'animazione finisca prima di aggiornare lo stato
+        // Wait for animation to finish before updating state
         setTimeout(() => {
-          // Rimuove il pezzo dalla posizione corrente
+          // Remove piece from current position
           this.board[current.row][current.col] = {
             hasPiece: false,
             pieceColor: null,
             isKing: false
           };
 
-          // Rimuove il pezzo catturato
+          // Remove captured piece
           this.board[capturedRow][capturedCol] = {
             hasPiece: false,
             pieceColor: null,
             isKing: false
           };
-        }, 300); // Attendi 300ms per l'animazione
+        }, 300); // Wait 300ms for animation
 
-        // Verifica se la pedina diventa dama
+        // Check if piece becomes king
         if (!movingPiece.isKing) {
           if ((movingPiece.pieceColor === 'white' && next.row === 0) ||
             (movingPiece.pieceColor === 'black' && next.row === 7)) {
-            // La pedina diventa dama
+            // Piece becomes king
             movingPiece.isKing = true;
 
-            // Riproduci suono promozione a dama
+            // Play king promotion sound
             this.audioService.playKingSound();
           }
         }
 
-        // Sposta il pezzo nella nuova posizione
+        // Move piece to new position
         this.board[next.row][next.col] = {
           hasPiece: true,
           pieceColor: movingPiece.pieceColor,
           isKing: movingPiece.isKing
         };
 
-        // Applica l'animazione di movimento al pezzo nella nuova posizione
+        // Apply movement animation to piece in new position
         setTimeout(() => {
           const newPieceElement = this.getPieceElement(next.row, next.col);
           if (newPieceElement) {
             newPieceElement.classList.add('moving');
           }
-        }, 10); // Piccolo ritardo per assicurarsi che il DOM sia aggiornato
+        }, 10); // Small delay to ensure DOM is updated
 
-        // Riproduci il suono di cattura
+        // Play capture sound
         this.audioService.playCaptureSound();
 
-        // Avanza all'animazione successiva
+        // Advance to next animation step
         this.captureAnimationStep++;
 
-        // Forza l'aggiornamento dell'interfaccia
+        // Force interface update
         this.board = [...this.board];
       } else {
-        // Fine dell'animazione
+        // End of animation
         clearInterval(this.captureAnimationInterval);
         this.captureAnimationInterval = null;
         this.isAnimatingCapture = false;
 
-        // Cambia il turno
+        // Change turn
         this.currentPlayer = this.currentPlayer === 'white' ? 'black' : 'white';
 
-        // Aggiorna il conteggio delle pedine
+        // Update piece count
         this.updatePieceCount();
 
-        // Controlla se la partita è finita
+        // Check if game is over
         this.checkGameOver();
       }
-    }, 500); // Ritardo di 500ms tra ogni passo dell'animazione
+    }, 500); // 500ms delay between each animation step
   }
 
-  // Metodo per aggiornare il conteggio delle pedine
+  /**
+   * Updates piece count for both colors
+   */
   updatePieceCount() {
     this.whiteCount = 0;
     this.blackCount = 0;
@@ -262,40 +350,49 @@ export class BotBoardComponent extends OfflineBoardComponent implements OnInit, 
     }
   }
 
-  // Override per gestire i click durante l'animazione
+  /**
+   * Handle cell clicks during animations and bot turns
+   */
   override onCellClick(row: number, col: number): void {
-    // Se c'è un'animazione in corso o non è il turno del giocatore, ignora i click
+    // If animation is running or bot is thinking or it's bot's turn, ignore clicks
     if (this.isAnimatingCapture || this.isThinking || this.currentPlayer === this.botColor) {
       return;
     }
 
-    // Altrimenti procedi normalmente
+    // Otherwise proceed normally
     super.onCellClick(row, col);
   }
 
-  // Metodo per cambiare la difficoltà
+  /**
+   * Changes bot difficulty level
+   */
   setDifficulty(level: number) {
     this.difficulty = level;
   }
 
-  // Metodo per cambiare il colore del bot
+  /**
+   * Changes bot and player colors
+   */
   setColors(botColor: 'black' | 'white') {
     this.botColor = botColor;
     this.playerColor = botColor === 'black' ? 'white' : 'black';
 
-    // Resetta il gioco
+    // Reset game
     this.resetGame();
 
-    // Se il bot inizia, fagli fare la prima mossa
+    // If bot starts, make its first move
     if (this.currentPlayer === this.botColor) {
       this.getBotMove();
     }
   }
 
+  /**
+   * Reset game and clear board history
+   */
   override resetGame(): void {
     super.resetGame();
 
-    // Interrompi eventuali animazioni in corso
+    // Stop any running animations
     if (this.captureAnimationInterval) {
       clearInterval(this.captureAnimationInterval);
       this.captureAnimationInterval = null;
@@ -304,7 +401,11 @@ export class BotBoardComponent extends OfflineBoardComponent implements OnInit, 
     this.isAnimatingCapture = false;
     this.isThinking = false;
 
-    // Se il bot inizia, fagli fare la prima mossa
+    // Clear board history when game resets
+    this.boardHistory = [];
+    console.log('Game reset - board history cleared');
+
+    // If bot starts, make its first move
     if (this.currentPlayer === this.botColor) {
       setTimeout(() => {
         this.getBotMove();
@@ -312,59 +413,69 @@ export class BotBoardComponent extends OfflineBoardComponent implements OnInit, 
     }
   }
 
-  // Override dei metodi di drag and drop
+  /**
+   * Handle drag start with animation and bot turn checks
+   */
   override onDragStart(event: DragEvent, row: number, col: number): void {
-    // Se c'è un'animazione in corso, il bot sta pensando, o non è il turno del giocatore, ignora il drag
+    // If animation is running, bot is thinking, or it's bot's turn, prevent drag
     if (this.isAnimatingCapture || this.isThinking || this.currentPlayer === this.botColor || this.gameOver) {
       event.preventDefault();
       return;
     }
 
-    // Altrimenti procedi normalmente
+    // Otherwise proceed normally
     super.onDragStart(event, row, col);
   }
 
+  /**
+   * Handle drag over with animation and bot turn checks
+   */
   override onDragOver(event: DragEvent, row: number, col: number): void {
-    // Se c'è un'animazione in corso, il bot sta pensando, o non è il turno del giocatore, ignora il drag over
+    // If animation is running, bot is thinking, or it's bot's turn, ignore drag over
     if (this.isAnimatingCapture || this.isThinking || this.currentPlayer === this.botColor || this.gameOver) {
       return;
     }
 
-    // Altrimenti procedi normalmente
+    // Otherwise proceed normally
     super.onDragOver(event, row, col);
   }
 
+  /**
+   * Handle drop with animation and bot turn checks
+   */
   override onDrop(event: DragEvent, row: number, col: number): void {
-    // Se c'è un'animazione in corso, il bot sta pensando, o non è il turno del giocatore, ignora il drop
+    // If animation is running, bot is thinking, or it's bot's turn, ignore drop
     if (this.isAnimatingCapture || this.isThinking || this.currentPlayer === this.botColor || this.gameOver) {
       return;
     }
 
-    // Altrimenti procedi normalmente
+    // Otherwise proceed normally
     super.onDrop(event, row, col);
   }
 
+  /**
+   * Handle drag end with animation and bot turn checks
+   */
   override onDragEnd(event: DragEvent): void {
-    // Se c'è un'animazione in corso, il bot sta pensando, o non è il turno del giocatore, ignora il drag end
+    // If animation is running, bot is thinking, or it's bot's turn, ignore drag end
     if (this.isAnimatingCapture || this.isThinking || this.currentPlayer === this.botColor || this.gameOver) {
       return;
     }
 
-    // Altrimenti procedi normalmente
+    // Otherwise proceed normally
     super.onDragEnd(event);
   }
 
   /**
-   * Sovrascrivi il metodo per mostrare un messaggio di errore personalizzato
-   * per la modalità di gioco contro il bot
+   * Show custom error message for bot game mode
    */
   override showTurnErrorMessage(): void {
-    // Cancella il timer precedente se esiste
+    // Clear previous timer if exists
     if (this.errorMessageTimeout) {
       clearTimeout(this.errorMessageTimeout);
     }
     
-    // Usa chiavi di traduzione specifiche per il bot
+    // Use bot-specific translation keys
     const key = this.currentPlayer === this.playerColor ? 
       'BOT.YOUR_TURN_ERROR' : 
       'BOT.BOT_TURN_ERROR';
@@ -378,5 +489,33 @@ export class BotBoardComponent extends OfflineBoardComponent implements OnInit, 
       this.showErrorMessage = false;
       this.errorMessage = null;
     }, 3000);
+  }
+
+  /**
+   * Debug method to log current history state
+   */
+  private logHistoryDebug(): void {
+    console.log('=== BOARD HISTORY DEBUG ===');
+    console.log('Total positions:', this.boardHistory.length);
+    
+    // Count unique positions
+    const uniquePositions = new Set(this.boardHistory).size;
+    console.log('Unique positions:', uniquePositions);
+    console.log('Repeated positions:', this.boardHistory.length - uniquePositions);
+    
+    // Show most recent positions
+    console.log('Last 5 positions:', this.boardHistory.slice(-5));
+    console.log('========================');
+  }
+
+  /**
+   * Get statistics about current game history
+   */
+  getHistoryStats(): { total: number, unique: number, repetitions: number } {
+    const total = this.boardHistory.length;
+    const unique = new Set(this.boardHistory).size;
+    const repetitions = total - unique;
+    
+    return { total, unique, repetitions };
   }
 }

@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import {OfflineBoardComponent} from '../../components/offline-board/offline-board.component';
+import { OfflineBoardComponent } from '../../components/offline-board/offline-board.component';
 
 @Component({
   selector: 'page-locale-player',
@@ -7,7 +7,8 @@ import {OfflineBoardComponent} from '../../components/offline-board/offline-boar
     imports: [
         OfflineBoardComponent,
     ],
-  templateUrl: './locale-player.page.html',
-  styleUrl: './locale-player.page.css'
+  template: `
+    <app-offline-board></app-offline-board>
+  `
 })
 export class LocalePlayerPage {}

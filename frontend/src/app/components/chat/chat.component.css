@@ -24,13 +24,11 @@
 
 .chat-messages {
   flex: 1;
-  overflow-y: auto; /* Questo era già presente ma è fondamentale */
+  overflow-y: auto;
   padding: 10px;
   margin-bottom: 10px;
-  /* Rimuoviamo min-height dato che abbiamo già un'altezza fissa del contenitore */
   color: var(--text-color);
   line-height: 1.5;
-  /* Aggiungiamo scrollbar personalizzata */
   scrollbar-width: thin;
   scrollbar-color: var(--card-border) transparent;
 }
@@ -81,7 +79,6 @@
   transform: scale(1.1);
 }
 
-/* Stile per la scrollbar su WebKit (Chrome, Safari, ecc.) */
 .chat-messages::-webkit-scrollbar {
   width: 8px;
 }
@@ -96,7 +93,6 @@
   border: 2px solid transparent;
 }
 
-/* Modifichiamo il responsive per mantenere un'altezza ragionevole su mobile */
 @media (max-width: 768px) {
   .chat {
     height: 400px;

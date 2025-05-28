@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd"
+>
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -10,25 +12,54 @@
     </parent>
     <groupId>org.checkersonline</groupId>
     <artifactId>backend</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.1.0-beta</version>
     <name>backend</name>
     <description>backend</description>
     <url/>
+
     <licenses>
-        <license/>
+        <license>
+            <name>MIT License</name>
+            <url>https://opensource.org/licenses/MIT</url>
+            <distribution>repo</distribution>
+        </license>
     </licenses>
+
     <developers>
-        <developer/>
+        <developer>
+            <name>Enzo Brancati</name>
+            <email>enzo.brancati04@gmail.com</email>
+            <url>https://www.linkedin.com/in/enzo-brancati-a2880520b/</url>
+        </developer>
+
+        <developer>
+            <name>Daniele Filareti</name>
+            <email>daniele.filareti@icloud.com</email>
+            <url>https://www.linkedin.com/in/daniele-filareti-227a85257</url>
+        </developer>
+
+        <developer>
+            <name>Domenico Farano</name>
+            <email>dodo.farano@gmail.com</email>
+            <url>https://www.linkedin.com/in/domenico-farano-418923285</url>
+        </developer>
+
+        <developer>
+            <name>AnielloPio Pentangelo</name>
+            <email>aniellopiopentangelo2@gmail.com</email>
+        </developer>
     </developers>
+
     <scm>
-        <connection/>
-        <developerConnection/>
-        <tag/>
-        <url/>
+        <connection>scm:git:https://github.com/ebrancati/OnlineCheckers.org.git</connection>
+        <developerConnection>scm:git:https://github.com/ebrancati/OnlineCheckers.org.git</developerConnection>
+        <url>https://github.com/ebrancati/OnlineCheckers.org</url>
     </scm>
+
     <properties>
         <java.version>21</java.version>
     </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>

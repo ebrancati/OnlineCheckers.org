@@ -243,7 +243,7 @@
   width: 250px;
 }
 
-/* Modale di fine partita */
+/* Game over modal */
 .game-over-modal {
   position: fixed;
   top: 0;
@@ -350,7 +350,7 @@ h2 {
   width: 20px;
 }
 
-/* Container per le info dei giocatori */
+/* Container for player infos */
 .player-info {
   display: flex;
   align-items: center;
@@ -363,7 +363,7 @@ h2 {
   transition: all 0.3s ease;
 }
 
-/* Stili specifici per i giocatori */
+/* Player-specific styles */
 .black-player {
   background-color: var(--player-black-bg);
   border-left: 4px solid var(--player-black-border);
@@ -375,7 +375,7 @@ h2 {
   border-left: 4px solid var(--player-white-border);
 }
 
-/* Icona pedina (decorativa) */
+/* Pawn icon */
 .player-piece {
   width: 24px;
   height: 24px;
@@ -394,7 +394,7 @@ h2 {
   border: 1px solid var(--piece-white-border);
 }
 
-/* Contenuto testuale */
+/* Text content */
 .player-text {
   flex-grow: 1;
   color: var(--player-text-color);
@@ -414,7 +414,7 @@ h2 {
   margin-top: 2px;
 }
 
-/* Stats del giocatore a destra */
+/* Stats of the player on the right */
 .player-stats {
   display: flex;
   align-items: center;
@@ -439,7 +439,7 @@ h2 {
   color: var(--turn-waiting-icon);
 }
 
-/* Stile per il turno di gioco */
+/* Stats of the player on the left */
 .turn-status-card {
   width: 100%;
   margin-top: 10px;
@@ -580,22 +580,22 @@ h2 {
   }
 
   .board {
-    grid-template-columns: repeat(8, 40px);
-    grid-template-rows: repeat(8, 40px);
+    grid-template-columns: repeat(8, 60px);
+    grid-template-rows: repeat(8, 60px);
   }
 
   .square {
-    width: 40px;
-    height: 40px;
+    width: 60px;
+    height: 60px;
   }
 
   .col-label {
-    width: 40px;
+    width: 60px;
     font-size: 0.9rem;
   }
 
   .row-label {
-    height: 40px;
+    height: 60px;
     font-size: 0.9rem;
   }
 
@@ -611,6 +611,7 @@ h2 {
 
   .player-info {
     padding: 8px 12px;
+    width: 90%;
   }
 
   .player-piece {
@@ -663,25 +664,30 @@ h2 {
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 550px) {
   .board {
-    grid-template-columns: repeat(8, 35px);
-    grid-template-rows: repeat(8, 35px);
+    grid-template-columns: repeat(8, 10vw);
+    grid-template-rows: repeat(8, 10vw);
   }
 
   .square {
-    width: 35px;
-    height: 35px;
+    width: 10vw;
+    height: 10vw;
   }
 
   .col-label {
-    width: 35px;
+    width: 10vw;
     font-size: 0.8rem;
   }
 
   .row-label {
-    height: 35px;
+    height: 10vw;
     font-size: 0.8rem;
+  }
+
+  .player-info {
+    padding: 8px 12px;
+    width: 85%;
   }
 
   .crown {
@@ -700,6 +706,7 @@ h2 {
 
   .turn-status {
     padding: 8px 10px;
+    width: 80vw;
   }
 
   .turn-icon {
@@ -721,23 +728,15 @@ h2 {
 }
 
 @media (max-width: 375px) {
-  .board {
-    grid-template-columns: repeat(8, 30px);
-    grid-template-rows: repeat(8, 30px);
-  }
-
-  .square {
-    width: 30px;
-    height: 30px;
+  .card {
+    width: 80vw;
   }
 
   .col-label {
-    width: 30px;
     font-size: 0.7rem;
   }
 
   .row-label {
-    height: 30px;
     font-size: 0.7rem;
   }
 
@@ -746,7 +745,16 @@ h2 {
     height: 85%;
   }
 
+  .player-info {
+    padding: 8px 12px;
+    width: 75%;
+  }
+
   .crown {
     font-size: 16px;
+  }
+
+  .difficulty-text {
+    font-size: 0.75rem !important;
   }
 }

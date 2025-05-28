@@ -1,4 +1,3 @@
-// src/services/bot.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -7,6 +6,7 @@ export interface BotMoveRequest {
   board: string[][];
   playerColor: string;
   difficulty: number;
+  boardHistory?: string[];
 }
 
 export interface BotMoveResponse {

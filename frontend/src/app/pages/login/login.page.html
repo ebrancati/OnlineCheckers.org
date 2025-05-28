@@ -3,7 +3,7 @@
     <div class="col-12 text-center">
       <h1 class="display-4 mb-5">{{ 'LOGIN.YOUR_NICKNAME' | translate }}</h1>
 
-      <form #newGameForm="ngForm" (ngSubmit)="newGame()">
+      <form class="mb-5" #newGameForm="ngForm" (ngSubmit)="newGame()">
         <div class="mb-4">
           <input
             id="nickname"
@@ -13,14 +13,12 @@
             required
             class="form-control form-control-lg"
             placeholder="{{ 'LOGIN.ENTER_NICKNAME' | translate }}"
-            style="min-width: 300px;"
           />
         </div>
 
-        <!-- Selezione del team -->
         <div class="mb-4">
           <label class="form-label">{{ 'LOGIN.CHOOSE_TEAM' | translate }}</label>
-          <div class="d-flex justify-content-center gap-3">
+          <div class="d-flex flex-column flex-md-row justify-content-center gap-3">
             <div class="form-check">
               <input
                 class="form-check-input"
@@ -57,9 +55,6 @@
             [disabled]="newGameForm.invalid"
           >
             {{ 'LOGIN.PLAY' | translate }}
-
-                        
-            <!-- Spinner di caricamento -->
             <span *ngIf="isLoading" class="d-flex align-items-center justify-content-center">
               <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
               {{ 'COMMON.LOADING' | translate }}

@@ -1,6 +1,6 @@
 <div class="container">
   <div class="board-container" [attr.data-player-team]="playerTeam">
-    <!-- Link di condivisione con pulsante copia -->
+    <!-- Share link with copy button -->
     <div *ngIf="gameID && needsOpponent()" class="card border-info mb-3">
       <div class="card-header bg-info text-white">
         <i class="bi bi-share-fill me-2"></i> {{ 'COMMON.SHARE_GAME' | translate }}
@@ -32,9 +32,9 @@
       </div>
     </div>
 
-    <!-- Visualizzazione diversa in base al team del giocatore -->
+    <!-- Different view based on player's team -->
     <ng-container *ngIf="playerTeam !== 'BLACK'">
-      <!-- Player nero in alto (avversario) quando sei bianco o spettatore -->
+      <!-- Player black on top (opponent) when you are player white or a spectator -->
       <div class="player-info black-player mb-3">
         <div class="player-piece black"></div>
         <div class="player-text">
@@ -49,7 +49,7 @@
       </div>
 
       <div class="board-with-coordinates">
-        <!-- Coordinate lettere (colonne) -->
+        <!-- Letter coordinates (columns) -->
         <div class="column-labels">
           <div class="corner-spacer"></div>
           <div *ngFor="let col of columns" class="col-label">{{ col }}</div>
@@ -57,12 +57,11 @@
         </div>
 
         <div class="board-with-row-labels">
-          <!-- Coordinate numeri (righe) -->
+          <!-- Coordinate numbers (rows) -->
           <div class="row-labels">
             <div *ngFor="let row of rows" class="row-label">{{ row }}</div>
           </div>
 
-          <!-- Scacchiera -->
           <div class="board">
             <div *ngFor="let row of board; let r = index" class="row">
               <div *ngFor="let cell of row; let c = index"
@@ -93,7 +92,7 @@
         </div>
       </div>
 
-      <!-- Player bianco in basso (tu) quando sei bianco o spettatore -->
+      <!-- Player white at the bottom (you) when you are player white or a spectator -->
       <div class="player-info white-player mt-3">
         <div class="player-piece white"></div>
         <div class="player-text">
@@ -109,7 +108,7 @@
     </ng-container>
 
     <ng-container *ngIf="playerTeam === 'BLACK'">
-      <!-- Player bianco in alto (avversario) quando sei nero -->
+      <!-- Player white up (opponent) when you are player black -->
       <div class="player-info white-player mb-3">
         <div class="player-piece white"></div>
         <div class="player-text">
@@ -124,7 +123,7 @@
       </div>
 
       <div class="board-with-coordinates">
-        <!-- Coordinate lettere (colonne) in alto -->
+        <!-- Letter (column) coordinates at the top -->
         <div class="column-labels">
           <div class="corner-spacer"></div>
           <div *ngFor="let col of columns" class="col-label">{{ col }}</div>
@@ -132,12 +131,11 @@
         </div>
 
         <div class="board-with-row-labels">
-          <!-- Coordinate numeri (righe) -->
+          <!-- Coordinate numbers (rows) -->
           <div class="row-labels">
             <div *ngFor="let row of rows" class="row-label">{{ row }}</div>
           </div>
 
-          <!-- Scacchiera -->
           <div class="board">
             <div *ngFor="let row of board; let r = index" class="row">
               <div *ngFor="let cell of row; let c = index"
@@ -168,7 +166,7 @@
         </div>
       </div>
 
-      <!-- Player nero in basso (tu) quando sei nero -->
+      <!-- Player black below (you) when you are player black -->
       <div class="player-info black-player mt-3">
         <div class="player-piece black"></div>
         <div class="player-text">
@@ -183,7 +181,7 @@
       </div>
     </ng-container>
 
-    <!-- Informazioni sul turno -->
+    <!-- Turn Information -->
     <div class="status-info mt-3">
       <div *ngIf="needsOpponent()" class="turn-status turn-waiting">
         <div class="turn-icon">
@@ -248,17 +246,17 @@
       </div>
     </div>
 
-    <!-- Modale per il game over -->
+    <!-- Game over modal -->
     <div *ngIf="showGameOverModal" class="game-over-modal">
       <div class="modal-content">
         <div class="close-button" (click)="hideGameOverModal()">✕</div>
         <h2>{{ 'GAME_OVER.TITLE' | translate }}</h2>
         <p>{{ 'GAME_OVER.WINNER' | translate }} <span class="winner-text">{{ winner === 'white' ? ('GAME_OVER.WHITE' | translate) : ('GAME_OVER.BLACK' | translate) }}</span></p>
 
-        <!-- Stato di riavvio -->
+        <!-- Restart status -->
         <div *ngIf="restartStatus" class="restart-status mt-3 mb-3">
           <div class="d-flex justify-content-center gap-3">
-            <!-- Stato giocatore bianco -->
+            <!-- Player white status -->
             <div class="player-restart-status white-player">
               <span class="player-name">{{ restartStatus.nicknameW }}</span>
               <span class="restart-icon" [ngClass]="{'ready': restartStatus.restartW}">
@@ -266,7 +264,7 @@
               </span>
             </div>
 
-            <!-- Stato giocatore nero -->
+            <!-- Player black status -->
             <div class="player-restart-status black-player">
               <span class="player-name">{{ restartStatus.nicknameB }}</span>
               <span class="restart-icon" [ngClass]="{'ready': restartStatus.restartB}">
@@ -275,22 +273,21 @@
             </div>
           </div>
         </div>
-        <!-- Messaggi di stato -->
+
+        <!-- Status Messages -->
         <div *ngIf="showRestartRequestedMessage" class="alert alert-success mt-2">
           {{ 'GAME_OVER.RESTART_REQUESTED' | translate }}
         </div>
-
         <div *ngIf="waitingForOpponentRestart && !hasOpponentRequestedRestart()" class="alert alert-info mt-2">
           {{ 'GAME_OVER.WAITING_FOR_OPPONENT_RESTART' | translate }}
         </div>
-
         <div *ngIf="hasOpponentRequestedRestart() && !waitingForOpponentRestart" class="alert alert-info mt-2">
           {{ 'GAME_OVER.OPPONENT_WANTS_RESTART' | translate }}
         </div>
 
-        <!-- Pulsanti azione -->
+        <!-- Action Buttons -->
         <div class="d-flex justify-content-center gap-3 mt-3">
-          <!-- Pulsante Richiedi Rivincita -->
+          <!-- Request Rematch Button -->
           <button
             *ngIf="!waitingForOpponentRestart && gameID"
             class="btn btn-success"
@@ -298,7 +295,7 @@
             {{ 'GAME_OVER.REQUEST_REMATCH' | translate }}
           </button>
 
-          <!-- Pulsante Annulla Richiesta -->
+          <!-- Cancel Request Button -->
           <button
             *ngIf="waitingForOpponentRestart && gameID"
             class="btn btn-warning"
@@ -306,7 +303,7 @@
             {{ 'GAME_OVER.CANCEL_REQUEST' | translate }}
           </button>
 
-          <!-- Pulsante Torna al Menu -->
+          <!-- Back to Menu Button -->
           <button class="btn btn-secondary" (click)="router.navigate(['/play'])">
             {{ 'GAME_OVER.BACK_TO_MENU' | translate }}
           </button>

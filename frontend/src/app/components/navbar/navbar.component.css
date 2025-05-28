@@ -168,3 +168,37 @@ a { cursor: pointer; }
     margin-top: 0.5rem;
   }
 }
+
+#beta {
+  background-color: rgb(65, 227, 214);
+  color: black;
+  font-size: 8px;
+  border-radius: 2vw;
+  padding: 5px;
+  cursor: default;
+}
+
+@media (max-width: 415px) {
+  .navbar-brand h3 {
+    font-size: 1rem;
+  }
+
+  #beta {
+    font-size: 0.5rem;
+  }
+
+  a {
+    margin-right: 0 !important;
+  }
+
+  .container-fluid {
+    padding: 0;
+  }
+}
+
+@media (max-width: 300px) {
+
+  #beta {
+    display: none;
+  }
+}

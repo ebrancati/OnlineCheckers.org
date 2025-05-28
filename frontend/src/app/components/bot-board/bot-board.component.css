@@ -188,7 +188,7 @@
   border-color: var(--navbar-hover);
 }
 
-/* Messaggi di errore (stessi stili del componente offline-board) */
+/* Error messages */
 .error-message {
   position: absolute;
   top: 10px;

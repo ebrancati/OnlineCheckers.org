@@ -22,8 +22,8 @@ Before you begin, ensure you have the following installed:
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/yourusername/online-checkers.git
-cd online-checkers/frontend
+git clone https://github.com/ebrancati/OnlineCheckers.org.git
+cd OnlineCheckers.org/frontend
 ```
 
 ### 2. Install dependencies
@@ -32,18 +32,7 @@ cd online-checkers/frontend
 npm install
 ```
 
-### 3. Configure the environment
-
-Edit `src/environments/environment.ts` for development configuration:
-
-```typescript
-export const environment = {
-  production: false,
-  apiUrl: 'http://localhost:8080'
-};
-```
-
-### 4. Run the development server
+### 3. Run the development server
 
 ```bash
 ng serve
@@ -108,8 +97,3 @@ ng test
 - Support both light and dark themes
 - Support both English and Italian languages
 - Ensure all new features work on mobile devices
-
-## License
-
-To the extent possible under law, this work is dedicated to the public domain worldwide. 
-http://creativecommons.org/publicdomain/zero/1.0/

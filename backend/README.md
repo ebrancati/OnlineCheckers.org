@@ -1,7 +1,5 @@
 # OnlineCheckers.org - Backend
 
-This is the backend component of OnlineCheckers.org, a web application that allows users to play Italian Checkers online against other players or against a bot.
-
 ## Technologies
 
 - Java 21
@@ -11,7 +9,7 @@ This is the backend component of OnlineCheckers.org, a web application that allo
 
 ## Prerequisites
 
-Before you begin, ensure you have the following installed:
+Ensure you have the following installed:
 
 - JDK 21 or later
 - Maven
@@ -23,34 +21,24 @@ Before you begin, ensure you have the following installed:
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/yourusername/online-checkers.git
-cd online-checkers/backend
+git clone https://github.com/ebrancati/OnlineCheckers.org.git
+cd OnlineCheckers.org/backend
 ```
 
-### 2. Configure Database
-
-Create a MySQL database:
-
-```sql
-CREATE DATABASE onlinecheckers;
-CREATE USER 'checkersuser'@'localhost' IDENTIFIED BY 'yourpassword';
-GRANT ALL PRIVILEGES ON onlinecheckers.* TO 'checkersuser'@'localhost';
-FLUSH PRIVILEGES;
-```
-
-### 3. Configure Application
+### 2. Configure Application
 
 Edit the `src/main/resources/application.properties` file:
 
 ```properties
-spring.datasource.url=jdbc:mysql://localhost:3306/onlinecheckers
-spring.datasource.username=checkersuser
-spring.datasource.password=yourpassword
+spring.datasource.url=jdbc:mysql://localhost:3306/checkersonline?createDatabaseIfNotExist=true&useSSL=false
+spring.datasource.username=root
+spring.datasource.password=
 spring.jpa.hibernate.ddl-auto=update
-spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQLDialect
+server.port=8080
 ```
 
-### 4. Build and Run
+### 3. Build and Run
 
 ```bash
 mvn clean install
@@ -98,8 +86,3 @@ The server will start on port 8080.
 3. Commit your changes (`git commit -m 'Add some amazing feature'`)
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
-
-## License
-
-To the extent possible under law, this work is dedicated to the public domain worldwide. 
-http://creativecommons.org/publicdomain/zero/1.0/

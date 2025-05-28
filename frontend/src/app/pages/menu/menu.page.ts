@@ -1,4 +1,3 @@
-// src/app/pages/menu/menu.page.ts
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
@@ -17,7 +16,6 @@ export class MenuPage {
   selectMode(mode: string): void {
     this.selectedMode = mode;
 
-    // Naviga alle pagine appropriate in base alla modalità selezionata
     switch (mode) {
       case 'online':
         this.router.navigate(['/login']);

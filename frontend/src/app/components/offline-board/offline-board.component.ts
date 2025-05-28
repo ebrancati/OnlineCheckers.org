@@ -45,7 +45,7 @@ export class OfflineBoardComponent implements OnInit, OnDestroy {
   piecesWithMoves: { row: number, col: number }[] = [];
   piecesWithoutMoves: { row: number, col: number }[] = [];
 
-  // Proprietà per il messaggio di errore
+  // Property for the error message
   errorMessage: string | null = null;
   showErrorMessage: boolean = false;
   errorMessageTimeout: any = null;
@@ -68,7 +68,7 @@ export class OfflineBoardComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    // Pulizia del timeout quando il componente viene distrutto
+    // Clean up timeout when component is destroyed
     if (this.errorMessageTimeout) {
       clearTimeout(this.errorMessageTimeout);
     }
@@ -102,13 +102,13 @@ export class OfflineBoardComponent implements OnInit, OnDestroy {
       }))
     );
 
-    this.currentPlayer = 'white'; // turno iniziale
-    this.moves = []; // memorizza cronologia mosse
-    this.gameOver = false; // partita non terminata
-    this.showGameOverModal = false; // nasconde modale di fine partita
+    this.currentPlayer = 'white'; // first turn
+    this.moves = []; // memorize moves cronology
+    this.gameOver = false; // game not ended
+    this.showGameOverModal = false;
     this.winner = null;
-    this.highlightedCells = []; // pulisce celle evidenziate sulla scacchiera
-    this.selectedCell = null; // nessun pezzo è selezionato
+    this.highlightedCells = []; // clear highted cells on the gameboard
+    this.selectedCell = null; // no piece is selected
   }
 
   /**
@@ -172,7 +172,7 @@ export class OfflineBoardComponent implements OnInit, OnDestroy {
       return;
     }
     
-    // Se il giocatore clicca una pedina che non è del suo turno, mostra un messaggio
+    // If the player clicks a token that is not in his turn, display a message
     if (cell.pieceColor !== this.currentPlayer) {
       this.showTurnErrorMessage();
       this.selectedCell = null;
@@ -221,7 +221,7 @@ export class OfflineBoardComponent implements OnInit, OnDestroy {
       : cell.pieceColor === 'white' ? [[-1, 1], [-1, -1]] : [[1, 1], [1, -1]]; // Regular pieces move forward only
 
 
-    // calcola e aggiunge le mosse normali (non di cattura) che un pezzo può fare
+    // Calculates and adds the normal (non-capturing) moves a piece can make
     directions.forEach(([dr, dc]) => {
       const r2 = row + dr;
       const c2 = col + dc;
@@ -285,9 +285,9 @@ export class OfflineBoardComponent implements OnInit, OnDestroy {
         return;
       }
 
-      // ottiene la cella che contiene il pezzo avversario che potrebbe essere catturato
+      // gets the cell containing the opponent's piece that could be captured
       const captureCell = this.board[captureRow][captureCol];
-      // ottiene la cella in cui il pezzo atterrerebbe dopo aver effettuato la cattura
+      // gets the cell where the piece would land after making the capture
       const landCell = this.board[landRow][landCol];
 
       // Check if there's an opponent's piece to capture and an empty cell to land on
@@ -310,7 +310,6 @@ export class OfflineBoardComponent implements OnInit, OnDestroy {
    * @param toRow - Destination row
    * @param toCol - Destination column
    */
-  // Modifica il metodo makeMove
   makeMove(fromRow: number, fromCol: number, toRow: number, toCol: number): void {
     console.log("test")
     this.resetMoveIndicators();
@@ -333,13 +332,12 @@ export class OfflineBoardComponent implements OnInit, OnDestroy {
     };
 
     // Handle captures
-    let capturedPiece = null;
     if (isCapture) {
-      // Calcola la posizione della pedina catturata
+      // Calculate the position of the captured piece
       const captureRow = fromRow + (toRow - fromRow) / 2;
       const captureCol = fromCol + (toCol - fromCol) / 2;
 
-      // Rimuovi il pezzo catturato
+      // Remove the captured piece
       this.board[captureRow][captureCol] = {
         hasPiece: false,
         pieceColor: null,
@@ -362,7 +360,6 @@ export class OfflineBoardComponent implements OnInit, OnDestroy {
       captured: isCapture ? [{ row: fromRow + (toRow - fromRow) / 2, col: fromCol + (toCol - fromCol) / 2 }] : undefined
     }];
 
-    // Dopo aver gestito la cattura o il movimento
     if (isCapture) {
       this.audioService.playCaptureSound();
     } else {
@@ -389,28 +386,28 @@ export class OfflineBoardComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Determina se una cella ha un pezzo con mosse disponibili
-   * @param row - Indice della riga della cella
-   * @param col - Indice della colonna della cella
-   * @returns True se la cella ha un pezzo con mosse disponibili
-   */
+  * Determines whether a cell has a piece with available moves
+  * @param row - The cell's row index
+  * @param col - The cell's column index
+  * @returns True if the cell has a piece with available moves
+  */
   hasAvailableMoves(row: number, col: number): boolean {
     return this.piecesWithMoves.some(piece => piece.row === row && piece.col === col);
   }
 
   /**
-   * Determina se una cella ha un pezzo senza mosse disponibili
-   * @param row - Indice della riga della cella
-   * @param col - Indice della colonna della cella
-   * @returns True se la cella ha un pezzo senza mosse disponibili
-   */
+  * Determines whether a cell has a piece with no moves available
+  * @param row - The cell's row index
+  * @param col - The cell's column index
+  * @returns True if the cell has a piece with no moves available
+  */
   hasNoAvailableMoves(row: number, col: number): boolean {
     return this.piecesWithoutMoves.some(piece => piece.row === row && piece.col === col);
   }
 
   /**
-   * Resetta gli indicatori di movimento
-   */
+  * Reset motion indicators
+  */
   resetMoveIndicators(): void {
     this.piecesWithMoves = [];
     this.piecesWithoutMoves = [];
@@ -419,7 +416,6 @@ export class OfflineBoardComponent implements OnInit, OnDestroy {
   /**
    * Checks if the game is over and determines the winner
    */
-  // Modifica il metodo checkGameOver
   checkGameOver(): void {
     // Check if a player has no pieces left
     this.whiteCount = 0;

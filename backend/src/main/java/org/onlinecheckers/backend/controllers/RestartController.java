@@ -1,0 +1,37 @@
+package org.onlinecheckers.backend.controllers;
+
+import org.onlinecheckers.backend.model.daos.GameDao;
+import org.onlinecheckers.backend.model.daos.PlayerRestartDao;
+import org.onlinecheckers.backend.model.dtos.PlayerRestartDto;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+import org.onlinecheckers.backend.exceptions.SessionGameNotFoundException;
+
+@RestController
+@RequestMapping("/api/restartStatus")
+public class RestartController {
+
+    @Autowired
+    GameDao gameDao;
+
+    @Autowired
+    PlayerRestartDao prdao;
+
+    @GetMapping("/{id}/")
+    public PlayerRestartDto statusRestart(@PathVariable String id) {
+        return prdao.findById(id).orElseThrow(() -> new SessionGameNotFoundException(id));
+    }
+
+    @PostMapping("/{id}")
+    public void statusRestartUpdate(@PathVariable String id, @RequestBody PlayerRestartDto playerStatus) {
+        prdao.save(playerStatus);
+    }
+
+    @PostMapping("/{id}/restart")
+    public PlayerRestartDto restart(@PathVariable String id) {
+        PlayerRestartDto pRestart = prdao.findById(id).orElseThrow(() -> new SessionGameNotFoundException(id));
+        pRestart.setRestartB(false);
+        pRestart.setRestartW(false);
+        return prdao.save(pRestart);
+    }
+}

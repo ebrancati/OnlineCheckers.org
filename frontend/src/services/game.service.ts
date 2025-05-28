@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import {HttpClient} from '@angular/common/http';
-import {player} from '../model/entities/player';
-import {GameState} from '../model/entities/GameState';
+import { HttpClient } from '@angular/common/http';
+import { player } from '../model/entities/player';
+import { GameState } from '../model/entities/GameState';
 
 @Injectable({
   providedIn: 'root'

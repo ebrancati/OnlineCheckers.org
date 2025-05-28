@@ -16,10 +16,10 @@
 .menu-button-custom {
   padding: 1.2rem 2rem;
   margin-bottom: 1rem;
-  background: rgba(100, 100, 100, 0.1); /* grigio trasparente */
+  background: rgba(100, 100, 100, 0.1);
   border: 1px solid rgba(120, 120, 120, 0.2);
   border-radius: 1rem;
-  color: #2c2c2c; /* testo grigio scuro leggibile */
+  color: #2c2c2c;
   font-weight: 500;
   font-size: 1.1rem;
   text-align: center;

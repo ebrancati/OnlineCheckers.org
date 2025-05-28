@@ -7,10 +7,8 @@ import {OnlineBoardComponent} from '../../components/online-board/online-board.c
     imports: [
         OnlineBoardComponent,
     ],
-  templateUrl: './online.page.html',
-  styleUrl: './online.page.css'
-
+  template: `
+    <app-online-board></app-online-board>
+  `
 })
-export class OnlinePage {
-
-}
+export class OnlinePage {}

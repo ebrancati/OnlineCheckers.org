@@ -40,22 +40,22 @@ export class OnlineMovesComponent implements OnChanges {
 
     let currentTurn = 1;
     let currentMove = 0;
-    let isWhiteTurn = true; // Bianco inizia sempre
+    let isWhiteTurn = true;
 
-    // Inizializza primo turno
+    // Initialize first turn
     this.displayMoves.push({
       number: currentTurn,
       white: [],
       black: []
     });
 
-    // Analizziamo le mosse per organizzarle in turni bianco/nero
+    // Analyze the moves to organize them into black/white turns
     while (currentMove < this.moves.length) {
       const currentTurnData = this.displayMoves[this.displayMoves.length - 1];
 
-      // Gestione mossa bianca
+      // White move
       if (isWhiteTurn) {
-        // Prima mossa bianca in questo turno
+        // White's first move this turn
         const move = this.moves[currentMove];
         const formattedMove = {
           notation: this.formatMove(move),
@@ -65,7 +65,7 @@ export class OnlineMovesComponent implements OnChanges {
         currentTurnData.white.push(formattedMove);
         currentMove++;
 
-        // Controlliamo se ci sono catture multiple da parte del bianco
+        // We check if there are multiple captures by player white
         while (currentMove < this.moves.length &&
                this.isFollowUpCapture(this.moves[currentMove-1], this.moves[currentMove])) {
           const captureMove = this.moves[currentMove];
@@ -80,10 +80,9 @@ export class OnlineMovesComponent implements OnChanges {
 
         isWhiteTurn = false;
       }
-      // Gestione mossa nera
+      // Black move
       else {
         if (currentMove < this.moves.length) {
-          // Mossa nera
           const move = this.moves[currentMove];
           const formattedMove = {
             notation: this.formatMove(move),
@@ -93,7 +92,7 @@ export class OnlineMovesComponent implements OnChanges {
           currentTurnData.black.push(formattedMove);
           currentMove++;
 
-          // Controlliamo se ci sono catture multiple da parte del nero
+          // Check if there are multiple captures by player black
           while (currentMove < this.moves.length &&
                  this.isFollowUpCapture(this.moves[currentMove-1], this.moves[currentMove])) {
             const captureMove = this.moves[currentMove];
@@ -110,7 +109,7 @@ export class OnlineMovesComponent implements OnChanges {
         isWhiteTurn = true;
         currentTurn++;
 
-        // Prepara il prossimo turno se ci sono altre mosse
+        // Prepare next turn if there are other moves
         if (currentMove < this.moves.length) {
           this.displayMoves.push({
             number: currentTurn,
@@ -123,16 +122,15 @@ export class OnlineMovesComponent implements OnChanges {
   }
 
   /**
-   * Calcola quante righe deve occupare il numero del turno
-   */
+  * Calculate how many rows the turn number should occupy
+  */
   getRowSpan(turn: TurnMoves): number {
-    // Calcola il numero massimo di mosse tra bianco e nero
     return Math.max(turn.white.length, turn.black.length);
   }
 
   /**
-   * Controlla se una mossa è la continuazione di una cattura multipla
-   */
+  * Checks whether a move is a continuation of a multiple capture
+  */
   private isFollowUpCapture(prevMove: Move, currentMove: Move): boolean {
     return prevMove.to.row === currentMove.from.row &&
            prevMove.to.col === currentMove.from.col &&
@@ -140,25 +138,22 @@ export class OnlineMovesComponent implements OnChanges {
   }
 
   /**
-   * Formatta una parte di cattura multipla
-   */
+  * Converts the board coordinates to algebraic notation
+  */
+  protected toAlgebraic(row: number, col: number): string {
+    const columns = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+    const rows = ['1', '2', '3', '4', '5', '6', '7', '8'];
+    return columns[col] + rows[row];
+  }
+  
   private formatCaptureChain(move: Move): string {
     const to = this.toAlgebraic(move.to.row, move.to.col);
     return `x${to}`;
   }
 
   /**
-   * Converte le coordinate della scacchiera in notazione algebrica
-   */
-  protected toAlgebraic(row: number, col: number): string {
-    const columns = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
-    const rows = ['1', '2', '3', '4', '5', '6', '7', '8'];
-    return columns[col] + rows[row];
-  }
-
-  /**
-   * Formatta una singola mossa in notazione algebrica
-   */
+  * Formats a single move in algebraic notation
+  */
   private formatMove(move: Move): string {
     const from = this.toAlgebraic(move.from.row, move.from.col);
     const to = this.toAlgebraic(move.to.row, move.to.col);

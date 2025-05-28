@@ -14,12 +14,13 @@ import { NgIf } from '@angular/common';
     FormsModule, TranslateModule, NgIf
   ],
   templateUrl: './login.page.html',
+  styleUrl: './login.page.css'
 })
 export class LoginPage {
   nickname = '';
   joinGameId = '';
-  preferredTeam = 'WHITE'; // Default a bianco
-  isLoading = false; // Flag per controllare lo stato di caricamento
+  preferredTeam = 'WHITE'; // Default
+  isLoading = false; // Flag to control loading status
 
   constructor(
     private playerSvc: PlayerService,
@@ -45,7 +46,7 @@ export class LoginPage {
         this.router.navigate(['/game', gs.id]);
       },
       error: (err) => {
-        console.error('Errore durante la creazione della partita:', err);
+        console.error('Error creating game:', err);
         this.isLoading = false;
       }
     });
@@ -65,11 +66,11 @@ export class LoginPage {
         if (success) {
           this.router.navigate(['/game', this.joinGameId]);
         } else {
-          console.error('Join fallito');
+          console.error('Join failed');
         }
       },
       error: err => {
-        console.error('Errore join:', err);
+        console.error('Error join:', err);
         this.isLoading = false;
       }
     });

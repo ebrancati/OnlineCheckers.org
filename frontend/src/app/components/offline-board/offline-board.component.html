@@ -1,6 +1,6 @@
 <div class="container">
   <div class="board-container">
-    <!-- Modale per il game over -->
+    <!-- Game over modal -->
     <div *ngIf="showGameOverModal" class="game-over-modal">
       <div class="modal-content">
         <div class="close-button" (click)="hideGameOverModal()">✕</div>
@@ -16,18 +16,18 @@
       </div>
     </div>
     <div class="board-with-coordinates">
-      <!-- Coordinate lettere (colonne) in alto -->
+      <!-- Letter coordinates (columns) -->
       <div class="column-labels">
         <div class="corner-spacer"></div>
         <div *ngFor="let col of columns" class="col-label">{{ col }}</div>
         <div class="corner-spacer"></div>
       </div>
       <div class="board-with-row-labels">
-        <!-- Coordinate numeri (righe) a sinistra -->
+        <!-- Coordinate numbers (rows) -->
         <div class="row-labels">
           <div *ngFor="let row of rows" class="row-label">{{ row }}</div>
         </div>
-        <!-- Scacchiera -->
+
         <div class="board">
           <div *ngFor="let row of board; let r = index" class="row">
             <div *ngFor="let cell of row; let c = index"

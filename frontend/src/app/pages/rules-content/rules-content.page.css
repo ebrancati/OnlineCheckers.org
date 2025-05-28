@@ -92,7 +92,6 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* Board illustration */
 .board-illustration {
     display: flex;
     justify-content: center;
@@ -130,7 +129,7 @@
     background-color: var(--board-dark);
 }
 
-/* Add some pieces to the board for illustration */
+/* board pieces */
 .checkerboard .dark:nth-child(1)::after,
 .checkerboard .dark:nth-child(3)::after,
 .checkerboard .dark:nth-child(5)::after,
@@ -192,7 +191,7 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
-/* Dark theme specific styles */
+/* Dark theme */
 .dark-theme .content-section {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }

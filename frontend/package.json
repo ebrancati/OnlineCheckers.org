@@ -1,6 +1,20 @@
 {
   "name": "frontend",
-  "version": "0.0.0",
+  "version": "0.1.0-beta",
+  "license": "MIT",
+  "author": "Enzo Brancati <enzo.brancati04@gmail.com>",
+  "contributors": [
+    "Daniele Filareti <daniele.filareti@icloud.com>",
+    "Domenico Farano <dodo.farano@gmail.com>",
+    "AnielloPio Pentangelo <aniellopiopentangelo2@gmail.com>"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ebrancati/OnlineCheckers.org.git"
+  },
+  "homepage": "https://onlinecheckers.org",
+  "description": "Play Italian Checkers online with friends or against AI",
+  "keywords": ["online", "checkers"],
   "scripts": {
     "ng": "ng",
     "start": "ng serve --proxy-config proxy.conf.json",

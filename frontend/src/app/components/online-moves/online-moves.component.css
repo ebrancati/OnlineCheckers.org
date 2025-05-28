@@ -81,7 +81,6 @@
   color: #a0a0a0;
 }
 
-/* RESPONSIVE STYLES */
 @media (max-width: 992px) {
   .moves {
     min-width: 200px;

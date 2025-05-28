@@ -32,7 +32,8 @@ export class ChatComponent {
       const formattedMessage = `<strong>${this.nickname}</strong>: ${text}`;
       this.messageAdded.emit(formattedMessage);
       this.messageInput = '';
-    } else {
+    }
+    else {
       // Handle online mode
       this.gameService.sendMessages(this.gameId, payload).subscribe({
         next: () => {
@@ -43,12 +44,9 @@ export class ChatComponent {
     }
   }
 
-
-
-    onKeyDown(event: KeyboardEvent): void {
-      if (event.key === 'Enter') {
-        this.sendMessage();
-      }
+  onKeyDown(event: KeyboardEvent): void {
+    if (event.key === 'Enter') {
+      this.sendMessage();
     }
-
   }
+}

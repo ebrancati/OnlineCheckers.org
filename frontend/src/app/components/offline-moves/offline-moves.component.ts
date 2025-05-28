@@ -38,22 +38,22 @@ export class OfflineMovesComponent implements OnChanges {
 
     if (this.moves.length === 0) return;
 
-    // Struttura delle mosse organizate per turno
+    // Move structure organized by turn
     const organizedMoves: TurnMoves[] = [];
     let currentTurn: TurnMoves = { number: 1, white: [], black: [] };
     let isWhiteTurn = true;
     let lastPosition: { row: number, col: number } | null = null;
 
-    // Processa tutte le mosse
+    // Process all moves
     for (let i = 0; i < this.moves.length; i++) {
       const move = this.moves[i];
       
-      // Verifica se è una cattura multipla
+      // Check if it's a multiple capture
       const isMultiCapture = lastPosition !== null && 
                             move.from.row === lastPosition.row && 
                             move.from.col === lastPosition.col;
       
-      // Formatta la mossa
+      // Format the move
       const formattedMove: FormattedMove = {
         notation: isMultiCapture ? 
                   this.formatCaptureChain(move) : 
@@ -61,11 +61,11 @@ export class OfflineMovesComponent implements OnChanges {
         isCaptureContinuation: isMultiCapture
       };
       
-      // Aggiungi la mossa al turno corrente
+      // Add the move to the current turn
       if (isWhiteTurn) {
         currentTurn.white.push(formattedMove);
         
-        // Se non è una cattura multipla o è l'ultima mossa, passa al nero
+        // If it is not a multiple capture or it is the last move, turn goes to black
         if (!move.captured || 
             i === this.moves.length - 1 || 
             this.moves[i+1].from.row !== move.to.row || 
@@ -75,7 +75,7 @@ export class OfflineMovesComponent implements OnChanges {
       } else {
         currentTurn.black.push(formattedMove);
         
-        // Se non è una cattura multipla o è l'ultima mossa, passa al bianco e inizia un nuovo turno
+        // If it is not a multiple capture or it is the last move, turn goes to white and a new turn begins
         if (!move.captured || 
             i === this.moves.length - 1 || 
             this.moves[i+1].from.row !== move.to.row || 
@@ -86,11 +86,11 @@ export class OfflineMovesComponent implements OnChanges {
         }
       }
       
-      // Aggiorna l'ultima posizione per rilevare catture multiple
+      // Update last position to detect multiple captures
       lastPosition = move.to;
     }
     
-    // Aggiungi l'ultimo turno se non è vuoto
+    // Add last round if not empty
     if (currentTurn.white.length > 0 || currentTurn.black.length > 0) {
       organizedMoves.push(currentTurn);
     }
@@ -99,24 +99,21 @@ export class OfflineMovesComponent implements OnChanges {
   }
 
   /**
-   * Calcola quante righe deve occupare il numero del turno
-   */
+  * Calculate how many rows the shift number should occupy
+  */
   getRowSpan(turn: TurnMoves): number {
-    // Calcola il numero massimo di mosse tra bianco e nero
+    // Calculate the maximum number of moves between black and white players
     return Math.max(turn.white.length, turn.black.length);
   }
 
-  /**
-   * Formatta una parte di cattura multipla
-   */
   private formatCaptureChain(move: Move): string {
     const to = this.toAlgebraic(move.to.row, move.to.col);
     return `x${to}`;
   }
 
   /**
-   * Converte le coordinate della scacchiera in notazione algebrica
-   */
+  * Converts the board coordinates to algebraic notation
+  */
   private toAlgebraic(row: number, col: number): string {
     const columns = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
     const rows = ['8', '7', '6', '5', '4', '3', '2', '1'];
@@ -124,8 +121,8 @@ export class OfflineMovesComponent implements OnChanges {
   }
 
   /**
-   * Formatta una singola mossa in notazione algebrica
-   */
+  * Formats a single move in algebraic notation
+  */
   private formatMove(move: Move): string {
     const from = this.toAlgebraic(move.from.row, move.from.col);
     const to = this.toAlgebraic(move.to.row, move.to.col);

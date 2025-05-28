@@ -8,7 +8,10 @@
     </div>
   </div>
   <div class="chat-input">
-    <input [(ngModel)]="messageInput" placeholder="{{ 'CHAT.PLACEHOLDER' | translate }}" (keydown)="onKeyDown($event)"/>
+    <input  [(ngModel)]="messageInput"
+            placeholder="{{ 'CHAT.PLACEHOLDER' | translate }}"
+            (keydown)="onKeyDown($event)"
+    />
     <button (click)="sendMessage()">➥</button>
   </div>
 </div>

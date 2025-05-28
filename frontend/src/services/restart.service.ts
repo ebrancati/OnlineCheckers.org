@@ -3,8 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 /**
- * Interfaccia che rappresenta lo stato di riavvio dei giocatori
- */
+* Interface that represents the restart state of players
+*/
 export interface PlayerRestartStatus {
   gameID: string;
   nicknameB: string;
@@ -21,58 +21,58 @@ export class RestartService {
   constructor(private http: HttpClient) {}
 
   /**
-   * Ottiene lo stato di riavvio corrente per una partita specifica
-   * @param gameId - ID della partita
-   * @returns Observable con lo stato di riavvio
-   */
+  * Gets the current restart state for a specific game
+  * @param gameId - Game ID
+  * @returns Observable with the restart state
+  */
   getRestartStatus(gameId: string): Observable<PlayerRestartStatus> {
     return this.http.get<PlayerRestartStatus>(`/api/restartStatus/${gameId}/`);
   }
 
   /**
-   * Aggiorna lo stato di riavvio di un giocatore
-   * @param status - Oggetto con lo stato aggiornato di riavvio
-   * @returns Observable con la risposta
-   */
+  * Updates a player's restart status
+  * @param status - Object with the updated restart status
+  * @returns Observable with the response
+  */
   updateRestartStatus(status: PlayerRestartStatus): Observable<any> {
     return this.http.post(`/api/restartStatus/${status.gameID}`, status);
   }
 
   /**
-   * Resetta la partita quando entrambi i giocatori hanno accettato
-   * @param gameId - ID della partita da resettare
-   * @returns Observable con la risposta
-   */
+  * Resets the game when both players have accepted
+  * @param gameId - Game ID to reset
+  * @returns Observable with the response
+  */
   resetGame(gameId: string): Observable<any> {
     return this.http.post(`/api/games/${gameId}/reset`, {});
   }
 
   /**
-   * Utilitario per determinare se il giocatore corrente è il bianco
-   * @param status - Stato di riavvio
-   * @param nickname - Nickname del giocatore corrente
-   * @returns true se il giocatore è il bianco
-   */
+  * Utility to determine if the current player is white
+  * @param status - Restart status
+  * @param nickname - Nickname of the current player
+  * @returns true if the player is white
+  */
   isWhitePlayer(status: PlayerRestartStatus, nickname: string | null): boolean {
     return nickname === status.nicknameW;
   }
 
   /**
-   * Utilitario per determinare se il giocatore corrente è il nero
-   * @param status - Stato di riavvio
-   * @param nickname - Nickname del giocatore corrente
-   * @returns true se il giocatore è il nero
-   */
+  * Utility to determine if the current player is black
+  * @param status - Restart status
+  * @param nickname - Nickname of the current player
+  * @returns true if the player is black
+  */
   isBlackPlayer(status: PlayerRestartStatus, nickname: string | null): boolean {
     return nickname === status.nicknameB;
   }
 
   /**
-   * Aggiorna lo stato di riavvio del giocatore bianco
-   * @param status - Stato di riavvio corrente
-   * @param wantsRestart - Nuovo valore
-   * @returns Nuovo oggetto stato con il valore aggiornato
-   */
+  * Updates the white player's restart status
+  * @param status - Current restart status
+  * @param wantsRestart - New value
+  * @returns New state object with the updated value
+  */
   setWhitePlayerRestart(status: PlayerRestartStatus, wantsRestart: boolean): PlayerRestartStatus {
     return {
       ...status,
@@ -81,11 +81,11 @@ export class RestartService {
   }
 
   /**
-   * Aggiorna lo stato di riavvio del giocatore nero
-   * @param status - Stato di riavvio corrente
-   * @param wantsRestart - Nuovo valore
-   * @returns Nuovo oggetto stato con il valore aggiornato
-   */
+  * Updates the black player's restart status
+  * @param status - Current restart status
+  * @param wantsRestart - New value
+  * @returns New state object with the updated value
+  */
   setBlackPlayerRestart(status: PlayerRestartStatus, wantsRestart: boolean): PlayerRestartStatus {
     return {
       ...status,
@@ -94,10 +94,10 @@ export class RestartService {
   }
 
   /**
-   * Verifica se entrambi i giocatori hanno richiesto il riavvio
-   * @param status - Stato di riavvio
-   * @returns true se entrambi i giocatori vogliono riavviare
-   */
+  * Check if both players have requested a restart
+  * @param status - Restart status
+  * @returns true if both players want to restart
+  */
   bothPlayersWantRestart(status: PlayerRestartStatus,): boolean {
     return status.restartB && status.restartW;
   }
@@ -105,5 +105,4 @@ export class RestartService {
   resetPlayerRestart(gameId:string) {
     return this.http.post<PlayerRestartStatus>(`/api/restartStatus/${gameId}/restart`, {});
   }
-
 }

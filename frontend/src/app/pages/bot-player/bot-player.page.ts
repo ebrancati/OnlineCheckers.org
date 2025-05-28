@@ -10,6 +10,5 @@ import { TranslateModule } from '@ngx-translate/core';
     TranslateModule
   ],
   template: '<app-bot-board></app-bot-board>',
-  styles: ['']
 })
 export class BotPlayerPage {}
