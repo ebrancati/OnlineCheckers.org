@@ -67,10 +67,10 @@ public class BotService {
 
     private int getDepthForDifficulty(int difficulty) {
         return switch (difficulty) {
-            case 1 -> 2;  // Easy
-            case 2 -> 4;  // Medium
-            case 3 -> 6;  // Hard
-            default -> 4;
+            case 1 -> 1;  // Easy
+            case 2 -> 3;  // Medium
+            case 3 -> 5;  // Hard
+            default -> 3;
         };
     }
 
