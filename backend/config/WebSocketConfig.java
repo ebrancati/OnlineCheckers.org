@@ -18,7 +18,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         // Register WebSocket endpoint for game connections
         registry.addHandler(gameWebSocketHandler, "/ws/game/{gameId}")
-                .setAllowedOrigins("*") // Configure origins based on your security needs
+                .setAllowedOrigins("http://localhost:4200", "http://localhost:3000", "*")
                 .withSockJS(); // Enable SockJS fallback for older browsers
     }
 }

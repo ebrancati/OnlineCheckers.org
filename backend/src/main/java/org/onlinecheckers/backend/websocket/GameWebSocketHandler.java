@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Component
 public class GameWebSocketHandler implements WebSocketHandler {
@@ -27,6 +29,9 @@ public class GameWebSocketHandler implements WebSocketHandler {
     private final Map<String, Map<String, WebSocketSession>> gameSessions = new ConcurrentHashMap<>();
     // Track session metadata: sessionId -> GameSessionInfo
     private final Map<String, GameSessionInfo> sessionInfo = new ConcurrentHashMap<>();
+    
+    // Pattern to extract gameId from WebSocket path
+    private static final Pattern GAME_ID_PATTERN = Pattern.compile("/ws/game/([^/]+)");
     
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
@@ -54,6 +59,9 @@ public class GameWebSocketHandler implements WebSocketHandler {
         // Notify other players about the new connection
         broadcastToGame(gameId, WebSocketMessage.playerJoined(gameId, playerId, playerNickname), 
                        session.getId());
+        
+        // Send connection confirmation
+        sendToSession(session, WebSocketMessage.heartbeatResponse(gameId));
     }
 
     @Override
@@ -61,20 +69,13 @@ public class GameWebSocketHandler implements WebSocketHandler {
         GameSessionInfo info = sessionInfo.get(session.getId());
         if (info == null) {
             logger.warn("Received message from unknown session: {}", session.getId());
+            sendErrorToSession(session, "Session not recognized");
             return;
         }
         
         try {
-            // Parse message based on payload type
-            String payload = null;
-            if (message.getPayload() instanceof String) {
-                payload = (String) message.getPayload();
-            } else if (message instanceof TextMessage) {
-                payload = ((TextMessage) message).getPayload();
-            } else if (message.getPayload() instanceof byte[]) {
-                payload = new String((byte[]) message.getPayload());
-            }
-            
+            // Parse message payload
+            String payload = extractPayload(message);
             if (payload == null || payload.trim().isEmpty()) {
                 logger.warn("Received empty message from session: {}", session.getId());
                 return;
@@ -172,6 +173,12 @@ public class GameWebSocketHandler implements WebSocketHandler {
                 sendToSession(session, WebSocketMessage.heartbeatResponse(wsMessage.getGameId()));
                 break;
                 
+            case PLAYER_IDENTIFICATION:
+                // Handle player identification (useful for reconnections)
+                logger.info("Player identification received for {}: {}", 
+                           wsMessage.getPlayerNickname(), wsMessage.getPlayerId());
+                break;
+                
             default:
                 logger.warn("Unknown message type: {} from player: {}", 
                            wsMessage.getType(), wsMessage.getPlayerNickname());
@@ -197,14 +204,19 @@ public class GameWebSocketHandler implements WebSocketHandler {
             return;
         }
         
-        gameRoom.forEach((sessionId, session) -> {
+        // Create a copy to avoid concurrent modification
+        Map<String, WebSocketSession> sessionsCopy = new ConcurrentHashMap<>(gameRoom);
+        
+        sessionsCopy.forEach((sessionId, session) -> {
             if (excludeSessionId != null && excludeSessionId.equals(sessionId)) {
                 return; // Skip excluded session
             }
             
             try {
                 if (session.isOpen()) {
-                    session.sendMessage(new TextMessage(messageJson));
+                    synchronized (session) {
+                        session.sendMessage(new TextMessage(messageJson));
+                    }
                 } else {
                     logger.debug("Session {} is closed, removing from game room", sessionId);
                     gameRoom.remove(sessionId);
@@ -227,7 +239,9 @@ public class GameWebSocketHandler implements WebSocketHandler {
         
         try {
             String messageJson = objectMapper.writeValueAsString(message);
-            session.sendMessage(new TextMessage(messageJson));
+            synchronized (session) {
+                session.sendMessage(new TextMessage(messageJson));
+            }
         } catch (IOException e) {
             logger.error("Error sending message to session {}: {}", session.getId(), e.getMessage());
         }
@@ -243,16 +257,15 @@ public class GameWebSocketHandler implements WebSocketHandler {
     }
     
     /**
-     * Extract game ID from WebSocket session URI
+     * Extract game ID from WebSocket session URI with improved pattern matching
      */
     private String extractGameIdFromSession(WebSocketSession session) {
         URI uri = session.getUri();
         if (uri != null) {
             String path = uri.getPath();
-            // Path format: /ws/game/{gameId}
-            String[] pathParts = path.split("/");
-            if (pathParts.length >= 3) {
-                return pathParts[pathParts.length - 1]; // Last part is gameId
+            Matcher matcher = GAME_ID_PATTERN.matcher(path);
+            if (matcher.find()) {
+                return matcher.group(1);
             }
         }
         throw new IllegalArgumentException("Cannot extract gameId from session URI: " + uri);
@@ -264,7 +277,7 @@ public class GameWebSocketHandler implements WebSocketHandler {
     private String extractPlayerIdFromSession(WebSocketSession session) {
         // Try to get from handshake headers first
         String playerId = getHeaderValue(session, "X-Player-Id");
-        if (playerId != null) {
+        if (playerId != null && !playerId.isEmpty()) {
             return playerId;
         }
         
@@ -278,7 +291,7 @@ public class GameWebSocketHandler implements WebSocketHandler {
     private String extractPlayerNicknameFromSession(WebSocketSession session) {
         // Try to get from handshake headers
         String nickname = getHeaderValue(session, "X-Player-Nickname");
-        if (nickname != null) {
+        if (nickname != null && !nickname.isEmpty()) {
             return nickname;
         }
         
@@ -291,6 +304,23 @@ public class GameWebSocketHandler implements WebSocketHandler {
      */
     private String getHeaderValue(WebSocketSession session, String headerName) {
         return session.getHandshakeHeaders().getFirst(headerName);
+    }
+    
+    /**
+     * Extract payload from WebSocket message with proper type handling
+     */
+    private String extractPayload(org.springframework.web.socket.WebSocketMessage<?> message) {
+        Object payload = message.getPayload();
+        
+        if (payload instanceof String) {
+            return (String) payload;
+        } else if (message instanceof TextMessage) {
+            return ((TextMessage) message).getPayload();
+        } else if (payload instanceof byte[]) {
+            return new String((byte[]) payload);
+        }
+        
+        return null;
     }
     
     /**

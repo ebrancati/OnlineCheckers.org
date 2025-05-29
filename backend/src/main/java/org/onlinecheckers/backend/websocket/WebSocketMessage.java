@@ -30,7 +30,7 @@ public class WebSocketMessage {
         HEARTBEAT_RESPONSE,
         ERROR,
         PLAYER_JOINED,
-        PLAYER_LEFT
+        PLAYER_LEFT, PLAYER_IDENTIFICATION
     }
     
     private MessageType type;

@@ -30,9 +30,8 @@ export class WebSocketService {
   private connectionStatusSubject$ = new BehaviorSubject<ConnectionStatus>(ConnectionStatus.DISCONNECTED);
   
   // Configuration
-  private readonly WS_ENDPOINT = this.getWebSocketUrl();
   private readonly RECONNECT_INTERVAL = 3000; // 3 seconds
-  private readonly MAX_RECONNECT_ATTEMPTS = 10;
+  private readonly MAX_RECONNECT_ATTEMPTS = 5; // Reduced for faster fallback
   private readonly HEARTBEAT_INTERVAL = 30000; // 30 seconds
   
   // State tracking
@@ -61,7 +60,8 @@ export class WebSocketService {
     this.currentGameId = gameId;
     this.connectionStatusSubject$.next(ConnectionStatus.CONNECTING);
 
-    const wsUrl = `${this.WS_ENDPOINT}/ws/game/${gameId}`;
+    // Fixed WebSocket URL construction
+    const wsUrl = this.getWebSocketUrl(gameId);
     console.log('Connecting to WebSocket:', wsUrl);
 
     this.socket$ = webSocket({
@@ -73,16 +73,20 @@ export class WebSocketService {
           this.reconnectAttempts = 0;
           this.startHeartbeat();
           
-          // Send player info in headers simulation
+          // Send initial player identification
           this.sendPlayerInfo();
         }
       },
       closeObserver: {
-        next: () => {
-          console.log('WebSocket connection closed');
+        next: (event) => {
+          console.log('WebSocket connection closed:', event);
           this.connectionStatusSubject$.next(ConnectionStatus.DISCONNECTED);
           this.stopHeartbeat();
-          this.scheduleReconnect();
+          
+          // Only try to reconnect if it wasn't a manual disconnect
+          if (event.code !== 1000) {
+            this.scheduleReconnect();
+          }
         }
       }
     });
@@ -105,25 +109,32 @@ export class WebSocketService {
   }
 
   /**
-   * Send message through WebSocket
+   * Send message through WebSocket with better error handling
    */
   send(message: WebSocketMessage): void {
     if (!this.socket$ || this.socket$.closed) {
       console.warn('WebSocket not connected, cannot send message:', message);
+      // Emit connection error for fallback handling
+      this.connectionStatusSubject$.next(ConnectionStatus.ERROR);
       return;
     }
 
-    // Add metadata to message
-    const enrichedMessage: WebSocketMessage = {
-      ...message,
-      gameId: message.gameId || this.currentGameId || undefined,
-      playerId: this.getPlayerId(),
-      playerNickname: this.playerNickname || undefined,
-      timestamp: Date.now()
-    };
+    try {
+      // Add metadata to message
+      const enrichedMessage: WebSocketMessage = {
+        ...message,
+        gameId: message.gameId || this.currentGameId || undefined,
+        playerId: this.getPlayerId(),
+        playerNickname: this.playerNickname || undefined,
+        timestamp: Date.now()
+      };
 
-    console.log('Sending WebSocket message:', enrichedMessage);
-    this.socket$.next(enrichedMessage);
+      console.log('Sending WebSocket message:', enrichedMessage);
+      this.socket$.next(enrichedMessage);
+    } catch (error) {
+      console.error('Error sending WebSocket message:', error);
+      this.connectionStatusSubject$.next(ConnectionStatus.ERROR);
+    }
   }
 
   /**
@@ -137,6 +148,7 @@ export class WebSocketService {
     }
     this.connectionStatusSubject$.next(ConnectionStatus.DISCONNECTED);
     this.currentGameId = null;
+    this.reconnectAttempts = 0;
   }
 
   /**
@@ -157,13 +169,20 @@ export class WebSocketService {
    * Handle incoming messages and route them to appropriate handlers
    */
   private handleIncomingMessage(message: WebSocketMessage): void {
+    // Reset error state on successful message
+    if (this.connectionStatusSubject$.value === ConnectionStatus.ERROR) {
+      this.connectionStatusSubject$.next(ConnectionStatus.CONNECTED);
+    }
+
     switch (message.type) {
       case 'HEARTBEAT_RESPONSE':
         // Heartbeat acknowledgment, no action needed
+        console.log('Heartbeat response received');
         break;
       
       case 'ERROR':
         console.error('Server error:', message.errorMessage);
+        this.connectionStatusSubject$.next(ConnectionStatus.ERROR);
         break;
       
       default:
@@ -174,11 +193,11 @@ export class WebSocketService {
   }
 
   /**
-   * Schedule reconnection attempt
+   * Schedule reconnection attempt with backoff
    */
   private scheduleReconnect(): void {
     if (this.reconnectAttempts >= this.MAX_RECONNECT_ATTEMPTS) {
-      console.error('Max reconnection attempts reached');
+      console.error(`Max reconnection attempts (${this.MAX_RECONNECT_ATTEMPTS}) reached, switching to polling fallback`);
       this.connectionStatusSubject$.next(ConnectionStatus.ERROR);
       return;
     }
@@ -186,9 +205,12 @@ export class WebSocketService {
     this.reconnectAttempts++;
     this.connectionStatusSubject$.next(ConnectionStatus.RECONNECTING);
     
-    console.log(`Scheduling reconnection attempt ${this.reconnectAttempts}/${this.MAX_RECONNECT_ATTEMPTS} in ${this.RECONNECT_INTERVAL}ms`);
+    // Exponential backoff: 3s, 6s, 12s, etc.
+    const backoffDelay = this.RECONNECT_INTERVAL * Math.pow(2, this.reconnectAttempts - 1);
     
-    timer(this.RECONNECT_INTERVAL).subscribe(() => {
+    console.log(`Scheduling reconnection attempt ${this.reconnectAttempts}/${this.MAX_RECONNECT_ATTEMPTS} in ${backoffDelay}ms`);
+    
+    timer(backoffDelay).subscribe(() => {
       if (this.currentGameId) {
         this.connect(this.currentGameId);
       }
@@ -204,6 +226,8 @@ export class WebSocketService {
     this.heartbeatTimer = setInterval(() => {
       if (this.isConnected()) {
         this.send({ type: 'HEARTBEAT' });
+      } else {
+        this.stopHeartbeat();
       }
     }, this.HEARTBEAT_INTERVAL);
   }
@@ -219,21 +243,28 @@ export class WebSocketService {
   }
 
   /**
-   * Get WebSocket URL based on current location
+   * Get WebSocket URL based on current location and game ID
    */
-  private getWebSocketUrl(): string {
+  private getWebSocketUrl(gameId: string): string {
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    // Always use backend port (8080) for WebSocket, not frontend port
     const host = window.location.hostname;
-    const port = '8080'; // Backend port
-    return `${protocol}//${host}:${port}`;
+    
+    // Use different ports for development vs production
+    let port: string;
+    if (host === 'localhost' || host === '127.0.0.1') {
+      port = '8080'; // Backend port for development
+    } else {
+      port = window.location.port || (protocol === 'wss:' ? '443' : '80');
+    }
+    
+    // Construct the full WebSocket URL
+    return `${protocol}//${host}:${port}/ws/game/${gameId}`;
   }
 
   /**
-   * Get unique player ID (you might want to implement this differently)
+   * Get unique player ID
    */
   private getPlayerId(): string {
-    // Simple implementation - you might want to use a more robust player ID system
     let playerId = localStorage.getItem('playerId');
     if (!playerId) {
       playerId = 'player_' + Math.random().toString(36).substr(2, 9);
@@ -253,12 +284,13 @@ export class WebSocketService {
    * Send player identification info after connection
    */
   private sendPlayerInfo(): void {
-    // Send a special message to identify the player
+    // Send player info for server-side session management
     this.send({
       type: 'PLAYER_IDENTIFICATION',
       data: {
         playerId: this.getPlayerId(),
-        playerNickname: this.playerNickname
+        playerNickname: this.playerNickname,
+        gameId: this.currentGameId
       }
     });
   }
@@ -269,5 +301,18 @@ export class WebSocketService {
   updatePlayerNickname(nickname: string): void {
     this.playerNickname = nickname;
     localStorage.setItem('nickname', nickname);
+  }
+
+  /**
+   * Force reconnection (useful for manual retry)
+   */
+  forceReconnect(): void {
+    this.disconnect();
+    if (this.currentGameId) {
+      setTimeout(() => {
+        this.reconnectAttempts = 0;
+        this.connect(this.currentGameId!);
+      }, 1000);
+    }
   }
 }

@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
-import { Observable, Subject, BehaviorSubject, timer } from 'rxjs';
-import { filter, takeUntil } from 'rxjs/operators';
+import { Observable, Subject, BehaviorSubject, timer, throwError } from 'rxjs';
+import { filter, takeUntil, catchError, timeout } from 'rxjs/operators';
 import { WebSocketService, WebSocketMessage, ConnectionStatus } from './websocket.service';
+import { HttpClient } from '@angular/common/http';
 
 // Message type constants
 export const WS_MESSAGE_TYPES = {
@@ -77,349 +78,393 @@ export class WebSocketGameService {
   public playerLeft$ = this.playerLeftSubject$.asObservable();
   public gameReset$ = this.gameResetSubject$.asObservable();
   public error$ = this.errorSubject$.asObservable();
-  public connectionStatus$!: Observable<ConnectionStatus>; // Initialize in constructor
+  public connectionStatus$!: Observable<ConnectionStatus>;
 
-  // Fallback mechanism
-  private pendingMoves = new Map<string, any>(); // Track moves awaiting confirmation
-  private moveTimeouts = new Map<string, any>(); // Track move timeouts
-  private readonly MOVE_TIMEOUT = 5000; // 5 seconds timeout for moves
+  // Fallback configuration
+  private readonly FALLBACK_DELAY = 5000; // 5 seconds before fallback to polling
+  private readonly MESSAGE_TIMEOUT = 10000; // 10 seconds timeout for critical operations
+  
+  // State tracking
+  private isUsingWebSocket = false;
+  private lastSyncTime = 0;
+  private pendingMoves = new Map<string, any>(); // Track moves waiting for confirmation
 
-  constructor(private webSocketService: WebSocketService) {
-    // Initialize connection status observable
+  constructor(
+    private webSocketService: WebSocketService,
+    private http: HttpClient
+  ) {
     this.connectionStatus$ = this.webSocketService.connectionStatus$;
-    
-    // Initialize message subscription after service is injected
-    this.initializeMessageHandling();
   }
 
   /**
-   * Initialize WebSocket message handling
+   * Initialize WebSocket connection for a game with fallback logic
    */
-  private initializeMessageHandling(): void {
-    // Subscribe to all WebSocket messages and route them
-    this.webSocketService.messages$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(message => this.handleIncomingMessage(message));
-  }
-
-  /**
-   * Connect to a game room
-   */
-  connectToGame(gameId: string): Observable<GameUpdateData | null> {
+  initializeConnection(gameId: string): Observable<boolean> {
     this.currentGameId = gameId;
-    
-    // Connect to WebSocket
-    this.webSocketService.connect(gameId)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe();
+    console.log(`Initializing connection for game: ${gameId}`);
 
-    return this.gameUpdate$;
-  }
+    return new Observable(observer => {
+      // Set timeout for initial connection
+      const connectionTimeout = timer(this.FALLBACK_DELAY).subscribe(() => {
+        console.warn('WebSocket connection timeout, using polling fallback');
+        this.isUsingWebSocket = false;
+        observer.next(false); // Indicate fallback to polling
+        observer.complete();
+      });
 
-  /**
-   * Disconnect from current game
-   */
-  disconnect(): void {
-    this.webSocketService.disconnect();
-    this.currentGameId = null;
-    this.destroy$.next();
-  }
-
-  /**
-   * Send a move with fallback mechanism
-   */
-  sendMove(from: string, to: string, player: string, path?: string[]): Promise<boolean> {
-    return new Promise((resolve, reject) => {
-      const moveId = `${Date.now()}_${Math.random()}`;
-      const moveData = { from, to, player, path };
-
-      // Store pending move
-      this.pendingMoves.set(moveId, { moveData, resolve, reject });
-
-      // Send via WebSocket
-      const message: WebSocketMessage = {
-        type: WS_MESSAGE_TYPES.MOVE,
-        gameId: this.currentGameId!,
-        data: { ...moveData, moveId }
-      };
-
-      if (this.webSocketService.isConnected()) {
-        this.webSocketService.send(message);
-        
-        // Set timeout for fallback
-        const timeout = setTimeout(() => {
-          if (this.pendingMoves.has(moveId)) {
-            console.warn('Move timeout, attempting REST fallback for move:', moveData);
-            this.handleMoveFallback(moveId, moveData);
+      // Try WebSocket connection
+      this.webSocketService.connect(gameId).pipe(
+        takeUntil(this.destroy$)
+      ).subscribe({
+        next: (message) => {
+          // Clear timeout on first successful message
+          connectionTimeout.unsubscribe();
+          
+          if (!this.isUsingWebSocket) {
+            console.log('WebSocket connection established successfully');
+            this.isUsingWebSocket = true;
+            observer.next(true); // Indicate WebSocket success
+            observer.complete();
           }
-        }, this.MOVE_TIMEOUT);
-        
-        this.moveTimeouts.set(moveId, timeout);
-      } else {
-        // WebSocket not connected, use fallback immediately
-        setTimeout(() => this.handleMoveFallback(moveId, moveData), 100);
-      }
-    });
-  }
-
-  /**
-   * Send chat message
-   */
-  sendChatMessage(text: string): void {
-    const message: WebSocketMessage = {
-      type: WS_MESSAGE_TYPES.CHAT,
-      gameId: this.currentGameId!,
-      data: { text }
-    };
-
-    if (this.webSocketService.isConnected()) {
-      this.webSocketService.send(message);
-    } else {
-      console.warn('Cannot send chat message: WebSocket not connected');
-      // Chat is not critical, so we don't implement REST fallback
-    }
-  }
-
-  /**
-   * Request game restart
-   */
-  requestRestart(): void {
-    const message: WebSocketMessage = {
-      type: WS_MESSAGE_TYPES.RESTART_REQUEST,
-      gameId: this.currentGameId!,
-      data: {}
-    };
-
-    if (this.webSocketService.isConnected()) {
-      this.webSocketService.send(message);
-    } else {
-      console.warn('Cannot send restart request: WebSocket not connected');
-      // Could implement REST fallback here if needed
-    }
-  }
-
-  /**
-   * Request full game synchronization
-   */
-  requestSync(): void {
-    if (this.webSocketService.isConnected()) {
-      this.webSocketService.requestSync();
-    } else {
-      console.warn('Cannot request sync: WebSocket not connected');
-      // This would trigger REST fallback in the calling component
-    }
-  }
-
-  /**
-   * Get current game state (latest received)
-   */
-  getCurrentGameState(): GameUpdateData | null {
-    return this.gameUpdateSubject$.value;
-  }
-
-  /**
-   * Get current restart status (latest received)
-   */
-  getCurrentRestartStatus(): RestartStatusData | null {
-    return this.restartStatusSubject$.value;
-  }
-
-  /**
-   * Check if WebSocket is connected
-   */
-  isConnected(): boolean {
-    return this.webSocketService.isConnected();
-  }
-
-  /**
-   * Handle incoming WebSocket messages
-   */
-  private handleIncomingMessage(message: WebSocketMessage): void {
-    if (!message.type) {
-      console.warn('Received message without type:', message);
-      return;
-    }
-
-    switch (message.type) {
-      case WS_MESSAGE_TYPES.GAME_UPDATE:
-      case WS_MESSAGE_TYPES.FULL_SYNC:
-        this.handleGameUpdate(message);
-        break;
-
-      case WS_MESSAGE_TYPES.CHAT_MESSAGE:
-        this.handleChatMessage(message);
-        break;
-
-      case WS_MESSAGE_TYPES.RESTART_STATUS_UPDATE:
-        this.handleRestartStatusUpdate(message);
-        break;
-
-      case WS_MESSAGE_TYPES.GAME_RESET:
-        this.handleGameReset(message);
-        break;
-
-      case WS_MESSAGE_TYPES.PLAYER_JOINED:
-        this.handlePlayerJoined(message);
-        break;
-
-      case WS_MESSAGE_TYPES.PLAYER_LEFT:
-        this.handlePlayerLeft(message);
-        break;
-
-      case WS_MESSAGE_TYPES.ERROR:
-        this.handleError(message);
-        break;
-
-      default:
-        console.log('Unhandled message type:', message.type, message);
-    }
-  }
-
-  /**
-   * Handle game update messages
-   */
-  private handleGameUpdate(message: WebSocketMessage): void {
-    if (message.data) {
-      const gameData = message.data as GameUpdateData;
-      this.gameUpdateSubject$.next(gameData);
-      
-      // Check if this confirms a pending move
-      this.checkPendingMoveConfirmation(gameData);
-    }
-  }
-
-  /**
-   * Handle chat messages
-   */
-  private handleChatMessage(message: WebSocketMessage): void {
-    if (message.data) {
-      const chatData = message.data as ChatMessageData;
-      this.chatMessageSubject$.next(chatData);
-    }
-  }
-
-  /**
-   * Handle restart status updates
-   */
-  private handleRestartStatusUpdate(message: WebSocketMessage): void {
-    if (message.data) {
-      const restartData = message.data as RestartStatusData;
-      this.restartStatusSubject$.next(restartData);
-    }
-  }
-
-  /**
-   * Handle game reset
-   */
-  private handleGameReset(message: WebSocketMessage): void {
-    this.gameResetSubject$.next();
-  }
-
-  /**
-   * Handle player joined
-   */
-  private handlePlayerJoined(message: WebSocketMessage): void {
-    if (message.data) {
-      this.playerJoinedSubject$.next({
-        playerId: message.data.playerId,
-        playerNickname: message.data.playerNickname
+          
+          this.handleWebSocketMessage(message);
+        },
+        error: (error) => {
+          console.error('WebSocket connection failed:', error);
+          connectionTimeout.unsubscribe();
+          this.isUsingWebSocket = false;
+          observer.next(false); // Indicate fallback to polling
+          observer.complete();
+        }
       });
-    }
-  }
 
-  /**
-   * Handle player left
-   */
-  private handlePlayerLeft(message: WebSocketMessage): void {
-    if (message.data) {
-      this.playerLeftSubject$.next({
-        playerId: message.data.playerId,
-        playerNickname: message.data.playerNickname
-      });
-    }
-  }
-
-  /**
-   * Handle error messages
-   */
-  private handleError(message: WebSocketMessage): void {
-    const errorMsg = message.errorMessage || 'Unknown WebSocket error';
-    console.error('WebSocket error:', errorMsg);
-    this.errorSubject$.next(errorMsg);
-  }
-
-  /**
-   * Check if received game update confirms a pending move
-   */
-  private checkPendingMoveConfirmation(gameData: GameUpdateData): void {
-    // Simple heuristic: if we received a game update and have pending moves,
-    // consider the oldest move as confirmed
-    if (this.pendingMoves.size > 0) {
-      const oldestMoveId = Array.from(this.pendingMoves.keys())[0];
-      this.confirmMove(oldestMoveId, true);
-    }
-  }
-
-  /**
-   * Confirm a pending move (success or failure)
-   */
-  private confirmMove(moveId: string, success: boolean): void {
-    const pendingMove = this.pendingMoves.get(moveId);
-    if (pendingMove) {
-      const timeout = this.moveTimeouts.get(moveId);
-      if (timeout) {
-        clearTimeout(timeout);
-        this.moveTimeouts.delete(moveId);
-      }
-      
-      this.pendingMoves.delete(moveId);
-      
-      if (success) {
-        pendingMove.resolve(true);
-      } else {
-        pendingMove.reject(new Error('Move failed'));
-      }
-    }
-  }
-
-  /**
-   * Handle move fallback to REST API
-   */
-  private handleMoveFallback(moveId: string, moveData: any): void {
-    const pendingMove = this.pendingMoves.get(moveId);
-    if (!pendingMove) return;
-
-    console.log('Executing REST fallback for move:', moveData);
-
-    // This would be implemented by injecting the HTTP service
-    // For now, we'll simulate the fallback
-    import('../services/move-service.service').then(({ MoveServiceService }) => {
-      // You would inject this service properly in a real implementation
-      // This is just to show the pattern
-      console.log('Would execute REST fallback here with MoveServiceService');
-      
-      // Simulate REST call
-      timer(1000).subscribe(() => {
-        // Simulate success/failure
-        const success = Math.random() > 0.1; // 90% success rate
-        this.confirmMove(moveId, success);
-        
-        if (success) {
-          // Would need to manually update game state from REST response
-          console.log('REST fallback succeeded for move:', moveData);
-        } else {
-          console.error('REST fallback failed for move:', moveData);
+      // Monitor connection status changes
+      this.connectionStatus$.pipe(
+        takeUntil(this.destroy$)
+      ).subscribe(status => {
+        switch (status) {
+          case ConnectionStatus.CONNECTED:
+            if (!this.isUsingWebSocket) {
+              console.log('WebSocket reconnected, switching from polling');
+              this.isUsingWebSocket = true;
+              this.requestFullSync(); // Sync state after reconnection
+            }
+            break;
+            
+          case ConnectionStatus.ERROR:
+          case ConnectionStatus.DISCONNECTED:
+            if (this.isUsingWebSocket) {
+              console.warn('WebSocket disconnected, may need to fallback to polling');
+              this.isUsingWebSocket = false;
+            }
+            break;
         }
       });
     });
   }
 
   /**
-   * Cleanup when service is destroyed
+   * Send a move through WebSocket with fallback confirmation via HTTP
    */
-  ngOnDestroy(): void {
+  sendMove(moveData: any): Observable<boolean> {
+    if (!this.currentGameId) {
+      return throwError(() => new Error('No active game'));
+    }
+
+    const moveId = this.generateMoveId();
+    this.pendingMoves.set(moveId, { ...moveData, timestamp: Date.now() });
+
+    if (this.isUsingWebSocket && this.webSocketService.isConnected()) {
+      console.log('Sending move via WebSocket:', moveData);
+      
+      // Send via WebSocket
+      this.webSocketService.send({
+        type: WS_MESSAGE_TYPES.MOVE,
+        gameId: this.currentGameId,
+        data: { ...moveData, moveId }
+      });
+
+      // Wait for confirmation or timeout
+      return this.waitForMoveConfirmation(moveId).pipe(
+        timeout(this.MESSAGE_TIMEOUT),
+        catchError(error => {
+          console.warn('WebSocket move confirmation timeout, falling back to HTTP');
+          this.pendingMoves.delete(moveId);
+          return this.sendMoveViaHttp(moveData);
+        })
+      );
+    } else {
+      // Direct HTTP fallback
+      console.log('Sending move via HTTP (WebSocket not available)');
+      return this.sendMoveViaHttp(moveData);
+    }
+  }
+
+  /**
+   * Send chat message via WebSocket
+   */
+  sendChatMessage(message: string): void {
+    if (!this.currentGameId) {
+      console.error('Cannot send chat: no active game');
+      return;
+    }
+
+    if (this.isUsingWebSocket && this.webSocketService.isConnected()) {
+      this.webSocketService.send({
+        type: WS_MESSAGE_TYPES.CHAT,
+        gameId: this.currentGameId,
+        data: { text: message }
+      });
+    } else {
+      console.warn('Chat message not sent: WebSocket not available');
+      // Could implement HTTP fallback for chat if needed
+    }
+  }
+
+  /**
+   * Request game restart via WebSocket
+   */
+  requestRestart(): void {
+    if (!this.currentGameId) {
+      console.error('Cannot request restart: no active game');
+      return;
+    }
+
+    if (this.isUsingWebSocket && this.webSocketService.isConnected()) {
+      this.webSocketService.send({
+        type: WS_MESSAGE_TYPES.RESTART_REQUEST,
+        gameId: this.currentGameId
+      });
+    } else {
+      console.warn('Restart request not sent: WebSocket not available');
+      // HTTP fallback could be implemented here
+    }
+  }
+
+  /**
+   * Request full game synchronization
+   */
+  requestFullSync(): void {
+    if (!this.currentGameId) return;
+
+    if (this.isUsingWebSocket && this.webSocketService.isConnected()) {
+      this.webSocketService.send({
+        type: WS_MESSAGE_TYPES.SYNC_REQUEST,
+        gameId: this.currentGameId
+      });
+    }
+  }
+
+  /**
+   * Get current connection method
+   */
+  isUsingWebSocketConnection(): boolean {
+    return this.isUsingWebSocket && this.webSocketService.isConnected();
+  }
+
+  /**
+   * Get current game state (for polling fallback)
+   */
+  getCurrentGameState(): GameUpdateData | null {
+    return this.gameUpdateSubject$.value;
+  }
+
+  /**
+   * Update game state manually (for polling integration)
+   */
+  updateGameState(gameData: GameUpdateData): void {
+    console.log('Manually updating game state:', gameData);
+    this.gameUpdateSubject$.next(gameData);
+    this.lastSyncTime = Date.now();
+  }
+
+  /**
+   * Disconnect and cleanup
+   */
+  disconnect(): void {
+    console.log('Disconnecting WebSocket game service');
+    this.webSocketService.disconnect();
     this.destroy$.next();
     this.destroy$.complete();
-    this.disconnect();
+    this.currentGameId = null;
+    this.isUsingWebSocket = false;
+    this.pendingMoves.clear();
+  }
+
+  /**
+   * Handle incoming WebSocket messages
+   */
+  private handleWebSocketMessage(message: WebSocketMessage): void {
+    console.log('Handling WebSocket message:', message.type, message.data);
+
+    switch (message.type) {
+      case WS_MESSAGE_TYPES.GAME_UPDATE:
+      case WS_MESSAGE_TYPES.FULL_SYNC:
+        if (message.data) {
+          this.gameUpdateSubject$.next(message.data as GameUpdateData);
+          this.lastSyncTime = Date.now();
+          
+          // Check if this confirms a pending move
+          this.checkPendingMoveConfirmation(message.data);
+        }
+        break;
+
+      case WS_MESSAGE_TYPES.CHAT_MESSAGE:
+        if (message.data) {
+          this.chatMessageSubject$.next(message.data as ChatMessageData);
+        }
+        break;
+
+      case WS_MESSAGE_TYPES.RESTART_STATUS_UPDATE:
+        if (message.data) {
+          this.restartStatusSubject$.next(message.data as RestartStatusData);
+        }
+        break;
+
+      case WS_MESSAGE_TYPES.GAME_RESET:
+        this.gameResetSubject$.next();
+        // Clear any pending moves on game reset
+        this.pendingMoves.clear();
+        break;
+
+      case WS_MESSAGE_TYPES.PLAYER_JOINED:
+        if (message.data) {
+          this.playerJoinedSubject$.next({
+            playerId: message.playerId || '',
+            playerNickname: message.playerNickname || 'Unknown'
+          });
+        }
+        break;
+
+      case WS_MESSAGE_TYPES.PLAYER_LEFT:
+        if (message.data) {
+          this.playerLeftSubject$.next({
+            playerId: message.playerId || '',
+            playerNickname: message.playerNickname || 'Unknown'
+          });
+        }
+        break;
+
+      case WS_MESSAGE_TYPES.ERROR:
+        const errorMessage = message.errorMessage || 'Unknown WebSocket error';
+        console.error('WebSocket error:', errorMessage);
+        this.errorSubject$.next(errorMessage);
+        break;
+
+      case WS_MESSAGE_TYPES.HEARTBEAT_RESPONSE:
+        // Heartbeat acknowledgment - connection is healthy
+        break;
+
+      default:
+        console.warn('Unknown WebSocket message type:', message.type);
+    }
+  }
+
+  /**
+   * Wait for move confirmation from server
+   */
+  private waitForMoveConfirmation(moveId: string): Observable<boolean> {
+    return new Observable(observer => {
+      const checkInterval = setInterval(() => {
+        if (!this.pendingMoves.has(moveId)) {
+          clearInterval(checkInterval);
+          observer.next(true);
+          observer.complete();
+        }
+      }, 100);
+
+      // Cleanup function
+      return () => {
+        clearInterval(checkInterval);
+      };
+    });
+  }
+
+  /**
+   * Check if incoming game update confirms a pending move
+   */
+  private checkPendingMoveConfirmation(gameData: any): void {
+    // Simple heuristic: if game state changed significantly, assume move was processed
+    const currentState = this.gameUpdateSubject$.value;
+    
+    if (currentState && gameData) {
+      // Check if turn changed or pieces count changed
+      const turnChanged = currentState.turno !== gameData.turno;
+      const piecesChanged = 
+        currentState.pedineW !== gameData.pedineW || 
+        currentState.pedineB !== gameData.pedineB ||
+        currentState.damaW !== gameData.damaW ||
+        currentState.damaB !== gameData.damaB;
+
+      if (turnChanged || piecesChanged) {
+        // Clear all pending moves as the game state has advanced
+        console.log('Game state changed, clearing pending moves');
+        this.pendingMoves.clear();
+      }
+    }
+  }
+
+  /**
+   * HTTP fallback for sending moves
+   */
+  private sendMoveViaHttp(moveData: any): Observable<boolean> {
+    const url = `/api/game/${this.currentGameId}/move`; // Adjust URL as needed
+    
+    return new Observable(observer => {
+      this.http.post(url, moveData).subscribe({
+        next: (response) => {
+          console.log('Move sent successfully via HTTP:', response);
+          observer.next(true);
+          observer.complete();
+        },
+        error: (error) => {
+          console.error('HTTP move failed:', error);
+          observer.next(false);
+          observer.complete();
+        }
+      });
+    });
+  }
+
+  /**
+   * Generate unique move ID for tracking
+   */
+  private generateMoveId(): string {
+    return `move_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  }
+
+  /**
+   * Check if WebSocket is responsive (for health monitoring)
+   */
+  isWebSocketHealthy(): boolean {
+    if (!this.isUsingWebSocket) return false;
+    
+    const timeSinceLastSync = Date.now() - this.lastSyncTime;
+    const maxHealthyDelay = 60000; // 1 minute
+    
+    return this.webSocketService.isConnected() && timeSinceLastSync < maxHealthyDelay;
+  }
+
+  /**
+   * Force reconnection attempt
+   */
+  forceReconnect(): void {
+    console.log('Forcing WebSocket reconnection...');
+    this.webSocketService.forceReconnect();
+  }
+
+  /**
+   * Get connection statistics for debugging
+   */
+  getConnectionInfo(): any {
+    return {
+      gameId: this.currentGameId,
+      usingWebSocket: this.isUsingWebSocket,
+      wsConnected: this.webSocketService.isConnected(),
+      wsStatus: this.webSocketService.getConnectionStatus(),
+      lastSyncTime: this.lastSyncTime,
+      pendingMoves: this.pendingMoves.size,
+      isHealthy: this.isWebSocketHealthy()
+    };
   }
 }
