@@ -10,6 +10,10 @@ Detailed setup instructions are in the README files in each component directory:
 - [Backend Documentation](./backend/README.md) - API setup and database configuration
 - [Bot Lambda Documentation](./bot-lambda/README.md) - AI service deployment and configuration
 
+## 🔧 Contributors
+
+Complete list available in [CONTRIBUTORS.md](./CONTRIBUTORS.md) with contact details
+
 ## 📄 License
 
 This project is licensed under the MIT [License](LICENSE)
