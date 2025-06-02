@@ -17,6 +17,8 @@ Before you begin, ensure you have the following installed:
 - Angular CLI (`npm install -g @angular/cli`)
 - Git
 
+⚠️ **Important**: This frontend requires the backend services to be running. See [Backend README](../backend/README.md) for backend setup instructions.
+
 ## Getting Started
 
 ### 1. Clone the repository
@@ -35,7 +37,7 @@ npm install
 ### 3. Run the development server
 
 ```bash
-ng serve
+npm start
 ```
 
 Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.

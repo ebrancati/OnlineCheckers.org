@@ -1,6 +1,6 @@
-package org.onlinecheckers.backend.model.daos;
+package org.onlinecheckers.backend.repositories;
 
 import org.onlinecheckers.backend.model.entities.Game;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface GameDao extends JpaRepository<Game, String> {}
+public interface GameRepository extends JpaRepository<Game, String> {}

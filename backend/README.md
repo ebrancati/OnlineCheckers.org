@@ -27,7 +27,7 @@ cd OnlineCheckers.org/backend
 
 ### 2. Configure Application
 
-Edit the `src/main/resources/application.properties` file:
+Create the `src/main/resources/application.properties` file:
 
 ```properties
 spring.datasource.url=jdbc:mysql://localhost:3306/checkersonline?createDatabaseIfNotExist=true&useSSL=false

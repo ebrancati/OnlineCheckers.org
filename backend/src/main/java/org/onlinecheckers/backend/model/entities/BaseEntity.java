@@ -1,11 +1,11 @@
 package org.onlinecheckers.backend.model.entities;
 
-import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.MappedSuperclass;
-import lombok.AllArgsConstructor;
+import jakarta.persistence.GeneratedValue;
 import lombok.Data;
+import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
 @MappedSuperclass

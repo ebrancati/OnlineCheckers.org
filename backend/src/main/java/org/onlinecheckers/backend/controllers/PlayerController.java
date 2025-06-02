@@ -1,18 +1,19 @@
 package org.onlinecheckers.backend.controllers;
 
-import org.onlinecheckers.backend.model.daos.PlayerDao;
 import org.onlinecheckers.backend.model.dtos.PlayerDto;
-import org.onlinecheckers.backend.model.dtos.services.PlayerService;
 import org.onlinecheckers.backend.model.entities.Player;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.onlinecheckers.backend.repositories.PlayerRepository;
+import org.onlinecheckers.backend.services.PlayerService;
+
 import org.springframework.web.bind.annotation.*;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @RestController
 @RequestMapping("/api/players")
 public class PlayerController {
 
     @Autowired
-    PlayerDao pDao;
+    PlayerRepository pDao;
 
     @Autowired
     PlayerService pService;

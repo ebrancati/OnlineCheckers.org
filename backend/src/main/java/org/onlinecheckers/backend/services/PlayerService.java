@@ -1,11 +1,12 @@
-package org.onlinecheckers.backend.model.dtos.services;
+package org.onlinecheckers.backend.services;
 
-import org.onlinecheckers.backend.model.daos.PlayerDao;
 import org.onlinecheckers.backend.model.dtos.PlayerDto;
-import org.onlinecheckers.backend.model.dtos.mappers.PlayerMapper;
 import org.onlinecheckers.backend.model.entities.Player;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.onlinecheckers.backend.model.mappers.PlayerMapper;
+import org.onlinecheckers.backend.repositories.PlayerRepository;
+
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Service
 public class PlayerService {
@@ -14,7 +15,7 @@ public class PlayerService {
     PlayerMapper pmapper;
 
     @Autowired
-    PlayerDao pdao;
+    PlayerRepository pdao;
 
     public Player createPlayer(PlayerDto playerDto) {
         Player p = new Player();

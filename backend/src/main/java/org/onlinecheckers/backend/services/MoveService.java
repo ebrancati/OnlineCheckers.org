@@ -1,13 +1,14 @@
-package org.onlinecheckers.backend.model.dtos.services;
+package org.onlinecheckers.backend.services;
 
-import org.onlinecheckers.backend.exceptions.InvalidMoveException;
-import org.onlinecheckers.backend.exceptions.SessionGameNotFoundException;
-import org.onlinecheckers.backend.model.daos.GameDao;
 import org.onlinecheckers.backend.model.dtos.MoveDto;
 import org.onlinecheckers.backend.model.entities.Game;
 import org.onlinecheckers.backend.model.entities.enums.Team;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.onlinecheckers.backend.repositories.GameRepository;
+import org.onlinecheckers.backend.exceptions.InvalidMoveException;
+import org.onlinecheckers.backend.exceptions.SessionGameNotFoundException;
+
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
@@ -16,7 +17,7 @@ import java.util.*;
 @Transactional
 public class MoveService {
     @Autowired
-    private GameDao gameDao;
+    private GameRepository gameDao;
 
     public Game makeMove(String gameId, MoveDto dto) {
 
@@ -290,55 +291,6 @@ public class MoveService {
         }
 
         return gameDao.save(game);
-    }
-
-    // valida il percorso di cattura
-    private void validateCapturePath(String[][] board, int startR, int startC, String piece, List<String> path) {
-        if (path.isEmpty()) {
-            throw new InvalidMoveException("Capture path is empty");
-        }
-
-        int currentR = startR;
-        int currentC = startC;
-
-        for (String position : path) {
-            int pathR = Character.getNumericValue(position.charAt(0));
-            int pathC = Character.getNumericValue(position.charAt(1));
-
-            // Verifica validità della posizione
-            validateCoordinates(pathR, pathC);
-
-            // Verifica che la cella di destinazione sia vuota
-            if (!board[pathR][pathC].isEmpty()) {
-                throw new InvalidMoveException("Destination in path is not empty: " + position);
-            }
-
-            // Verifica che sia una mossa di cattura valida
-            int dr = pathR - currentR;
-            int dc = pathC - currentC;
-
-            // Deve essere una mossa diagonale di 2 caselle (per cattura)
-            if (Math.abs(dr) != 2 || Math.abs(dc) != 2) {
-                throw new InvalidMoveException("Invalid capture distance in path: " + currentR + currentC + " to " + position);
-            }
-
-            // Verifica che ci sia una pedina avversaria da catturare
-            int capturedR = (currentR + pathR) / 2;
-            int capturedC = (currentC + pathC) / 2;
-            String capturedPiece = board[capturedR][capturedC];
-
-            if (capturedPiece.isEmpty()) {
-                throw new InvalidMoveException("No piece to capture at " + capturedR + capturedC);
-            }
-
-            if (capturedPiece.equalsIgnoreCase(piece)) {
-                throw new InvalidMoveException("Cannot capture own piece at " + capturedR + capturedC);
-            }
-
-            // Aggiorna la posizione corrente
-            currentR = pathR;
-            currentC = pathC;
-        }
     }
 
     private void validateCoordinates(int r, int c) {

@@ -1,10 +1,9 @@
 package org.onlinecheckers.backend.model.entities;
 
 import org.onlinecheckers.backend.model.entities.enums.Team;
-
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
 @Entity

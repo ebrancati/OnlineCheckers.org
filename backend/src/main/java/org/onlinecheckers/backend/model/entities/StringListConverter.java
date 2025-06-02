@@ -1,7 +1,7 @@
 package org.onlinecheckers.backend.model.entities;
 
-import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
+import jakarta.persistence.AttributeConverter;
 
 import java.util.ArrayList;
 import java.util.Arrays;

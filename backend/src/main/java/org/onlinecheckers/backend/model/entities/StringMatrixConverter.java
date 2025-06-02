@@ -1,13 +1,12 @@
 package org.onlinecheckers.backend.model.entities;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
+import jakarta.persistence.AttributeConverter;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hibernate.query.sqm.sql.ConversionException;
 
 @Converter
-public class StringMatrixConverter implements AttributeConverter<String[][], String>
-{
+public class StringMatrixConverter implements AttributeConverter<String[][], String> {
 
 	private final ObjectMapper objectMapper = new ObjectMapper();
 

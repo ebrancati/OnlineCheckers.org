@@ -2,10 +2,11 @@ package org.onlinecheckers.backend.controllers;
 
 import org.onlinecheckers.backend.model.dtos.BotMoveRequestDto;
 import org.onlinecheckers.backend.model.dtos.BotMoveResponseDto;
-import org.onlinecheckers.backend.model.dtos.services.BotService;
+import org.onlinecheckers.backend.services.BotService;
+
+import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/bot")

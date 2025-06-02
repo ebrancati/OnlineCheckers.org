@@ -1,18 +1,19 @@
 package org.onlinecheckers.backend.controllers;
 
-import org.onlinecheckers.backend.exceptions.SessionGameNotFoundException;
-import org.onlinecheckers.backend.model.daos.GameDao;
-import org.onlinecheckers.backend.model.daos.PlayerDao;
-import org.onlinecheckers.backend.model.daos.PlayerRestartDao;
 import org.onlinecheckers.backend.model.dtos.*;
-import org.onlinecheckers.backend.model.dtos.mappers.GameMapper;
-import org.onlinecheckers.backend.model.dtos.services.MoveService;
 import org.onlinecheckers.backend.model.entities.Game;
 import org.onlinecheckers.backend.model.entities.Player;
 import org.onlinecheckers.backend.model.entities.enums.Team;
+import org.onlinecheckers.backend.model.mappers.GameMapper;
+import org.onlinecheckers.backend.repositories.GameRepository;
+import org.onlinecheckers.backend.repositories.PlayerRepository;
+import org.onlinecheckers.backend.repositories.PlayerRestartRepository;
+import org.onlinecheckers.backend.services.MoveService;
+import org.onlinecheckers.backend.exceptions.SessionGameNotFoundException;
+
+import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -21,10 +22,10 @@ import java.util.List;
 public class SessionGameController {
 
     @Autowired
-    GameDao gameDao;
+    GameRepository gameDao;
 
     @Autowired
-    PlayerDao pDao;
+    PlayerRepository pDao;
 
     @Autowired
     GameMapper gameMapper;
@@ -33,7 +34,7 @@ public class SessionGameController {
     private MoveService moveService;
 
     @Autowired
-    PlayerRestartDao prdao;
+    PlayerRestartRepository prdao;
 
     @GetMapping("/{id}")
     public Game stateGame(@PathVariable String id) {

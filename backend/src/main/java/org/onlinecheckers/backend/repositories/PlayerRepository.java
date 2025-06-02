@@ -1,11 +1,11 @@
-package org.onlinecheckers.backend.model.daos;
+package org.onlinecheckers.backend.repositories;
 
 import org.onlinecheckers.backend.model.entities.Player;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public interface PlayerDao extends JpaRepository<Player, String> {
+public interface PlayerRepository extends JpaRepository<Player, String> {
     List<Player> findByNickname(String nickname);
     void deleteAllByGameId(String gameId);
 }

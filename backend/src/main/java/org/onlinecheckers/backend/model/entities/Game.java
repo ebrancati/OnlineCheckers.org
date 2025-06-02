@@ -1,8 +1,8 @@
 package org.onlinecheckers.backend.model.entities;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;

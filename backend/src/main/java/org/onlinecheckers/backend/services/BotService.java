@@ -1,4 +1,4 @@
-package org.onlinecheckers.backend.model.dtos.services;
+package org.onlinecheckers.backend.services;
 
 import org.onlinecheckers.backend.model.dtos.BotMoveRequestDto;
 import org.onlinecheckers.backend.model.dtos.BotMoveResponseDto;

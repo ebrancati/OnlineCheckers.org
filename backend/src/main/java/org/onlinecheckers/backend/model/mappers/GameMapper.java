@@ -1,7 +1,8 @@
-package org.onlinecheckers.backend.model.dtos.mappers;
+package org.onlinecheckers.backend.model.mappers;
 
 import org.onlinecheckers.backend.model.dtos.GameDto;
 import org.onlinecheckers.backend.model.entities.Game;
+
 import org.springframework.stereotype.Service;
 
 @Service

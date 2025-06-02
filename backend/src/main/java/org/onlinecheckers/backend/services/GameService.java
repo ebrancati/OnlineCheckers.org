@@ -1,12 +1,13 @@
-package org.onlinecheckers.backend.model.dtos.services;
+package org.onlinecheckers.backend.services;
 
-import org.onlinecheckers.backend.exceptions.SessionGameNotFoundException;
-import org.onlinecheckers.backend.model.daos.GameDao;
 import org.onlinecheckers.backend.model.dtos.GameDto;
-import org.onlinecheckers.backend.model.dtos.mappers.GameMapper;
 import org.onlinecheckers.backend.model.entities.Game;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.onlinecheckers.backend.model.mappers.GameMapper;
+import org.onlinecheckers.backend.repositories.GameRepository;
+import org.onlinecheckers.backend.exceptions.SessionGameNotFoundException;
+
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Service
 public class GameService {
@@ -15,7 +16,7 @@ public class GameService {
     GameMapper gameMapper;
 
     @Autowired
-    GameDao gameDao;
+    GameRepository gameDao;
 
     public Game createGame(GameDto gameDto) {
         Game g = new Game();
