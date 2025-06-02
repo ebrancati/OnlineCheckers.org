@@ -50,11 +50,11 @@ The server will start on port 8080.
 ## Project Structure
 
 - **controllers/** - REST API endpoints
-- **model/entities/** - JPA entities
 - **model/dtos/** - Data transfer objects
-- **model/dtos/services/** - Business logic services
-- **model/dtos/mappers/** - Entity-DTO mappers
-- **model/daos/** - Data access objects (repositories)
+- **model/entities/** - JPA entities
+- **model/mappers/** - Entity-DTO mappers
+- **model/repositories/** - Data access objects
+- **model/services/** - Business logic services
 - **exceptions/** - Custom exception classes
 
 ## API Endpoints
