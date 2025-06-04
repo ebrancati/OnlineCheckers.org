@@ -1,3 +1,38 @@
+<!-- Connection Status Indicator -->
+<div class="connection-status-bar" [ngClass]="connectionStatus">
+  <div class="container">
+    <div class="d-flex align-items-center justify-content-between">
+      <div class="connection-info">
+        <i class="bi" [ngClass]="{
+          'bi-wifi': connectionStatus === 'connected',
+          'bi-wifi-off': connectionStatus === 'disconnected', 
+          'bi-arrow-clockwise': connectionStatus === 'connecting'
+        }"></i>
+        <span class="ms-2">
+          {{ connectionStatus === 'connected' ? ('WEBSOCKET.CONNECTED' | translate) : 
+             connectionStatus === 'connecting' ? ('WEBSOCKET.CONNECTING' | translate) : 
+             ('WEBSOCKET.DISCONNECTED' | translate) }}
+        </span>
+      </div>
+      
+      <button 
+        *ngIf="connectionStatus === 'disconnected'"
+        class="btn btn-sm btn-outline-light"
+        (click)="refreshConnection()">
+        <i class="bi bi-arrow-clockwise me-1"></i>
+        {{ 'WEBSOCKET.RECONNECT' | translate }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Connection Error Alert -->
+<div *ngIf="showConnectionError" class="alert alert-warning alert-dismissible fade show mx-3 mt-2" role="alert">
+  <i class="bi bi-exclamation-triangle-fill me-2"></i>
+  {{ connectionErrorMessage }}
+  <button type="button" class="btn-close" (click)="showConnectionError = false"></button>
+</div>
+
 <div class="container">
   <div class="board-container" [attr.data-player-team]="playerTeam">
     <!-- Share link with copy button -->

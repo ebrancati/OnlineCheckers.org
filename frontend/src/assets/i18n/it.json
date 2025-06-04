@@ -118,5 +118,13 @@
     "UNKNOWN_ERROR": "Si è verificato un errore sconosciuto. Riprova più tardi.",
     "GO_TO_LOCAL_MODE": "Vai alla Modalità Locale",
     "CREATE_NEW_GAME": "Crea Nuova Partita"
+  },
+  "WEBSOCKET": {
+    "CONNECTED": "🟢 Connesso",
+    "CONNECTING": "🟡 Connessione...",
+    "DISCONNECTED": "🔴 Disconnesso", 
+    "RECONNECT": "Riconnetti",
+    "CONNECTION_ERROR": "Connessione persa. Tentativo di riconnessione...",
+    "MAX_ATTEMPTS_ERROR": "Impossibile connettersi al server. Ricarica la pagina."
   }
 }
