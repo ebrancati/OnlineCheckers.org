@@ -55,36 +55,43 @@ public class GameWebSocketHandler implements WebSocketHandler {
         try {
             // Extract the text payload from Spring's WebSocketMessage
             String messageText = ((TextMessage) message).getPayload();
-
-            System.out.println(messageText);
+            System.out.println("Raw message received: " + messageText);
             
-            // Parse into our custom GameWebSocketMessage
+            // Parse into our custom GameWebSocketMessage using polymorphic deserialization
             GameWebSocketMessage wsMessage = objectMapper.readValue(messageText, GameWebSocketMessage.class);
             
-            // Extract message type (no cast needed!)
-            String messageType = wsMessage.getType();
+            System.out.println("Parsed message class: " + wsMessage.getClass().getName());
+            System.out.println("Game ID: " + wsMessage.getGameId());
+            System.out.println("Player ID: " + wsMessage.getPlayerId());
             
-            switch (messageType) {
-                case "SUBSCRIBE_GAME":
-                    handleSubscribeGame(session, (SubscribeGameMessage) wsMessage);
-                    break;
-                case "MAKE_MOVE":
-                    handleMakeMove(session, (MakeMoveMessage) wsMessage);
-                    break;
-                case "SEND_MESSAGE":
-                    handleSendMessage(session, (SendMessageMessage) wsMessage);
-                    break;
-                case "UPDATE_RESTART_STATUS":
-                    handleUpdateRestartStatus(session, (UpdateRestartStatusMessage) wsMessage);
-                    break;
-                case "RESET_GAME":
-                    handleResetGame(session, (ResetGameMessage) wsMessage);
-                    break;
-                default:
-                    sendError(session, "Unknown message type: " + messageType);
+            // Use instanceof instead of string comparison
+            if (wsMessage instanceof SubscribeGameMessage) {
+                System.out.println("Handling SUBSCRIBE_GAME message");
+                handleSubscribeGame(session, (SubscribeGameMessage) wsMessage);
+            }
+            else if (wsMessage instanceof MakeMoveMessage) {
+                System.out.println("Handling MAKE_MOVE message");
+                handleMakeMove(session, (MakeMoveMessage) wsMessage);
+            }
+            else if (wsMessage instanceof SendMessageMessage) {
+                System.out.println("Handling SEND_MESSAGE message");
+                handleSendMessage(session, (SendMessageMessage) wsMessage);
+            }
+            else if (wsMessage instanceof UpdateRestartStatusMessage) {
+                System.out.println("Handling UPDATE_RESTART_STATUS message");
+                handleUpdateRestartStatus(session, (UpdateRestartStatusMessage) wsMessage);
+            }
+            else if (wsMessage instanceof ResetGameMessage) {
+                System.out.println("Handling RESET_GAME message");
+                handleResetGame(session, (ResetGameMessage) wsMessage);
+            }
+            else {
+                System.err.println("Unknown message type: " + wsMessage.getClass().getSimpleName());
+                sendError(session, "Unknown message type: " + wsMessage.getClass().getSimpleName());
             }
         } catch (Exception e) {
             System.err.println("Error handling WebSocket message: " + e.getMessage());
+            e.printStackTrace(); // This will show the full stack trace
             sendError(session, "Error processing message: " + e.getMessage());
         }
     }
@@ -106,6 +113,9 @@ public class GameWebSocketHandler implements WebSocketHandler {
         
         // Notify other players in the room
         broadcastToGame(gameId, new PlayerConnectionMessage("PLAYER_CONNECTED", playerId, gameId), session);
+
+        // Broadcast game state to all players when someone connects
+        broadcastGameStateToGame(gameId);
         
         System.out.println("Player " + playerId + " subscribed to game " + gameId);
     }
@@ -210,7 +220,7 @@ public class GameWebSocketHandler implements WebSocketHandler {
             RestartStatusUpdateMessage message = new RestartStatusUpdateMessage("RESTART_STATUS_UPDATE", restartStatus);
             session.sendMessage(new TextMessage(objectMapper.writeValueAsString(message)));
         } catch (Exception e) {
-            // Restart status might not exist yet, ignore
+
         }
     }
 
@@ -226,7 +236,7 @@ public class GameWebSocketHandler implements WebSocketHandler {
             RestartStatusUpdateMessage message = new RestartStatusUpdateMessage("RESTART_STATUS_UPDATE", restartStatus);
             broadcastToGame(gameId, message, null);
         } catch (Exception e) {
-            // Restart status might not exist, ignore
+
         }
     }
 

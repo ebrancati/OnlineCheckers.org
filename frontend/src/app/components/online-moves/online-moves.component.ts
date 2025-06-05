@@ -33,13 +33,11 @@ export class OnlineMovesComponent implements OnChanges {
   displayMoves: TurnMoves[] = [];
 
   ngOnChanges(): void {
-    // Reset display moves
     this.displayMoves = [];
 
     if (this.moves.length === 0) return;
 
     let currentTurn = 1;
-    let currentMove = 0;
     let isWhiteTurn = true;
 
     // Initialize first turn
@@ -49,72 +47,28 @@ export class OnlineMovesComponent implements OnChanges {
       black: []
     });
 
-    // Analyze the moves to organize them into black/white turns
-    while (currentMove < this.moves.length) {
+    for (const move of this.moves) {
       const currentTurnData = this.displayMoves[this.displayMoves.length - 1];
-
-      // White move
-      if (isWhiteTurn) {
-        // White's first move this turn
-        const move = this.moves[currentMove];
-        const formattedMove = {
+          
+      const formattedMove = {
           notation: this.formatMove(move),
           isCaptureContinuation: false
-        };
+      };
 
+      if (isWhiteTurn) {
         currentTurnData.white.push(formattedMove);
-        currentMove++;
-
-        // We check if there are multiple captures by player white
-        while (currentMove < this.moves.length &&
-               this.isFollowUpCapture(this.moves[currentMove-1], this.moves[currentMove])) {
-          const captureMove = this.moves[currentMove];
-          const formattedCapture = {
-            notation: this.formatCaptureChain(captureMove),
-            isCaptureContinuation: true
-          };
-
-          currentTurnData.white.push(formattedCapture);
-          currentMove++;
-        }
-
         isWhiteTurn = false;
-      }
-      // Black move
-      else {
-        if (currentMove < this.moves.length) {
-          const move = this.moves[currentMove];
-          const formattedMove = {
-            notation: this.formatMove(move),
-            isCaptureContinuation: false
-          };
-
-          currentTurnData.black.push(formattedMove);
-          currentMove++;
-
-          // Check if there are multiple captures by player black
-          while (currentMove < this.moves.length &&
-                 this.isFollowUpCapture(this.moves[currentMove-1], this.moves[currentMove])) {
-            const captureMove = this.moves[currentMove];
-            const formattedCapture = {
-              notation: this.formatCaptureChain(captureMove),
-              isCaptureContinuation: true
-            };
-
-            currentTurnData.black.push(formattedCapture);
-            currentMove++;
-          }
-        }
-
+      } else {
+        currentTurnData.black.push(formattedMove);
         isWhiteTurn = true;
         currentTurn++;
 
-        // Prepare next turn if there are other moves
-        if (currentMove < this.moves.length) {
+        // Prepare next turn if there are more moves
+        if (this.moves.indexOf(move) < this.moves.length - 1) {
           this.displayMoves.push({
-            number: currentTurn,
-            white: [],
-            black: []
+              number: currentTurn,
+              white: [],
+              black: []
           });
         }
       }

@@ -16,5 +16,7 @@ public record GameDto(
     boolean partitaTerminata,
     Team vincitore,
     List<Player> players,
-    List<String> lastMultiCapturePath
+    List<String> lastMultiCapturePath,
+    List<String> cronologiaMosse,
+    String chat
 ) {}

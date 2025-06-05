@@ -20,7 +20,9 @@ public class GameMapper {
             game.isPartitaTerminata(),
             game.getVincitore(),
             game.getPlayers(),
-            game.getLastMultiCapturePath()
+            game.getLastMultiCapturePath(),
+            game.getCronologiaMosse(),
+            game.getChat()
         );
     }
 }

@@ -269,6 +269,11 @@ export class OnlineBoardComponent implements OnInit, OnDestroy {
       }
     }
 
+    if (gameState.cronologiaMosse && Array.isArray(gameState.cronologiaMosse)) {
+        console.log('Updating moves from server:', gameState.cronologiaMosse);
+        this.updateMovesFromHistory(gameState.cronologiaMosse);
+    }
+
     // Skip update if currently capturing multiple pieces
     if (this.isCapturingMultiple) {
       this.chatHistory = gameState.chat ?? '';
@@ -310,11 +315,6 @@ export class OnlineBoardComponent implements OnInit, OnDestroy {
 
     // Normal state update
     this.updateGameState(gameState);
-
-    // Update moves from history
-    if (gameState.cronologiaMosse && Array.isArray(gameState.cronologiaMosse)) {
-      this.updateMovesFromHistory(gameState.cronologiaMosse);
-    }
   }
 
   /**
@@ -421,12 +421,6 @@ export class OnlineBoardComponent implements OnInit, OnDestroy {
       if (!this.capturePath) this.capturePath = [];
       this.capturePath.push(`${toRow}${toCol}`);
 
-      this.moves = [...this.moves, {
-        from: { row: fromRow, col: fromCol },
-        to: { row: toRow, col: toCol },
-        captured: [{ row: (fromRow + toRow) / 2, col: (fromCol + toCol) / 2 }]
-      }];
-
       this.selectedCell = { row: toRow, col: toCol };
       this.highlightedCells = further.map(m => m.to);
       this.resetMoveIndicators();
@@ -435,14 +429,6 @@ export class OnlineBoardComponent implements OnInit, OnDestroy {
     } else {
       // Send move to server via WebSocket
       const start = this.captureChainStart || { row: fromRow, col: fromCol };
-
-      if (!isCapture || !this.captureChainStart) {
-        this.moves = [...this.moves, {
-          from: { row: fromRow, col: fromCol },
-          to: { row: toRow, col: toCol },
-          captured: isCapture ? [{ row: (fromRow + toRow) / 2, col: (fromCol + toCol) / 2 }] : undefined
-        }];
-      }
 
       if (isCapture && this.captureChainStart) {
         this.capturePath.push(`${toRow}${toCol}`);
@@ -656,38 +642,65 @@ export class OnlineBoardComponent implements OnInit, OnDestroy {
    * @param moveHistory - Array of move strings from server
    */
   updateMovesFromHistory(moveHistory: string[]): void {
+      this.moves = [];
+      
+      if (!moveHistory || moveHistory.length === 0) return;
 
-    this.moves = [];
+      for (let i = 0; i < moveHistory.length; i++) {
+          const moveString = moveHistory[i];
+          const parts = moveString.split('-');
+          if (parts.length < 3) continue;
 
-    for (const moveString of moveHistory) {
-      // Parse move string in format "fromRow,fromCol-toRow,toCol-player"
-      const parts = moveString.split('-');
-      if (parts.length < 3) continue; // Skip invalid format
+          const fromRow = parseInt(parts[0][0]);
+          const fromCol = parseInt(parts[0][1]);
+          const toRow = parseInt(parts[1][0]);
+          const toCol = parseInt(parts[1][1]);
+          const player = parts[2];
 
-      const fromRow = parseInt(parts[0][0]);
-      const fromCol = parseInt(parts[0][1]);
-      const toRow = parseInt(parts[1][0]);
-      const toCol = parseInt(parts[1][1]);
+          const isCapture = Math.abs(fromRow - toRow) === 2 && Math.abs(fromCol - toCol) === 2;
 
-      // Check if this is a capture move (distance = 2)
-      const isCapture = Math.abs(fromRow - toRow) === 2 && Math.abs(fromCol - toCol) === 2;
+          let isContinuation = false;
+          if (i > 0 && isCapture && this.moves.length > 0) {
+              const lastMove = this.moves[this.moves.length - 1];
+              const prevMove = moveHistory[i - 1];
+              const prevParts = prevMove.split('-');
+              const prevPlayer = prevParts[2];
 
-      // Create move object
-      const move: Move = {
-        from: { row: fromRow, col: fromCol },
-        to: { row: toRow, col: toCol }
-      };
+              if (player === prevPlayer && 
+                  fromRow === lastMove.to.row && 
+                  fromCol === lastMove.to.col &&
+                  lastMove.captured && lastMove.captured.length > 0) {
+                  isContinuation = true;
+              }
+          }
 
-      // Add captured piece if it's a capture
-      if (isCapture) {
-        const capturedRow = Math.floor((fromRow + toRow) / 2);
-        const capturedCol = Math.floor((fromCol + toCol) / 2);
-        move.captured = [{ row: capturedRow, col: capturedCol }];
+          if (isContinuation && this.moves.length > 0) {
+              const lastMove = this.moves[this.moves.length - 1];
+              
+              lastMove.to = { row: toRow, col: toCol };
+              
+              if (isCapture) {
+                  const capturedRow = Math.floor((fromRow + toRow) / 2);
+                  const capturedCol = Math.floor((fromCol + toCol) / 2);
+                  lastMove.captured!.push({ row: capturedRow, col: capturedCol });
+              }
+          } else {
+              const move: any = {
+                  from: { row: fromRow, col: fromCol },
+                  to: { row: toRow, col: toCol }
+              };
+
+              if (isCapture) {
+                  const capturedRow = Math.floor((fromRow + toRow) / 2);
+                  const capturedCol = Math.floor((fromCol + toCol) / 2);
+                  move.captured = [{ row: capturedRow, col: capturedCol }];
+              }
+
+              this.moves.push(move);
+          }
       }
-
-      // Add the move to the moves array
-      this.moves.push(move);
-    }
+      
+      console.log('Final moves with multi-captures grouped:', this.moves);
   }
 
   /**
@@ -1518,6 +1531,39 @@ export class OnlineBoardComponent implements OnInit, OnDestroy {
     } else {
       this.router.navigate(['/play']);
     }
+  }
+
+    private shouldAddMoveToHistory(serverMove: any): boolean {
+      const nickname = localStorage.getItem('nickname');
+      if (serverMove.player === (this.playerTeam === 'WHITE' ? 'white' : 'black')) {
+          return false;
+      }
+
+      return !this.moves.some(move => 
+          move.from.row === parseInt(serverMove.from[0]) &&
+          move.from.col === parseInt(serverMove.from[1]) &&
+          move.to.row === parseInt(serverMove.to[0]) &&
+          move.to.col === parseInt(serverMove.to[1])
+      );
+  }
+
+  private addServerMoveToHistory(serverMove: any): void {
+      const move = {
+          from: { 
+              row: parseInt(serverMove.from[0]), 
+              col: parseInt(serverMove.from[1]) 
+          },
+          to: { 
+              row: parseInt(serverMove.to[0]), 
+              col: parseInt(serverMove.to[1]) 
+          },
+          captured: serverMove.path && serverMove.path.length > 0 ? [{ 
+              row: (parseInt(serverMove.from[0]) + parseInt(serverMove.to[0])) / 2,
+              col: (parseInt(serverMove.from[1]) + parseInt(serverMove.to[1])) / 2
+          }] : undefined
+      };
+      
+      this.moves = [...this.moves, move];
   }
 
   protected readonly localStorage = localStorage;

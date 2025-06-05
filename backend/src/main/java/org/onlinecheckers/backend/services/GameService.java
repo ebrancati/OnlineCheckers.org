@@ -8,6 +8,7 @@ import org.onlinecheckers.backend.exceptions.SessionGameNotFoundException;
 
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class GameService {
@@ -35,11 +36,16 @@ public class GameService {
         return gameDao.save(g);
     }
 
+    @Transactional(readOnly = true)
     public GameDto getGame(String id) {
         Game g = gameDao.findById(id).orElse(null);
         if (g == null) {
             throw new SessionGameNotFoundException("Game with id " + id + " not found");
         }
+        
+        // Force loading of players collection before mapping
+        g.getPlayers().size(); // This triggers lazy loading while session is still open
+        
         return gameMapper.toDto(g);
     }
 }
