@@ -311,7 +311,7 @@ export class OfflineBoardComponent implements OnInit, OnDestroy {
    * @param toCol - Destination column
    */
   makeMove(fromRow: number, fromCol: number, toRow: number, toCol: number): void {
-    console.log("test")
+    
     this.resetMoveIndicators();
     
     const isCapture = Math.abs(fromRow - toRow) === 2 && Math.abs(fromCol - toCol) === 2;
@@ -350,6 +350,7 @@ export class OfflineBoardComponent implements OnInit, OnDestroy {
       if ((movingPiece.pieceColor === 'white' && toRow === 0) ||
         (movingPiece.pieceColor === 'black' && toRow === 7)) {
         this.board[toRow][toCol].isKing = true;
+        this.audioService.playKingSound();
       }
     }
 

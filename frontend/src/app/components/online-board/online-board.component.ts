@@ -113,6 +113,7 @@ export class OnlineBoardComponent implements OnInit, OnDestroy {
   // Stop polling when user is making multiple moves
   isCapturingMultiple: boolean = false;
 
+  showConnectionStatus = true;
   restartStatus: PlayerRestartStatus | null = null;
   restartPollingSubscription: Subscription | null = null;
   showRestartRequestedMessage: boolean = false;
@@ -210,7 +211,14 @@ export class OnlineBoardComponent implements OnInit, OnDestroy {
     this.connectionStatusSubscription = this.webSocketService.connectionStatus$.subscribe({
       next: (status) => {
         this.connectionStatus = status;
-        console.log('Connection status:', status);
+
+        if (status === 'connected') {
+          setTimeout(() => {
+            this.showConnectionStatus = false;
+          }, 3000);
+        } else {
+          this.showConnectionStatus = true;
+        }
       }
     });
 
@@ -642,65 +650,50 @@ export class OnlineBoardComponent implements OnInit, OnDestroy {
    * @param moveHistory - Array of move strings from server
    */
   updateMovesFromHistory(moveHistory: string[]): void {
-      this.moves = [];
-      
-      if (!moveHistory || moveHistory.length === 0) return;
+    this.moves = [];
+    let currentMoveGroup: any[] = [];
+    let lastFromPos: string | null = null;
 
-      for (let i = 0; i < moveHistory.length; i++) {
-          const moveString = moveHistory[i];
-          const parts = moveString.split('-');
-          if (parts.length < 3) continue;
+    for (const moveString of moveHistory) {
+      const parts = moveString.split('-');
+      if (parts.length < 3) continue;
 
-          const fromRow = parseInt(parts[0][0]);
-          const fromCol = parseInt(parts[0][1]);
-          const toRow = parseInt(parts[1][0]);
-          const toCol = parseInt(parts[1][1]);
-          const player = parts[2];
+      const fromPos = parts[0];
+      const toPos = parts[1];
+      const fromRow = parseInt(fromPos[0]);
+      const fromCol = parseInt(fromPos[1]);
+      const toRow = parseInt(toPos[0]);
+      const toCol = parseInt(toPos[1]);
 
-          const isCapture = Math.abs(fromRow - toRow) === 2 && Math.abs(fromCol - toCol) === 2;
+      const isCapture = Math.abs(fromRow - toRow) === 2 && Math.abs(fromCol - toCol) === 2;
 
-          let isContinuation = false;
-          if (i > 0 && isCapture && this.moves.length > 0) {
-              const lastMove = this.moves[this.moves.length - 1];
-              const prevMove = moveHistory[i - 1];
-              const prevParts = prevMove.split('-');
-              const prevPlayer = prevParts[2];
-
-              if (player === prevPlayer && 
-                  fromRow === lastMove.to.row && 
-                  fromCol === lastMove.to.col &&
-                  lastMove.captured && lastMove.captured.length > 0) {
-                  isContinuation = true;
-              }
+      // Se è una cattura multipla (stesso punto di partenza o continua dall'ultimo punto)
+      if (isCapture && (fromPos === lastFromPos || (this.moves.length > 0 && fromPos === this.moves[this.moves.length - 1].to.row + '' + this.moves[this.moves.length - 1].to.col))) {
+          // Aggiungi alla cattura multipla esistente
+          const lastMove = this.moves[this.moves.length - 1];
+          if (lastMove && lastMove.captured) {
+              lastMove.captured.push({
+                  row: Math.floor((fromRow + toRow) / 2),
+                  col: Math.floor((fromCol + toCol) / 2)
+              });
           }
-
-          if (isContinuation && this.moves.length > 0) {
-              const lastMove = this.moves[this.moves.length - 1];
-              
-              lastMove.to = { row: toRow, col: toCol };
-              
-              if (isCapture) {
-                  const capturedRow = Math.floor((fromRow + toRow) / 2);
-                  const capturedCol = Math.floor((fromCol + toCol) / 2);
-                  lastMove.captured!.push({ row: capturedRow, col: capturedCol });
-              }
-          } else {
-              const move: any = {
-                  from: { row: fromRow, col: fromCol },
-                  to: { row: toRow, col: toCol }
-              };
-
-              if (isCapture) {
-                  const capturedRow = Math.floor((fromRow + toRow) / 2);
-                  const capturedCol = Math.floor((fromCol + toCol) / 2);
-                  move.captured = [{ row: capturedRow, col: capturedCol }];
-              }
-
-              this.moves.push(move);
-          }
+          // Aggiorna destinazione finale
+          lastMove.to = { row: toRow, col: toCol };
+      } else {
+          // Nuova mossa
+          const move = {
+              from: { row: fromRow, col: fromCol },
+              to: { row: toRow, col: toCol },
+              captured: isCapture ? [{
+                  row: Math.floor((fromRow + toRow) / 2),
+                  col: Math.floor((fromCol + toCol) / 2)
+              }] : undefined
+          };
+          this.moves.push(move);
       }
-      
-      console.log('Final moves with multi-captures grouped:', this.moves);
+
+      lastFromPos = fromPos;
+    }
   }
 
   /**

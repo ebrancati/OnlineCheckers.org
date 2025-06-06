@@ -1,5 +1,9 @@
 <!-- Connection Status Indicator -->
-<div class="connection-status-bar" [ngClass]="connectionStatus">
+<div
+  *ngIf="connectionStatus !== 'connected' || showConnectionStatus"
+  class="connection-status-bar"
+  [ngClass]="connectionStatus"
+>
   <div class="container">
     <div class="d-flex align-items-center justify-content-between">
       <div class="connection-info">

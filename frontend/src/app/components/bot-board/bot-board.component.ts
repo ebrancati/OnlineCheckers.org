@@ -90,7 +90,7 @@ export class BotBoardComponent extends OfflineBoardComponent implements OnInit, 
       // Add small delay to give illusion that bot is "thinking"
       setTimeout(() => {
         this.getBotMove();
-      }, 500);
+      }, 1000);
     }
   }
 
@@ -138,16 +138,36 @@ export class BotBoardComponent extends OfflineBoardComponent implements OnInit, 
 
         // Execute bot move
         if (response.path && response.path.length > 0) {
-          // Handle multiple capture with animation
-          this.moves = [...this.moves, {
-            from: { row: fromRow, col: fromCol },
-            to: { row: toRow, col: toCol },
-            captured: [{ row: fromRow + (toRow - fromRow) / 2, col: fromCol + (toCol - fromCol) / 2 }]
-          }];
+          let currentFrom = response.from;
+          
+          for (const pathStep of response.path) {
+            const stepFromRow = parseInt(currentFrom.charAt(0));
+            const stepFromCol = parseInt(currentFrom.charAt(1));
+            const stepToRow = parseInt(pathStep.charAt(0));
+            const stepToCol = parseInt(pathStep.charAt(1));
+            
+            // Calculate the piece captured in this step
+            const capturedRow = (stepFromRow + stepToRow) / 2;
+            const capturedCol = (stepFromCol + stepToCol) / 2;
+            
+            // Add this move to history
+            this.moves = [...this.moves, {
+              from: { row: stepFromRow, col: stepFromCol },
+              to: { row: stepToRow, col: stepToCol },
+              captured: [{ row: capturedRow, col: capturedCol }]
+            }];
+            
+            // The next segment starts from where this one ends
+            currentFrom = pathStep;
+          }
+          
           this.animateBotCapturePath(fromRow, fromCol, response.path);
         } else {
           // Simple move
           super.makeMove(fromRow, fromCol, toRow, toCol);
+          setTimeout(() => {
+            this.audioService.playMoveSound();
+          }, 400);
         }
 
         // Add the new board state after bot's move to history
