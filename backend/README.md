@@ -1,88 +1,128 @@
-# OnlineCheckers.org - Backend
+# OnlineCheckers.org - Backend Services
 
-## Technologies
+This directory contains all the Java backend services for the OnlineCheckers.org project.
 
-- Java 21
-- Spring Boot 3.4.5
-- Spring Data JPA
-- MySQL
+## Architecture
 
-## Prerequisites
+The backend is composed of three main components:
 
-Ensure you have the following installed:
+### bot-core/
+Shared library containing the checkers AI algorithm and common data models.
+- **Technology**: Pure Java 21
+- **Purpose**: Single source of truth for bot logic
+- **Used by**: Both api-server and bot-lambda
 
+### api-server/
+Main REST API server and WebSocket handler for the checkers game.
+- **Technology**: Spring Boot 3.4.5, MySQL, WebSockets
+- **Purpose**: Game management, player sessions, real-time communication
+- **Deployment**: Traditional server/container
+
+### bot-lambda/
+Serverless AI service for calculating bot moves.
+- **Technology**: Quarkus 3.6.4, AWS Lambda
+- **Purpose**: High-performance AI move calculation
+- **Deployment**: AWS Lambda function
+
+## 🚀 Quick Start
+
+### Prerequisites
 - JDK 21 or later
-- Maven
-- MySQL Server
-- Git
+- MySQL Server (for api-server)
 
-## Getting Started
-
-### 1. Clone the repository
-
+### Build All Services
 ```bash
-git clone https://github.com/ebrancati/OnlineCheckers.org.git
-cd OnlineCheckers.org/backend
+# From backend/ directory
+.\mvnw.cmd clean install
 ```
 
-### 2. Configure Application
+### Run API Server
+```bash
+# From backend/ directory  
+.\mvnw.cmd spring-boot:run -pl api-server
+```
 
-Create the `src/main/resources/application.properties` file:
+### Deploy Bot Lambda (Optional)
+```bash
+# From backend/ directory
+.\mvnw.cmd clean package -pl bot-lambda
+# Deploy the generated JAR to AWS Lambda
+```
+
+## Service Communication
+
+```
+Frontend (Angular)
+        ↓
+   api-server (Spring Boot)
+        ↓ (optional fallback)
+   bot-lambda (Quarkus)
+        ↓
+   bot-core (shared logic)
+```
+
+- **Primary**: Frontend ↔ api-server ↔ bot-lambda
+- **Fallback**: If Lambda fails, api-server uses local bot-core directly
+
+## Development
+
+### Adding New Bot Features
+1. Implement in `bot-core/`
+2. Test with `api-server`
+3. Deploy to `bot-lambda`
+
+### Database Changes
+Update entities in `api-server/src/main/java/.../entities/`
+
+### WebSocket Events
+1. Add message types in `api-server/src/main/java/.../websocket/`
+2. Update handlers in `GameWebSocketHandler.java`
+
+## 📋 API Documentation
+
+### Main Endpoints
+- **POST** `/api/games/create` - Create new game
+- **POST** `/api/games/join/{id}` - Join existing game  
+- **POST** `/api/games/{id}/move` - Make a move
+- **POST** `/api/bot/move` - Calculate bot move
+- **WebSocket** `/ws/game` - Real-time game updates
+
+### Bot Lambda Endpoints
+- **POST** `/bot/move` - Calculate AI move
+- **GET** `/bot/health` - Health check
+
+## Configuration
+
+### api-server Configuration
+Create `api-server/src/main/resources/application.properties`:
 
 ```properties
+# Database Configuration
 spring.datasource.url=jdbc:mysql://localhost:3306/checkersonline?createDatabaseIfNotExist=true&useSSL=false
 spring.datasource.username=root
-spring.datasource.password=
+spring.datasource.password=your_mysql_password
+
+# JPA Settings
 spring.jpa.hibernate.ddl-auto=update
 spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQLDialect
+
+# Server
 server.port=8080
+
+# Bot Lambda (optional)
+bot.lambda.enabled=false
+bot.lambda.url=https://your-lambda-url.amazonaws.com
 ```
 
-### 3. Build and Run
+⚠️ **Note**: This file contains sensitive information and is not committed to Git.
 
-```bash
-mvn clean install
-mvn spring-boot:run
-```
+### bot-lambda Configuration
+Pre-configured in `bot-lambda/src/main/resources/application.properties`:
 
-The server will start on port 8080.
+✅ **Note**: This file is safe to commit and requires no manual configuration.
 
-## Project Structure
+## Monitoring & Logging
 
-- **controllers/** - REST API endpoints
-- **model/dtos/** - Data transfer objects
-- **model/entities/** - JPA entities
-- **model/mappers/** - Entity-DTO mappers
-- **model/repositories/** - Data access objects
-- **model/services/** - Business logic services
-- **exceptions/** - Custom exception classes
-
-## API Endpoints
-
-### Players
-- POST `/api/players/create` - Create a new player
-
-### Games
-- GET `/api/games/{id}` - Get game state
-- POST `/api/games/create` - Create a new game
-- POST `/api/games/join/{id}` - Join an existing game
-- POST `/api/games/{id}/move` - Make a move
-- POST `/api/games/{id}/chat` - Send a chat message
-- POST `/api/games/{id}/reset` - Reset a game
-- DELETE `/api/games/{id}` - Delete a game
-
-### Bot
-- POST `/api/bot/move` - Calculate bot move
-
-### Restart Status
-- GET `/api/restartStatus/{id}/` - Get game restart status
-- POST `/api/restartStatus/{id}` - Update restart status
-- POST `/api/restartStatus/{id}/restart` - Reset restart status
-
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+- **api-server**: Standard Spring Boot logging to console
+- **bot-lambda**: CloudWatch logs when deployed to AWS, console logs in dev mode
+- **Performance**: Track bot response times and fallback usage in api-server logs
