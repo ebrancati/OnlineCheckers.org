@@ -49,6 +49,8 @@ Serverless AI service for calculating bot moves.
 # Deploy the generated JAR to AWS Lambda
 ```
 
+Guide: [How to test Bot Lambda Locally](./bot-lambda/README.md)
+
 ## Service Communication
 
 ```
@@ -63,20 +65,6 @@ Frontend (Angular)
 
 - **Primary**: Frontend ↔ api-server ↔ bot-lambda
 - **Fallback**: If Lambda fails, api-server uses local bot-core directly
-
-## Development
-
-### Adding New Bot Features
-1. Implement in `bot-core/`
-2. Test with `api-server`
-3. Deploy to `bot-lambda`
-
-### Database Changes
-Update entities in `api-server/src/main/java/.../entities/`
-
-### WebSocket Events
-1. Add message types in `api-server/src/main/java/.../websocket/`
-2. Update handlers in `GameWebSocketHandler.java`
 
 ## 📋 API Documentation
 
