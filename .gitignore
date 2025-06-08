@@ -1,0 +1,145 @@
+# Root .gitignore
+
+#########################################
+# BACKEND (Java/Spring Boot/Quarkus)
+#########################################
+
+# Maven
+backend/target/
+backend/!.mvn/wrapper/maven-wrapper.jar
+backend/!**/src/main/**/target/
+backend/!**/src/test/**/target/
+
+# IDE Files
+backend/**/.idea/
+backend/**/*.iws
+backend/**/*.iml
+backend/**/*.ipr
+
+# Eclipse
+backend/**/.apt_generated
+backend/**/.classpath
+backend/**/.factorypath
+backend/**/.project
+backend/**/.settings
+backend/**/.springBeans
+backend/**/.sts4-cache
+
+# NetBeans
+backend/**/nbproject/private/
+backend/**/nbbuild/
+backend/**/dist/
+backend/**/nbdist/
+backend/**/.nb-gradle/
+backend/**/build/
+backend/!**/src/main/**/build/
+backend/!**/src/test/**/build/
+
+# VS Code
+backend/**/.vscode/
+
+# Logs
+backend/**/*.log
+
+# Application Properties (sensitive config)
+backend/api-server/src/main/resources/application.properties
+
+# Temporary files
+backend/**/*.tmp
+backend/**/*.temp
+
+#########################################
+# FRONTEND (Angular/Node.js)
+#########################################
+
+# Node.js
+frontend/node_modules/
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+
+# Angular Build Output
+frontend/dist/
+frontend/tmp/
+frontend/out-tsc/
+frontend/bazel-out/
+
+# Angular Cache
+frontend/.angular/cache/
+frontend/.sass-cache/
+
+# IDEs and editors
+frontend/.idea/
+frontend/.project
+frontend/.classpath
+frontend/.c9/
+frontend/*.launch
+frontend/.settings/
+frontend/*.sublime-workspace
+
+# Visual Studio Code
+frontend/.vscode/*
+frontend/!.vscode/settings.json
+frontend/!.vscode/tasks.json
+frontend/!.vscode/launch.json
+frontend/!.vscode/extensions.json
+frontend/.history/*
+
+# Environment files
+frontend/.env
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+
+#########################################
+# GLOBAL IGNORES
+#########################################
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# Temporary directories
+tmp/
+temp/
+
+#########################################
+# DEVELOPMENT TOOLS
+#########################################
+
+.vscode/
+
+# JetBrains IDEs
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# VS Code workspace files
+*.code-workspace

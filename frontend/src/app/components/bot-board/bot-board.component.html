@@ -1,13 +1,6 @@
 <div class="container">
 
   <div class="game-container">
-    <!-- Indicator bot is thinking -->
-    <div *ngIf="isThinking" class="bot-thinking-indicator">
-      <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">Loading...</span>
-      </div>
-      <p>{{ 'BOT.THINKING' | translate }}</p>
-    </div>
 
     <!-- Wrong turn error message -->
     <div *ngIf="showErrorMessage" class="error-message">
@@ -18,6 +11,7 @@
     </div>
 
     <div class="board-container">
+
       <!-- Game over modal -->
       <div *ngIf="showGameOverModal" class="game-over-modal">
         <div class="modal-content">
@@ -33,6 +27,13 @@
 
       <div *ngIf="isAnimatingCapture" class="capture-animation-indicator">
         <p>{{ 'BOT.CAPTURING' | translate }}</p>
+      </div>
+
+      <div *ngIf="isThinking" class="bot-thinking-indicator">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <p>{{ 'BOT.THINKING' | translate }}</p>
       </div>
 
       <div class="board-with-coordinates">

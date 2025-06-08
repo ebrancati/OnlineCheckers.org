@@ -5,28 +5,6 @@
   margin: 0 auto 20px;
 }
 
-.bot-thinking-indicator {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background-color: var(--card-bg);
-  padding: 20px;
-  border-radius: 10px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  z-index: 100;
-  box-shadow: 0 2px 10px var(--board-shadow);
-  border: 1px solid var(--card-border);
-}
-
-.bot-thinking-indicator p {
-  margin-top: 10px;
-  font-weight: bold;
-  color: var(--card-text);
-}
-
 .game-container {
   position: relative;
 }
@@ -143,6 +121,28 @@
   border: 1px solid var(--card-border);
   color: var(--card-text);
   z-index: 100;
+}
+
+.bot-thinking-indicator {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: var(--card-bg);
+  padding: 20px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 100;
+  box-shadow: 0 2px 10px var(--board-shadow);
+  border: 1px solid var(--card-border);
+}
+
+.bot-thinking-indicator p {
+  margin-top: 10px;
+  font-weight: bold;
+  color: var(--card-text);
 }
 
 /* Drag and drop styles */

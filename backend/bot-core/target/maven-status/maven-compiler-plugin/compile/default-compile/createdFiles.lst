@@ -1,0 +1,6 @@
+org\onlinecheckers\bot\model\Move.class
+org\onlinecheckers\bot\model\MoveEvaluation.class
+org\onlinecheckers\bot\service\BotAlgorithm.class
+org\onlinecheckers\bot\dto\BotMoveResponseDto.class
+org\onlinecheckers\bot\dto\BotMoveRequestDto.class
+org\onlinecheckers\bot\model\Team.class
