@@ -6,9 +6,8 @@ Play Checkers online with friends or against AI opponents.
 
 Detailed setup instructions are in the README files in each component directory:
 
-- [Frontend Documentation](./frontend/README.md) - Angular app development and building
-- [Backend Documentation](./backend/README.md) - API setup and database configuration
-- [Bot Lambda Documentation](./bot-lambda/README.md) - AI service deployment and configuration
+- [Frontend Documentation](./frontend/README.md)
+- [Backend Documentation](./backend/README.md)
 
 ## 🔧 Contributors
 

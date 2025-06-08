@@ -1,38 +1,24 @@
 import { Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { NgClass, NgForOf, NgIf } from '@angular/common';
+import { DOCUMENT } from '@angular/common';
+import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
+import { TranslateModule } from '@ngx-translate/core';
+import { interval, Subscription } from 'rxjs';
 import { OnlineMovesComponent as MovesComponent } from '../online-moves/online-moves.component';
 import { ChatComponent } from '../chat/chat.component';
-import { MoveServiceService } from '../../../services/move-service.service';
-import { GameService } from '../../../services/game.service';
-import { ActivatedRoute } from '@angular/router';
-import { DOCUMENT } from '@angular/common';
-import { interval, Subscription } from 'rxjs';
-import { MoveP } from '../../../model/entities/MoveP';
-import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
-import { AudioService } from '../../../services/audio.service';
-import { TranslateModule } from '@ngx-translate/core';
 import { RestartService, PlayerRestartStatus } from '../../../services/restart.service';
+import { WebSocketService } from '../../../services/websocket.service';
+import { GameService }      from '../../../services/game.service';
+import { AudioService }     from '../../../services/audio.service';
+import { GameAccessDto }    from '../../../model/entities/GameAccessDto';
+import { GameResponse }     from '../../../model/entities/GameResponse';
+import { MoveP }            from '../../../model/entities/MoveP';
 
 export interface PlayerDto {
   id: string;
   nickname: string;
   team: 'WHITE' | 'BLACK';
-}
-
-export interface GameResponse {
-  cronologiaMosse: string[];
-  chat: string;
-  id: string;
-  board: string[][];
-  turno: 'WHITE' | 'BLACK' | 'NONE';
-  pedineW: number;
-  pedineB: number;
-  damaW: number;
-  damaB: number;
-  partitaTerminata: boolean;
-  vincitore: 'WHITE' | 'BLACK' | 'NONE';
-  players: PlayerDto[];
-  lastMultiCapturePath?: string[];
 }
 
 /**
@@ -112,6 +98,7 @@ export class OnlineBoardComponent implements OnInit, OnDestroy {
   // Stop polling when user is making multiple moves
   isCapturingMultiple: boolean = false;
 
+  showConnectionStatus = true;
   restartStatus: PlayerRestartStatus | null = null;
   restartPollingSubscription: Subscription | null = null;
   showRestartRequestedMessage: boolean = false;
@@ -123,13 +110,29 @@ export class OnlineBoardComponent implements OnInit, OnDestroy {
   linkCopied: boolean = false;
   protected chatHistory: string='';
 
+  // WebSocket subscriptions
+  private gameStateSubscription: Subscription | null = null;
+  private restartStatusSubscription: Subscription | null = null;
+  private connectionStatusSubscription: Subscription | null = null;
+  private errorSubscription: Subscription | null = null;
+
+  userRole: 'PLAYER' | 'SPECTATOR' = 'SPECTATOR';
+  isSpectator: boolean = true;
+  spectatorMessage: string | undefined = undefined;
+  spectatorCount: number = 0;
+
+  // Connection status for UI
+  connectionStatus: 'connected' | 'connecting' | 'disconnected' = 'disconnected';
+  showConnectionError = false;
+  connectionErrorMessage = '';
+
   constructor(
-    private moveService: MoveServiceService,
     private gameService: GameService,
     private route: ActivatedRoute,
     public router: Router,
     private audioService: AudioService,
     private restartService: RestartService,
+    private webSocketService: WebSocketService,
     @Inject(DOCUMENT) private document: Document
   ) {
     this.origin = this.document.location.origin;
@@ -139,11 +142,14 @@ export class OnlineBoardComponent implements OnInit, OnDestroy {
     this.gameID = this.route.snapshot.paramMap.get('gameId')!;
     this.initBoard();
 
-    // Start polling for status updates
-    this.startPolling();
+    // Connect to WebSocket instead of starting polling
+    this.connectToWebSocket();
   }
 
   ngOnDestroy() {
+    // Clean up WebSocket subscriptions
+    this.disconnectFromWebSocket();
+
     if (this.pollingSubscription) {
       this.pollingSubscription.unsubscribe();
     }
@@ -153,6 +159,415 @@ export class OnlineBoardComponent implements OnInit, OnDestroy {
     if (this.captureAnimationInterval) {
       clearInterval(this.captureAnimationInterval);
     }
+  }
+
+  /**
+   * Connect to WebSocket and set up subscriptions
+   */
+  private connectToWebSocket(): void {
+    const nickname = localStorage.getItem('nickname');
+    if (!nickname) {
+      console.error('No nickname found in localStorage');
+      return;
+    }
+
+    // Connect to WebSocket
+    this.webSocketService.connect(this.gameID, nickname);
+
+    // Subscribe to game state updates
+    this.gameStateSubscription = this.webSocketService.gameState$.subscribe({
+      next: (gameState) => {
+        console.log('Received game state update:', gameState);
+        this.handleGameStateUpdate(gameState);
+      },
+      error: (error) => {
+        console.error('Error in game state subscription:', error);
+      }
+    });
+
+    // Subscribe to restart status updates
+    this.restartStatusSubscription = this.webSocketService.restartStatus$.subscribe({
+      next: (restartStatus) => {
+        console.log('Received restart status update:', restartStatus);
+        this.handleRestartStatusUpdate(restartStatus);
+      },
+      error: (error) => {
+        console.error('Error in restart status subscription:', error);
+      }
+    });
+
+    // Subscribe to connection status
+    this.connectionStatusSubscription = this.webSocketService.connectionStatus$.subscribe({
+      next: (status) => {
+        this.connectionStatus = status;
+
+        if (status === 'connected') {
+          setTimeout(() => {
+            this.showConnectionStatus = false;
+          }, 3000);
+        } else {
+          this.showConnectionStatus = true;
+        }
+      }
+    });
+
+    // Subscribe to errors
+    this.errorSubscription = this.webSocketService.error$.subscribe({
+      next: (error) => {
+        console.error('WebSocket error:', error);
+        this.showConnectionError = true;
+        this.connectionErrorMessage = error.message;
+        
+        // Hide error after 5 seconds
+        setTimeout(() => {
+          this.showConnectionError = false;
+        }, 5000);
+      }
+    });
+  }
+
+  /**
+   * Disconnect from WebSocket
+   */
+  private disconnectFromWebSocket(): void {
+    if (this.gameStateSubscription) {
+      this.gameStateSubscription.unsubscribe();
+    }
+    if (this.restartStatusSubscription) {
+      this.restartStatusSubscription.unsubscribe();
+    }
+    if (this.connectionStatusSubscription) {
+      this.connectionStatusSubscription.unsubscribe();
+    }
+    if (this.errorSubscription) {
+      this.errorSubscription.unsubscribe();
+    }
+    
+    this.webSocketService.disconnect();
+  }
+
+  /**
+   * Handle game state updates from WebSocket
+   * Replaces the old fetchGameState method
+   */
+  private handleGameStateUpdate(gameState: any): void {
+    // NEW: First, get the full game access info to determine user role
+    this.gameService.getGameState(this.gameID).subscribe({
+      next: (gameAccess: GameAccessDto) => {
+        // Update user role and spectator status
+        this.userRole = gameAccess.role;
+        this.isSpectator = gameAccess.role === 'SPECTATOR';
+        this.spectatorMessage = gameAccess.message;
+
+        // Log for debugging
+        console.log('User role:', this.userRole, 'Is spectator:', this.isSpectator);
+
+        // Use the gameState from the parameter (WebSocket data) for real-time updates
+        // but use gameAccess.gameState for role-specific logic
+        this.processGameStateUpdate(gameState, gameAccess.gameState);
+      },
+      error: (error) => {
+        console.error('Error getting game access info:', error);
+        // Fallback: treat as spectator if we can't determine role
+        this.userRole = 'SPECTATOR';
+        this.isSpectator = true;
+        this.spectatorMessage = 'Unable to determine your role in this game.';
+        
+        // Still process the game state update
+        this.processGameStateUpdate(gameState, gameState);
+      }
+    });
+  }
+
+  /**
+   * Process the actual game state update logic
+   * Separated from handleGameStateUpdate for clarity
+   */
+  private processGameStateUpdate(gameState: any, authorizedGameState?: any): void {
+
+    this.spectatorCount = gameState.spectatorCount || 0;
+
+    if (this.gameOver && !gameState.partitaTerminata) {
+      this.gameOver = false;
+      this.winner = null;
+      this.showGameOverModal = false;
+    }
+
+    const nickname = localStorage.getItem('nickname');
+    if (nickname) {
+      const playerMatch = gameState.players.find((p: { nickname: string; }) => p.nickname === nickname);
+      if (playerMatch) {
+        this.playerTeam = playerMatch.team as 'WHITE' | 'BLACK';
+      }
+    }
+
+    if (gameState.cronologiaMosse && Array.isArray(gameState.cronologiaMosse)) {
+        console.log('Updating moves from server:', gameState.cronologiaMosse);
+        this.updateMovesFromHistory(gameState.cronologiaMosse);
+    }
+
+    // Skip update if currently capturing multiple pieces
+    if (this.isCapturingMultiple) {
+      this.chatHistory = gameState.chat ?? '';
+      return;
+    }
+
+    // Save current board state for animation comparison
+    const oldBoard = JSON.parse(JSON.stringify(this.board));
+
+    // Update chat
+    this.chatHistory = gameState.chat ?? '';
+
+    // Update player nicknames
+    for (const player of gameState.players) {
+      if (player.team === 'WHITE') {
+        this.whitePlayerNickname = player.nickname;
+      } else if (player.team === 'BLACK') {
+        this.blackPlayerNickname = player.nickname;
+      }
+    }
+
+    // Handle multi-capture animations
+    const captureId = gameState.lastMultiCapturePath ?
+                      gameState.lastMultiCapturePath.join('-') + '-' + gameState.turno :
+                      '';
+
+    if (
+      gameState.lastMultiCapturePath &&
+      gameState.lastMultiCapturePath.length > 1 &&
+      gameState.turno === this.playerTeam &&
+      captureId !== this.lastAnimatedCaptureId
+    ) {
+      this.lastAnimatedCaptureId = captureId;
+      this.startCaptureAnimation(oldBoard, gameState.lastMultiCapturePath, () => {
+        this.updateGameState(gameState);
+      });
+      return;
+    }
+
+    // Normal state update
+    this.updateGameState(gameState);
+  }
+
+  /**
+   * Handle restart status updates from WebSocket
+   */
+  private handleRestartStatusUpdate(restartStatus: any): void {
+
+    this.restartStatus = restartStatus;
+    
+    // Check if current player has requested restart
+    if (this.playerTeam === 'WHITE' && restartStatus.restartW) {
+      this.waitingForOpponentRestart = true;
+    }
+    else if (this.playerTeam === 'BLACK' && restartStatus.restartB) {
+      this.waitingForOpponentRestart = true;
+    }
+
+    // Check if both players want restart
+    if (restartStatus.restartB && restartStatus.restartW && !this.isResetting) {
+      this.handleBothPlayersWantRestart();
+    }
+  }
+
+  /**
+   * Handle when both players want to restart
+   */
+  private handleBothPlayersWantRestart(): void {
+    this.isResetting = true;
+    
+    // Reset the game via WebSocket
+    const nickname = localStorage.getItem('nickname');
+    if (nickname) {
+      this.webSocketService.resetGame(this.gameID, nickname);
+    }
+
+    this.audioService.playMoveSound();
+
+    // Hide game over modal and reset local state
+    this.showGameOverModal = false;
+    this.waitingForOpponentRestart = false;
+    this.gameOver = false;
+    this.winner = null;
+    this.resetLocalState();
+
+    // Reset the resetting flag after a delay
+    setTimeout(() => {
+      this.isResetting = false;
+    }, 1000);
+  }
+
+  /**
+   * Make a move via WebSocket instead of HTTP
+   * Replaces the HTTP-based makeMove method
+   */
+  makeMove(fromRow: number, fromCol: number, toRow: number, toCol: number): void {
+    
+    if (this.isSpectator) {
+      console.log('Spectators cannot make moves');
+      return;
+    }
+    
+    if (!this.isPlayerTurn()) return;
+
+    const isCapture = Math.abs(fromRow - toRow) === 2 && Math.abs(fromCol - toCol) === 2;
+    const movingPiece = { ...this.board[fromRow][fromCol] };
+
+    // Visual feedback for capture
+    if (isCapture) {
+      const capRow = (fromRow + toRow) / 2;
+      const capCol = (fromCol + toCol) / 2;
+      const capturedPiece = this.board[capRow][capCol];
+
+      if (!capturedPiece.hasPiece || capturedPiece.pieceColor === movingPiece.pieceColor) {
+        return;
+      }
+
+      this.board[capRow][capCol] = { hasPiece: false, pieceColor: null, isKing: false };
+      this.audioService.playCaptureSound();
+    } else {
+      this.audioService.playMoveSound();
+    }
+
+    // Move piece locally for immediate feedback
+    this.board[fromRow][fromCol] = { hasPiece: false, pieceColor: null, isKing: false };
+
+    // Check promotion
+    let becomesKing = false;
+    if (!movingPiece.isKing) {
+      if ((movingPiece.pieceColor === 'white' && toRow === 0) ||
+          (movingPiece.pieceColor === 'black' && toRow === 7)) {
+        movingPiece.isKing = true;
+        becomesKing = true;
+        this.audioService.playKingSound();
+      }
+    }
+
+    this.board[toRow][toCol] = { ...movingPiece };
+
+    // Check for additional captures
+    const further = this.getCapturesForPiece(toRow, toCol);
+
+    if (isCapture && further.length > 0) {
+      // Multiple capture sequence
+      if (!this.captureChainStart) {
+        this.captureChainStart = { row: fromRow, col: fromCol };
+        this.isCapturingMultiple = true;
+      }
+
+      if (!this.capturePath) this.capturePath = [];
+      this.capturePath.push(`${toRow}${toCol}`);
+
+      this.selectedCell = { row: toRow, col: toCol };
+      this.highlightedCells = further.map(m => m.to);
+      this.resetMoveIndicators();
+      this.piecesWithMoves.push({ row: toRow, col: toCol });
+
+    } else {
+      // Send move to server via WebSocket
+      const start = this.captureChainStart || { row: fromRow, col: fromCol };
+
+      if (isCapture && this.captureChainStart) {
+        this.capturePath.push(`${toRow}${toCol}`);
+      }
+
+      // Send via WebSocket instead of HTTP
+      const nickname = localStorage.getItem('nickname');
+      if (nickname) {
+        const moveData: MoveP = {
+          from: `${start.row}${start.col}`,
+          to: `${toRow}${toCol}`,
+          player: movingPiece.pieceColor!,
+          path: (this.captureChainStart && this.capturePath && this.capturePath.length > 0) ? this.capturePath : undefined
+        };
+
+        this.webSocketService.makeMove(this.gameID, nickname, moveData);
+      }
+
+      // Reset capture state
+      this.captureChainStart = null;
+      this.selectedCell = null;
+      this.highlightedCells = [];
+      this.isCapturingMultiple = false;
+      this.capturePath = [];
+      this.resetMoveIndicators();
+
+      // Change turn locally (will be confirmed by server)
+      this.currentPlayer = this.currentPlayer === 'white' ? 'black' : 'white';
+      this.checkGameOver();
+    }
+  }
+
+  /**
+   * Request restart via WebSocket
+   */
+  requestRestart(): void {
+
+    if (this.isSpectator) {
+      console.log('Spectators cannot request restart');
+      return;
+    }
+
+    this.hasClickedRestart = true;
+    
+    if (!this.restartStatus) {
+      console.error('Cannot request restart: restart status not available');
+      return;
+    }
+    
+    const updatedStatus = {
+      gameID: this.restartStatus.gameID,
+      nicknameB: this.restartStatus.nicknameB,
+      nicknameW: this.restartStatus.nicknameW,
+      restartB: this.playerTeam === 'BLACK' ? true : this.restartStatus.restartB,
+      restartW: this.playerTeam === 'WHITE' ? true : this.restartStatus.restartW
+    };
+    
+    const nickname = localStorage.getItem('nickname');
+    if (nickname) {
+      this.webSocketService.updateRestartStatus(this.gameID, nickname, updatedStatus);
+    }
+    
+    this.waitingForOpponentRestart = true;
+    this.showRestartRequestedMessage = true;
+  }
+
+  /**
+   * Cancel restart request via WebSocket
+   */
+  cancelRestartRequest(): void {
+
+    if (this.isSpectator) {
+      console.log('Spectators cannot cancel restart requests');
+      return;
+    }
+
+    if (!this.gameID || !this.restartStatus || !this.waitingForOpponentRestart) return;
+
+    const updatedStatus = { ...this.restartStatus };
+
+    if (this.playerTeam === 'WHITE') {
+      updatedStatus.restartW = false;
+    } else if (this.playerTeam === 'BLACK') {
+      updatedStatus.restartB = false;
+    }
+
+    const nickname = localStorage.getItem('nickname');
+    if (nickname) {
+      this.webSocketService.updateRestartStatus(this.gameID, nickname, updatedStatus);
+    }
+
+    this.waitingForOpponentRestart = false;
+  }
+
+  /**
+   * Handle page refresh - reconnect WebSocket
+   */
+  refreshConnection(): void {
+    this.disconnectFromWebSocket();
+    setTimeout(() => {
+      this.connectToWebSocket();
+    }, 1000);
   }
 
   /**
@@ -190,7 +605,9 @@ export class OnlineBoardComponent implements OnInit, OnDestroy {
     if (!this.gameID || this.isAnimatingCapture) return;
 
     this.gameService.getGameState(this.gameID).subscribe({
-      next: (response: GameResponse) => {
+      next: (gameAccess: GameAccessDto) => {
+
+        const response = gameAccess.gameState;
 
         if (this.gameOver && !response.partitaTerminata) {
           this.gameOver = false;
@@ -276,37 +693,49 @@ export class OnlineBoardComponent implements OnInit, OnDestroy {
    * @param moveHistory - Array of move strings from server
    */
   updateMovesFromHistory(moveHistory: string[]): void {
-
     this.moves = [];
+    let currentMoveGroup: any[] = [];
+    let lastFromPos: string | null = null;
 
     for (const moveString of moveHistory) {
-      // Parse move string in format "fromRow,fromCol-toRow,toCol-player"
       const parts = moveString.split('-');
-      if (parts.length < 3) continue; // Skip invalid format
+      if (parts.length < 3) continue;
 
-      const fromRow = parseInt(parts[0][0]);
-      const fromCol = parseInt(parts[0][1]);
-      const toRow = parseInt(parts[1][0]);
-      const toCol = parseInt(parts[1][1]);
+      const fromPos = parts[0];
+      const toPos = parts[1];
+      const fromRow = parseInt(fromPos[0]);
+      const fromCol = parseInt(fromPos[1]);
+      const toRow = parseInt(toPos[0]);
+      const toCol = parseInt(toPos[1]);
 
-      // Check if this is a capture move (distance = 2)
       const isCapture = Math.abs(fromRow - toRow) === 2 && Math.abs(fromCol - toCol) === 2;
 
-      // Create move object
-      const move: Move = {
-        from: { row: fromRow, col: fromCol },
-        to: { row: toRow, col: toCol }
-      };
-
-      // Add captured piece if it's a capture
-      if (isCapture) {
-        const capturedRow = Math.floor((fromRow + toRow) / 2);
-        const capturedCol = Math.floor((fromCol + toCol) / 2);
-        move.captured = [{ row: capturedRow, col: capturedCol }];
+      // Se è una cattura multipla (stesso punto di partenza o continua dall'ultimo punto)
+      if (isCapture && (fromPos === lastFromPos || (this.moves.length > 0 && fromPos === this.moves[this.moves.length - 1].to.row + '' + this.moves[this.moves.length - 1].to.col))) {
+          // Aggiungi alla cattura multipla esistente
+          const lastMove = this.moves[this.moves.length - 1];
+          if (lastMove && lastMove.captured) {
+              lastMove.captured.push({
+                  row: Math.floor((fromRow + toRow) / 2),
+                  col: Math.floor((fromCol + toCol) / 2)
+              });
+          }
+          // Aggiorna destinazione finale
+          lastMove.to = { row: toRow, col: toCol };
+      } else {
+          // Nuova mossa
+          const move = {
+              from: { row: fromRow, col: fromCol },
+              to: { row: toRow, col: toCol },
+              captured: isCapture ? [{
+                  row: Math.floor((fromRow + toRow) / 2),
+                  col: Math.floor((fromCol + toCol) / 2)
+              }] : undefined
+          };
+          this.moves.push(move);
       }
 
-      // Add the move to the moves array
-      this.moves.push(move);
+      lastFromPos = fromPos;
     }
   }
 
@@ -314,11 +743,13 @@ export class OnlineBoardComponent implements OnInit, OnDestroy {
    * Updates the game state based on the response from the server
    */
   updateGameState(response: GameResponse) {
+
+    this.spectatorCount = response.spectatorCount || 0;
+
     // Reset move indicators
     this.resetMoveIndicators();
     
     // Save the previous state for comparison
-    const oldBoard = this.board ? JSON.parse(JSON.stringify(this.board)) : null;
     const oldTurn = this.currentPlayer;
 
     // Update the current shift
@@ -396,6 +827,9 @@ export class OnlineBoardComponent implements OnInit, OnDestroy {
    * Check if it's the current player's turn
    */
   isPlayerTurn(): boolean {
+    // Spectators cannot play
+    if (this.isSpectator) return false;
+
     // If we don't have a role yet, it's not our turn
     if (!this.playerTeam) return false;
 
@@ -477,6 +911,12 @@ export class OnlineBoardComponent implements OnInit, OnDestroy {
    */
   onCellClick(row: number, col: number): void {
     if (this.gameOver) return;
+
+    // Block spectators from clicking
+    if (this.isSpectator) {
+      console.log('Spectators cannot interact with the board');
+      return;
+    }
 
     // Check if it's the player's turn
     if (!this.isPlayerTurn()) return;
@@ -637,149 +1077,6 @@ export class OnlineBoardComponent implements OnInit, OnDestroy {
     });
 
     return captures;
-  }
-
-  /**
-   * Executes a move from one position to another
-   * @param fromRow - Starting row
-   * @param fromCol - Starting column
-   * @param toRow - Destination row
-   * @param toCol - Destination column
-   */
-  makeMove(fromRow: number, fromCol: number, toRow: number, toCol: number): void {
-    if (!this.isPlayerTurn()) return;
-
-    const isCapture = Math.abs(fromRow - toRow) === 2 && Math.abs(fromCol - toCol) === 2;
-    const movingPiece = { ...this.board[fromRow][fromCol] };
-
-    // For captures, we immediately remove the captured piece for visual feedback
-    if (isCapture) {
-      const capRow = (fromRow + toRow) / 2;
-      const capCol = (fromCol + toCol) / 2;
-      const capturedPiece = this.board[capRow][capCol];
-
-      // Check that there is actually a piece to capture
-      if (!capturedPiece.hasPiece) return;
-
-      // Check if it's an opponent's piece
-      if (capturedPiece.pieceColor === movingPiece.pieceColor) return;
-
-      this.board[capRow][capCol] = { hasPiece: false, pieceColor: null, isKing: false };
-      this.audioService.playCaptureSound();
-    } else {
-      this.audioService.playMoveSound();
-    }
-
-    // Move piece
-    this.board[fromRow][fromCol] = { hasPiece: false, pieceColor: null, isKing: false };
-
-    // Check if normal piece becomes a promoted piece
-    let becomesKing = false;
-    if (!movingPiece.isKing) {
-      if ((movingPiece.pieceColor === 'white' && toRow === 0) ||
-          (movingPiece.pieceColor === 'black' && toRow === 7)) {
-        movingPiece.isKing = true;
-        becomesKing = true;
-        this.audioService.playKingSound();
-      }
-    }
-
-    // Update the piece in the new position
-    this.board[toRow][toCol] = { ...movingPiece };
-
-    // Check for additional catches AFTER promotion
-    const further = this.getCapturesForPiece(toRow, toCol);
-
-    if (isCapture && further.length > 0) {
-      // Start or continue the capture
-      if (!this.captureChainStart) {
-        this.captureChainStart = { row: fromRow, col: fromCol };
-        this.isCapturingMultiple = true;
-      }
-
-      // Add this step to the capture path
-      if (!this.capturePath) this.capturePath = [];
-      this.capturePath.push(`${toRow}${toCol}`);
-
-      // Aggiungi alla cronologia locale
-      this.moves = [...this.moves, {
-        from: { row: fromRow, col: fromCol },
-        to: { row: toRow, col: toCol },
-        captured: [{ row: (fromRow + toRow) / 2, col: (fromCol + toCol) / 2 }]
-      }];
-
-      this.selectedCell = { row: toRow, col: toCol };
-      this.highlightedCells = further.map(m => m.to);
-      
-      // Reset indicators except for the current piece
-      this.resetMoveIndicators();
-      this.piecesWithMoves.push({ row: toRow, col: toCol });
-
-      // If it has become a lady, update the interface
-      if (becomesKing) {
-        // Force an interface refresh
-        setTimeout(() => {
-          // This is a trick to force Angular to do change detection
-          this.board = [...this.board];
-        }, 100);
-      }
-    }
-    else {
-      // End of capture path or simple move -> send to server
-      const start = this.captureChainStart || { row: fromRow, col: fromCol };
-
-      // If it's a simple move or the last capture, add to local history
-      if (!isCapture || !this.captureChainStart) {
-        this.moves = [...this.moves, {
-          from: { row: fromRow, col: fromCol },
-          to: { row: toRow, col: toCol },
-          captured: isCapture ? [{ row: (fromRow + toRow) / 2, col: (fromCol + toCol) / 2 }] : undefined
-        }];
-      }
-
-      // For the last capture in a sequence, also add this position to the path
-      if (isCapture && this.captureChainStart) {
-        this.capturePath.push(`${toRow}${toCol}`);
-      }
-
-      // Preparing payload with path for server
-      const payload: MoveP = {
-        from: `${start.row}${start.col}`,
-        to: `${toRow}${toCol}`,
-        player: movingPiece.pieceColor!
-      };
-
-      // Add the path if it's a multiple capture
-      if (this.captureChainStart && this.capturePath && this.capturePath.length > 0) {
-        payload.path = this.capturePath;
-      }
-
-      this.moveService.saveMove(payload, this.gameID).subscribe({
-        next: res => {
-          // When we receive the response from the server, we update the state
-          this.updateGameState(res);
-
-          if (res && (res as any).cronologiaMosse) {
-            this.updateMovesFromHistory((res as any).cronologiaMosse);
-          }
-        },
-        error: err => console.error('Errore salvataggio mossa', err)
-      });
-
-      // Clear capture state, highlights and path
-      this.captureChainStart = null;
-      this.selectedCell = null;
-      this.highlightedCells = [];
-      this.isCapturingMultiple = false;
-      this.capturePath = [];
-      
-      // Reset indicators 
-      this.resetMoveIndicators();
-
-      // Change turn and check end of game
-      this.currentPlayer = this.currentPlayer === 'white' ? 'black' : 'white';
-      this.checkGameOver();
-    }
   }
 
   /**
@@ -947,32 +1244,14 @@ export class OnlineBoardComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Helper method to get the DOM element for a piece at the specified position
-   * @param row - Row index of the piece
-   * @param col - Column index of the piece
-   * @returns The DOM element for the piece, or null if not found
-   */
-  private getPieceElement(row: number, col: number): HTMLElement | null {
-    // Find the square element at the specified position
-    const squares = document.querySelectorAll('.square');
-    const index = row * 8 + col;
-
-    if (index >= 0 && index < squares.length) {
-      // Find the piece element within the square
-      return squares[index].querySelector('.piece') as HTMLElement;
-    }
-
-    return null;
-  }
-
-  /**
    * Handles the start of a drag operation
    * @param event - The drag event
    * @param row - Row index of the dragged piece
    * @param col - Column index of the dragged piece
    */
   onDragStart(event: DragEvent, row: number, col: number): void {
-    if (this.gameOver || !this.isPlayerTurn()) {
+
+    if (this.gameOver || !this.isPlayerTurn() || this.isSpectator) {
       event.preventDefault();
       return;
     }
@@ -1004,6 +1283,9 @@ export class OnlineBoardComponent implements OnInit, OnDestroy {
    * @param event - The drag event
    */
   onDragEnd(event: DragEvent): void {
+
+    if (this.isSpectator) return;
+    
     // Reset drag state if no drop occurred
     this.draggedPiece = null;
     this.dragOverCell = null;
@@ -1016,6 +1298,9 @@ export class OnlineBoardComponent implements OnInit, OnDestroy {
    * @param col - Column index of the target cell
    */
   onDragOver(event: DragEvent, row: number, col: number): void {
+
+    if (this.isSpectator) return;
+
     // Prevent default to allow drop
     if (this.isHighlight(row, col)) {
       event.preventDefault();
@@ -1035,6 +1320,9 @@ export class OnlineBoardComponent implements OnInit, OnDestroy {
    * @param col - Column index of the target cell
    */
   onDrop(event: DragEvent, row: number, col: number): void {
+
+    if (this.isSpectator) return
+
     event.preventDefault();
 
     // Remove drag-over class
@@ -1258,66 +1546,6 @@ export class OnlineBoardComponent implements OnInit, OnDestroy {
     this.isCapturingMultiple = false;
     this.restartPollingSubscription?.unsubscribe();
     this.restartPollingSubscription = null;
-  }
-
-  /**
-  * Method to request restart
-  */
-  requestRestart() {
-    // Marks that we have clicked the Restart button
-    this.hasClickedRestart = true;
-    
-    // Verifica che restartStatus esista
-    if (!this.restartStatus) {
-      console.error('Impossibile richiedere il riavvio: stato di riavvio non disponibile');
-      return;
-    }
-    
-    // Create a proper copy of the object, making sure all properties are defined
-    const updatedStatus: PlayerRestartStatus = {
-      gameID: this.restartStatus.gameID,
-      nicknameB: this.restartStatus.nicknameB,
-      nicknameW: this.restartStatus.nicknameW,
-      restartB: this.playerTeam === 'BLACK' ? true : this.restartStatus.restartB,
-      restartW: this.playerTeam === 'WHITE' ? true : this.restartStatus.restartW
-    };
-    
-    this.restartService.updateRestartStatus(updatedStatus).subscribe({
-      next: () => {
-        this.waitingForOpponentRestart = true;
-        this.showRestartRequestedMessage = true;
-      },
-      error: (err) => {
-        console.error('restart request update error:', err);
-      }
-    });
-  }
-
-  /**
-  * Method to cancel the reboot request
-  */
-  cancelRestartRequest() {
-    if (!this.gameID || !this.restartStatus || !this.waitingForOpponentRestart) return;
-
-    // Create a copy of the current state
-    let updatedStatus = { ...this.restartStatus };
-
-    // Update status based on player's team
-    if (this.playerTeam === 'WHITE') {
-      updatedStatus.restartW = false;
-    } else if (this.playerTeam === 'BLACK') {
-      updatedStatus.restartB = false;
-    }
-
-    // Send the update to the server
-    this.restartService.updateRestartStatus(updatedStatus).subscribe({
-      next: () => {
-        this.waitingForOpponentRestart = false;
-      },
-      error: (err) => {
-        console.error('Error canceling restart request:', err);
-      }
-    });
   }
 
   /**

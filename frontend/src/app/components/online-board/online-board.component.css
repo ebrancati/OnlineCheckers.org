@@ -421,6 +421,51 @@ h2 {
   margin-left: 10px;
 }
 
+.spectator-counter {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.spectator-info {
+  background-color: rgba(108, 117, 125, 0.1);
+  border: 1px solid rgba(108, 117, 125, 0.2);
+  border-radius: 20px;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  font-size: 0.9rem;
+  color: var(--player-secondary-text);
+  transition: all 0.3s ease;
+  backdrop-filter: blur(4px);
+}
+
+.spectator-info:hover {
+  background-color: rgba(108, 117, 125, 0.15);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.spectator-info i {
+  color: var(--player-secondary-text);
+  opacity: 0.8;
+}
+
+.spectator-text {
+  font-weight: 500;
+  letter-spacing: 0.3px;
+}
+
+.dark-theme .spectator-info {
+  background-color: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.dark-theme .spectator-info:hover {
+  background-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
 .status-badge {
   padding: 3px 8px;
   border-radius: 12px;
@@ -564,6 +609,101 @@ h2 {
   flex-direction: column;
 }
 
+.restart-status {
+  background-color: rgba(0, 0, 0, 0.05);
+  padding: 10px;
+  border-radius: 8px;
+}
+
+.player-restart-status {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 15px;
+  border-radius: 6px;
+  min-width: 100px;
+}
+
+.player-restart-status.white-player {
+  background-color: var(--player-white-bg);
+  border: 1px solid var(--player-white-border);
+}
+
+.player-restart-status.black-player {
+  background-color: var(--player-black-bg);
+  color: var(--player-text-color);
+  border: 1px solid var(--player-black-border);
+}
+
+.player-name {
+  font-weight: bold;
+  margin-bottom: 5px;
+  font-size: 0.9rem;
+}
+
+.restart-icon {
+  font-size: 1.2rem;
+  transition: all 0.3s ease;
+}
+
+.restart-icon.ready {
+  color: var(--turn-active-icon);
+  transform: scale(1.2);
+}
+
+/* Connection status indicators */
+
+.connection-status-bar {
+  padding: 5px 0;
+  font-size: 0.85rem;
+  transition: all 0.3s ease;
+}
+
+.connection-status-bar.connected {
+  background-color: #d4edda;
+  color: #155724;
+  border-bottom: 1px solid #c3e6cb;
+}
+
+.connection-status-bar.connecting {
+  background-color: #fff3cd;
+  color: #856404;
+  border-bottom: 1px solid #ffeaa7;
+}
+
+.connection-status-bar.disconnected {
+  background-color: #f8d7da;
+  color: #721c24;
+  border-bottom: 1px solid #f5c6cb;
+}
+
+.connection-status-bar .bi-arrow-clockwise {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.dark-theme .connection-status-bar.connected {
+  background-color: #2d5a3d;
+  color: #4caf50;
+  border-bottom-color: #4caf50;
+}
+
+.dark-theme .connection-status-bar.connecting {
+  background-color: #5a4d2d;
+  color: #ffd54f;
+  border-bottom-color: #ffd54f;
+}
+
+.dark-theme .connection-status-bar.disconnected {
+  background-color: #5a2d2d;
+  color: #f44336;
+  border-bottom-color: #f44336;
+}
+
 @media (max-width: 992px) {
   .board {
     grid-template-columns: repeat(8, 45px);
@@ -593,6 +733,11 @@ h2 {
     flex-direction: column;
     align-items: center;
     padding: 10px;
+  }
+
+  .spectator-info {
+    font-size: 0.8rem;
+    padding: 6px 12px;
   }
 
   .board {
@@ -768,46 +913,4 @@ h2 {
   .crown {
     font-size: 16px;
   }
-}
-
-.restart-status {
-  background-color: rgba(0, 0, 0, 0.05);
-  padding: 10px;
-  border-radius: 8px;
-}
-
-.player-restart-status {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 8px 15px;
-  border-radius: 6px;
-  min-width: 100px;
-}
-
-.player-restart-status.white-player {
-  background-color: var(--player-white-bg);
-  border: 1px solid var(--player-white-border);
-}
-
-.player-restart-status.black-player {
-  background-color: var(--player-black-bg);
-  color: var(--player-text-color);
-  border: 1px solid var(--player-black-border);
-}
-
-.player-name {
-  font-weight: bold;
-  margin-bottom: 5px;
-  font-size: 0.9rem;
-}
-
-.restart-icon {
-  font-size: 1.2rem;
-  transition: all 0.3s ease;
-}
-
-.restart-icon.ready {
-  color: var(--turn-active-icon);
-  transform: scale(1.2);
 }

@@ -22,6 +22,8 @@ export class BotBoardComponent extends OfflineBoardComponent implements OnInit, 
   playerColor: 'black' | 'white' = 'white';
   difficulty: number = 2; // Default: medium difficulty
   isThinking: boolean = false;
+  private thinkingTimeout: any = null; // Timer for showing thinking indicator
+  private readonly THINKING_DELAY = 3000; // Show indicator only after 3 seconds
 
   // BOARD HISTORY TRACKING FOR ANTI-LOOP
   private boardHistory: string[] = []; // Complete board state history
@@ -60,6 +62,8 @@ export class BotBoardComponent extends OfflineBoardComponent implements OnInit, 
       clearInterval(this.captureAnimationInterval);
       this.captureAnimationInterval = null;
     }
+
+    this.clearThinkingIndicator();
     
     // Call parent destroy method
     super.ngOnDestroy();
@@ -83,22 +87,24 @@ export class BotBoardComponent extends OfflineBoardComponent implements OnInit, 
       const afterMoveHash = this.createBoardHash();
       this.addBoardToHistory(afterMoveHash);
       console.log('Player move completed. New board hash:', afterMoveHash);
+      
+      // If after player's move it's bot's turn and game is not over
+      if (!this.gameOver && this.currentPlayer === this.botColor) {
+        // Add small delay to give illusion that bot is "thinking"
+        setTimeout(() => {
+          this.getBotMove();
+        }, 900)
+      }
     }, 100);
-
-    // If after player's move it's bot's turn and game is not over
-    if (!this.gameOver && this.currentPlayer === this.botColor) {
-      // Add small delay to give illusion that bot is "thinking"
-      setTimeout(() => {
-        this.getBotMove();
-      }, 500);
-    }
   }
 
   /**
    * Enhanced getBotMove method that sends board history to backend
    */
   getBotMove() {
-    this.isThinking = true;
+    this.thinkingTimeout = setTimeout(() => {
+      this.isThinking = true;
+    }, this.THINKING_DELAY);
 
     // Create current board hash
     const currentBoardHash = this.createBoardHash();
@@ -123,7 +129,8 @@ export class BotBoardComponent extends OfflineBoardComponent implements OnInit, 
 
     this.botService.calculateMove(request).subscribe({
       next: (response) => {
-        this.isThinking = false;
+
+        this.clearThinkingIndicator();
 
         // Add current position to history BEFORE making the move
         this.addBoardToHistory(currentBoardHash);
@@ -138,30 +145,60 @@ export class BotBoardComponent extends OfflineBoardComponent implements OnInit, 
 
         // Execute bot move
         if (response.path && response.path.length > 0) {
-          // Handle multiple capture with animation
-          this.moves = [...this.moves, {
-            from: { row: fromRow, col: fromCol },
-            to: { row: toRow, col: toCol },
-            captured: [{ row: fromRow + (toRow - fromRow) / 2, col: fromCol + (toCol - fromCol) / 2 }]
-          }];
+          let currentFrom = response.from;
+          
+          for (const pathStep of response.path) {
+            const stepFromRow = parseInt(currentFrom.charAt(0));
+            const stepFromCol = parseInt(currentFrom.charAt(1));
+            const stepToRow = parseInt(pathStep.charAt(0));
+            const stepToCol = parseInt(pathStep.charAt(1));
+            
+            // Calculate the piece captured in this step
+            const capturedRow = (stepFromRow + stepToRow) / 2;
+            const capturedCol = (stepFromCol + stepToCol) / 2;
+            
+            // Add this move to history
+            this.moves = [...this.moves, {
+              from: { row: stepFromRow, col: stepFromCol },
+              to: { row: stepToRow, col: stepToCol },
+              captured: [{ row: capturedRow, col: capturedCol }]
+            }];
+            
+            // The next segment starts from where this one ends
+            currentFrom = pathStep;
+          }
+          
           this.animateBotCapturePath(fromRow, fromCol, response.path);
         } else {
           // Simple move
           super.makeMove(fromRow, fromCol, toRow, toCol);
+          this.audioService.playMoveSound();
         }
 
         // Add the new board state after bot's move to history
-        setTimeout(() => {
-          const afterMoveHash = this.createBoardHash();
-          this.addBoardToHistory(afterMoveHash);
-          console.log('Bot move completed. New board hash:', afterMoveHash);
-        }, 100);
+        const afterMoveHash = this.createBoardHash();
+        this.addBoardToHistory(afterMoveHash);
+        console.log('Bot move completed. New board hash:', afterMoveHash);
       },
       error: (err) => {
         console.error('Error calculating bot move:', err);
-        this.isThinking = false;
+        this.clearThinkingIndicator();
       }
     });
+  }
+
+  /**
+   * Clear thinking indicator and any pending timer
+   */
+  private clearThinkingIndicator(): void {
+    // Clear the timer if it hasn't fired yet
+    if (this.thinkingTimeout) {
+      clearTimeout(this.thinkingTimeout);
+      this.thinkingTimeout = null;
+    }
+    
+    // Hide thinking indicator
+    this.isThinking = false;
   }
 
   /**
@@ -399,7 +436,7 @@ export class BotBoardComponent extends OfflineBoardComponent implements OnInit, 
     }
 
     this.isAnimatingCapture = false;
-    this.isThinking = false;
+    this.clearThinkingIndicator();
 
     // Clear board history when game resets
     this.boardHistory = [];
@@ -489,23 +526,6 @@ export class BotBoardComponent extends OfflineBoardComponent implements OnInit, 
       this.showErrorMessage = false;
       this.errorMessage = null;
     }, 3000);
-  }
-
-  /**
-   * Debug method to log current history state
-   */
-  private logHistoryDebug(): void {
-    console.log('=== BOARD HISTORY DEBUG ===');
-    console.log('Total positions:', this.boardHistory.length);
-    
-    // Count unique positions
-    const uniquePositions = new Set(this.boardHistory).size;
-    console.log('Unique positions:', uniquePositions);
-    console.log('Repeated positions:', this.boardHistory.length - uniquePositions);
-    
-    // Show most recent positions
-    console.log('Last 5 positions:', this.boardHistory.slice(-5));
-    console.log('========================');
   }
 
   /**

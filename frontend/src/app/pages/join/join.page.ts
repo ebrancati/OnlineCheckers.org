@@ -68,21 +68,21 @@ export class JoinPage implements OnInit {
   private async checkGameStatus(): Promise<{ canJoin: boolean, errorCode?: string }> {
     try {
       // Get game state from server
-      const gameState = await firstValueFrom(this.gameSvc.getGameState(this.gameId));
+      const gameAccess = await firstValueFrom(this.gameSvc.getGameState(this.gameId));
       
       // CASE 1: Check if the match exists
-      if (!gameState) {
+      if (!gameAccess || !gameAccess.gameState) {
         return { canJoin: false, errorCode: 'GAME_NOT_FOUND' };
       }
       
       // CASE 2: Check if the game is already full (already has two players)
-      if (gameState.players && gameState.players.length >= 2) {
+      if (gameAccess.gameState.players && gameAccess.gameState.players.length >= 2) {
         return { canJoin: false, errorCode: 'GAME_FULL' };
       }
       
       // CASE 3: Check if the user is trying to play against himself
-      const creatorNickname = gameState.players && gameState.players.length > 0 ? 
-                              gameState.players[0].nickname : null;
+      const creatorNickname = gameAccess.gameState.players && gameAccess.gameState.players.length > 0 ? 
+                              gameAccess.gameState.players[0].nickname : null;
       const localStorageNickname = localStorage.getItem('nickname');
       
       if (creatorNickname && localStorageNickname === creatorNickname) {
@@ -91,7 +91,8 @@ export class JoinPage implements OnInit {
       
       // If no checks fail, the user can join the game
       return { canJoin: true };
-    } catch (error) {
+    }
+    catch (error) {
       console.error('Errore durante il controllo dello stato del gioco:', error);
       return { canJoin: false, errorCode: 'SERVER_ERROR' };
     }
