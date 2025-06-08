@@ -6,7 +6,9 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Data
@@ -28,11 +30,60 @@ public class Game extends SessionGame {
     @Convert(converter = StringListConverter.class)
     private List<String> lastMultiCapturePath = new ArrayList<>();
 
+    @ElementCollection
+    @CollectionTable(name = "game_authorized_sessions", joinColumns = @JoinColumn(name = "game_id"))
+    @Column(name = "session_id")
+    private Set<String> authorizedSessions = new HashSet<>();
+
     public void addPlayer(Player p) {
         if (players.size() >= 2)
             throw new IllegalStateException("The game already has 2 players");
 
         players.add(p);
         p.setGame(this);
+    }
+
+    /**
+     * Add a session ID to the list of authorized sessions that can interact with the game
+     * @param sessionId The HTTP session ID to authorize
+     */
+    public void addAuthorizedSession(String sessionId) {
+        if (sessionId != null && !sessionId.trim().isEmpty()) {
+            this.authorizedSessions.add(sessionId);
+        }
+    }
+
+    /**
+     * Check if a session is authorized to interact with the game
+     * @param sessionId The HTTP session ID to check
+     * @return true if the session is authorized, false otherwise
+     */
+    public boolean isSessionAuthorized(String sessionId) {
+        return sessionId != null && this.authorizedSessions.contains(sessionId);
+    }
+
+    /**
+     * Check if a session is a spectator (not authorized to interact)
+     * @param sessionId The HTTP session ID to check
+     * @return true if the session is a spectator, false if authorized
+     */
+    public boolean isSpectator(String sessionId) {
+        return !isSessionAuthorized(sessionId);
+    }
+
+    /**
+     * Get all authorized session IDs for this game
+     * @return Set of authorized session IDs
+     */
+    public Set<String> getAuthorizedSessions() {
+        return new HashSet<>(this.authorizedSessions);
+    }
+
+    /**
+     * Remove a session from authorized sessions (useful for cleanup)
+     * @param sessionId The session ID to remove
+     */
+    public void removeAuthorizedSession(String sessionId) {
+        this.authorizedSessions.remove(sessionId);
     }
 }

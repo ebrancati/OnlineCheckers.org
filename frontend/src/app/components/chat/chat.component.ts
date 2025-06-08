@@ -14,16 +14,23 @@ import { TranslateModule } from '@ngx-translate/core';
 export class ChatComponent {
   @Input() gameId!: string;
   @Input() chatHistory: string = '';
+  @Input() nickname!: string | null;
+  @Input() isSpectator: boolean = false;
   @Output() messageAdded = new EventEmitter<string>();
 
   messageInput: string = '';
-  @Input() nickname!: string | null;
-
+  
   constructor(private webSocketService: WebSocketService) {}
 
   sendMessage(): void {
     const text = this.messageInput.trim();
     if (!text) return;
+
+    if (this.isSpectator) {
+      console.log('Spectators cannot send chat messages');
+      alert('Spectators cannot send chat messages');
+      return;
+    }
 
     if (this.gameId === 'offline') {
       // Handle offline mode (unchanged)

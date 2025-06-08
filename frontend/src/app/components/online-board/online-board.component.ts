@@ -13,6 +13,7 @@ import { MoveP } from '../../../model/entities/MoveP';
 import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
 import { RestartService, PlayerRestartStatus } from '../../../services/restart.service';
+import { GameAccessDto } from '../../../model/entities/GameAccessDto';
 
 export interface PlayerDto {
   id: string;
@@ -130,6 +131,10 @@ export class OnlineBoardComponent implements OnInit, OnDestroy {
   private restartStatusSubscription: Subscription | null = null;
   private connectionStatusSubscription: Subscription | null = null;
   private errorSubscription: Subscription | null = null;
+
+  userRole: 'PLAYER' | 'SPECTATOR' = 'SPECTATOR';
+  isSpectator: boolean = true;
+  spectatorMessage: string | undefined = undefined;
 
   // Connection status for UI
   connectionStatus: 'connected' | 'connecting' | 'disconnected' = 'disconnected';
@@ -262,6 +267,39 @@ export class OnlineBoardComponent implements OnInit, OnDestroy {
    * Replaces the old fetchGameState method
    */
   private handleGameStateUpdate(gameState: any): void {
+    // NEW: First, get the full game access info to determine user role
+    this.gameService.getGameState(this.gameID).subscribe({
+      next: (gameAccess: GameAccessDto) => {
+        // Update user role and spectator status
+        this.userRole = gameAccess.role;
+        this.isSpectator = gameAccess.role === 'SPECTATOR';
+        this.spectatorMessage = gameAccess.message;
+
+        // Log for debugging
+        console.log('User role:', this.userRole, 'Is spectator:', this.isSpectator);
+
+        // Use the gameState from the parameter (WebSocket data) for real-time updates
+        // but use gameAccess.gameState for role-specific logic
+        this.processGameStateUpdate(gameState, gameAccess.gameState);
+      },
+      error: (error) => {
+        console.error('Error getting game access info:', error);
+        // Fallback: treat as spectator if we can't determine role
+        this.userRole = 'SPECTATOR';
+        this.isSpectator = true;
+        this.spectatorMessage = 'Unable to determine your role in this game.';
+        
+        // Still process the game state update
+        this.processGameStateUpdate(gameState, gameState);
+      }
+    });
+  }
+
+  /**
+   * Process the actual game state update logic
+   * Separated from handleGameStateUpdate for clarity
+   */
+  private processGameStateUpdate(gameState: any, authorizedGameState?: any): void {
     // Same logic as the old updateGameState method
     if (this.gameOver && !gameState.partitaTerminata) {
       this.gameOver = false;
@@ -379,6 +417,12 @@ export class OnlineBoardComponent implements OnInit, OnDestroy {
    * Replaces the HTTP-based makeMove method
    */
   makeMove(fromRow: number, fromCol: number, toRow: number, toCol: number): void {
+    
+    if (this.isSpectator) {
+      console.log('Spectators cannot make moves');
+      return;
+    }
+    
     if (!this.isPlayerTurn()) return;
 
     const isCapture = Math.abs(fromRow - toRow) === 2 && Math.abs(fromCol - toCol) === 2;
@@ -473,6 +517,12 @@ export class OnlineBoardComponent implements OnInit, OnDestroy {
    * Request restart via WebSocket
    */
   requestRestart(): void {
+
+    if (this.isSpectator) {
+      console.log('Spectators cannot request restart');
+      return;
+    }
+
     this.hasClickedRestart = true;
     
     if (!this.restartStatus) {
@@ -501,6 +551,12 @@ export class OnlineBoardComponent implements OnInit, OnDestroy {
    * Cancel restart request via WebSocket
    */
   cancelRestartRequest(): void {
+
+    if (this.isSpectator) {
+      console.log('Spectators cannot cancel restart requests');
+      return;
+    }
+
     if (!this.gameID || !this.restartStatus || !this.waitingForOpponentRestart) return;
 
     const updatedStatus = { ...this.restartStatus };
@@ -782,6 +838,9 @@ export class OnlineBoardComponent implements OnInit, OnDestroy {
    * Check if it's the current player's turn
    */
   isPlayerTurn(): boolean {
+    // Spectators cannot play
+    if (this.isSpectator) return false;
+
     // If we don't have a role yet, it's not our turn
     if (!this.playerTeam) return false;
 
@@ -863,6 +922,12 @@ export class OnlineBoardComponent implements OnInit, OnDestroy {
    */
   onCellClick(row: number, col: number): void {
     if (this.gameOver) return;
+
+    // Block spectators from clicking
+    if (this.isSpectator) {
+      console.log('Spectators cannot interact with the board');
+      return;
+    }
 
     // Check if it's the player's turn
     if (!this.isPlayerTurn()) return;
@@ -1215,7 +1280,8 @@ export class OnlineBoardComponent implements OnInit, OnDestroy {
    * @param col - Column index of the dragged piece
    */
   onDragStart(event: DragEvent, row: number, col: number): void {
-    if (this.gameOver || !this.isPlayerTurn()) {
+
+    if (this.gameOver || !this.isPlayerTurn() || this.isSpectator) {
       event.preventDefault();
       return;
     }
@@ -1247,6 +1313,9 @@ export class OnlineBoardComponent implements OnInit, OnDestroy {
    * @param event - The drag event
    */
   onDragEnd(event: DragEvent): void {
+
+    if (this.isSpectator) return;
+    
     // Reset drag state if no drop occurred
     this.draggedPiece = null;
     this.dragOverCell = null;
@@ -1259,6 +1328,9 @@ export class OnlineBoardComponent implements OnInit, OnDestroy {
    * @param col - Column index of the target cell
    */
   onDragOver(event: DragEvent, row: number, col: number): void {
+
+    if (this.isSpectator) return;
+
     // Prevent default to allow drop
     if (this.isHighlight(row, col)) {
       event.preventDefault();
@@ -1278,6 +1350,9 @@ export class OnlineBoardComponent implements OnInit, OnDestroy {
    * @param col - Column index of the target cell
    */
   onDrop(event: DragEvent, row: number, col: number): void {
+
+    if (this.isSpectator) return
+
     event.preventDefault();
 
     // Remove drag-over class
@@ -1524,39 +1599,6 @@ export class OnlineBoardComponent implements OnInit, OnDestroy {
     } else {
       this.router.navigate(['/play']);
     }
-  }
-
-    private shouldAddMoveToHistory(serverMove: any): boolean {
-      const nickname = localStorage.getItem('nickname');
-      if (serverMove.player === (this.playerTeam === 'WHITE' ? 'white' : 'black')) {
-          return false;
-      }
-
-      return !this.moves.some(move => 
-          move.from.row === parseInt(serverMove.from[0]) &&
-          move.from.col === parseInt(serverMove.from[1]) &&
-          move.to.row === parseInt(serverMove.to[0]) &&
-          move.to.col === parseInt(serverMove.to[1])
-      );
-  }
-
-  private addServerMoveToHistory(serverMove: any): void {
-      const move = {
-          from: { 
-              row: parseInt(serverMove.from[0]), 
-              col: parseInt(serverMove.from[1]) 
-          },
-          to: { 
-              row: parseInt(serverMove.to[0]), 
-              col: parseInt(serverMove.to[1]) 
-          },
-          captured: serverMove.path && serverMove.path.length > 0 ? [{ 
-              row: (parseInt(serverMove.from[0]) + parseInt(serverMove.to[0])) / 2,
-              col: (parseInt(serverMove.from[1]) + parseInt(serverMove.to[1])) / 2
-          }] : undefined
-      };
-      
-      this.moves = [...this.moves, move];
   }
 
   protected readonly localStorage = localStorage;
