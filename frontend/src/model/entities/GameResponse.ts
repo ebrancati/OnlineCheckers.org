@@ -1,8 +1,4 @@
-export interface PlayerDto {
-  id: string;
-  nickname: string;
-  team: 'WHITE' | 'BLACK';
-}
+import { PlayerDto } from './PlayerDto';
 
 export interface GameResponse {
   chat: string;
@@ -18,4 +14,5 @@ export interface GameResponse {
   players: PlayerDto[];
   cronologiaMosse: string[];
   lastMultiCapturePath?: string[];
+  spectatorCount: number;
 }

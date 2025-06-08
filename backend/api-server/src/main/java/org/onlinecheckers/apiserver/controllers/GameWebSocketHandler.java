@@ -8,11 +8,17 @@ import org.onlinecheckers.apiserver.services.MoveService;
 import org.onlinecheckers.apiserver.services.GameService;
 import org.onlinecheckers.apiserver.services.RestartService;
 import org.onlinecheckers.apiserver.repositories.GameRepository;
+import org.onlinecheckers.apiserver.model.entities.Game;
+import org.onlinecheckers.apiserver.exceptions.UnauthorizedMoveException;
+import org.onlinecheckers.apiserver.exceptions.UnauthorizedChatException;
+import org.onlinecheckers.apiserver.exceptions.UnauthorizedResetException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import jakarta.servlet.http.HttpSession;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -105,23 +111,50 @@ public class GameWebSocketHandler implements WebSocketHandler {
         sessionToGame.put(session.getId(), gameId);
         sessionToPlayer.put(session.getId(), playerId);
         
+        // Get HTTP session ID and check authorization
+        String httpSessionId = getHttpSessionId(session);
+        boolean isAuthorized = isUserAuthorized(gameId, httpSessionId);
+        
+        // Manage spectator tracking - use query that loads ALL collections
+        Game game = gameRepository.findByIdWithAllCollections(gameId).orElse(null);
+        if (game != null) {
+            if (!isAuthorized) {
+                // User is a spectator - add to spectator sessions
+                game.addSpectatorSession(httpSessionId);
+                gameRepository.save(game);
+                System.out.println("Added spectator session " + httpSessionId + " to game " + gameId);
+            }
+        }
+        
         // Send initial game state
         sendGameStateToSession(session, gameId);
         
         // Send initial restart status
         sendRestartStatusToSession(session, gameId);
         
-        // Notify other players in the room
+        // Notify other players in the room about connection
         broadcastToGame(gameId, new PlayerConnectionMessage("PLAYER_CONNECTED", playerId, gameId), session);
 
-        // Broadcast game state to all players when someone connects
+        // Broadcast updated game state to all players (includes new spectator count)
         broadcastGameStateToGame(gameId);
         
-        System.out.println("Player " + playerId + " subscribed to game " + gameId);
+        System.out.println("Player " + playerId + " subscribed to game " + gameId + 
+                        (isAuthorized ? " as player" : " as spectator"));
     }
 
     private void handleMakeMove(WebSocketSession session, MakeMoveMessage message) throws Exception {
         try {
+            // Get HTTP session ID and check authorization
+            String httpSessionId = getHttpSessionId(session);
+            
+            if (
+                !isUserAuthorized(message.getGameId(), httpSessionId) ||
+                !isValidPlayerForGame(message.getGameId(), message.getPlayerId(), httpSessionId)
+            ) {
+                sendAuthorizationError(session, "make moves");
+                return;
+            }
+            
             // Convert to existing MoveDto format
             MoveDto moveDto = new MoveDto();
             moveDto.setFrom(message.getFrom());
@@ -135,6 +168,9 @@ public class GameWebSocketHandler implements WebSocketHandler {
             // Broadcast updated game state to all players in the game
             broadcastGameStateToGame(message.getGameId());
             
+        } catch (UnauthorizedMoveException e) {
+            // Handle the case where the move service itself throws an authorization error
+            sendAuthorizationError(session, "make this move");
         } catch (Exception e) {
             sendError(session, "Move failed: " + e.getMessage());
         }
@@ -142,6 +178,17 @@ public class GameWebSocketHandler implements WebSocketHandler {
 
     private void handleSendMessage(WebSocketSession session, SendMessageMessage message) throws Exception {
         try {
+            // Get HTTP session ID and check authorization
+            String httpSessionId = getHttpSessionId(session);
+            
+            if (
+                !isUserAuthorized(message.getGameId(), httpSessionId) ||
+                !isValidPlayerForGame(message.getGameId(), message.getPlayerId(), httpSessionId)
+            ) {
+                sendAuthorizationError(session, "send chat messages");
+                return;
+            }
+            
             // Convert to existing MessageDto format
             MessageDto messageDto = new MessageDto(message.getPlayerId(), message.getText());
             
@@ -154,6 +201,9 @@ public class GameWebSocketHandler implements WebSocketHandler {
             // Broadcast updated game state (includes chat)
             broadcastGameStateToGame(message.getGameId());
             
+        } catch (UnauthorizedChatException e) {
+            // Handle the case where chat service itself throws an authorization error
+            sendAuthorizationError(session, "send chat messages");
         } catch (Exception e) {
             sendError(session, "Failed to send message: " + e.getMessage());
         }
@@ -168,6 +218,17 @@ public class GameWebSocketHandler implements WebSocketHandler {
             status.setNicknameB(message.getNicknameB());
             status.setRestartW(message.isRestartW());
             status.setRestartB(message.isRestartB());
+
+            // Get HTTP session ID and check authorization
+            String httpSessionId = getHttpSessionId(session);
+
+            if (
+                !isUserAuthorized(message.getGameId(), httpSessionId) ||
+                !isValidPlayerForGame(message.getGameId(), message.getPlayerId(), httpSessionId)
+            ) {
+                sendAuthorizationError(session, "update restart status");
+                return;
+            }
             
             // Use existing restart service
             restartService.updateRestartStatus(status);
@@ -182,6 +243,17 @@ public class GameWebSocketHandler implements WebSocketHandler {
 
     private void handleResetGame(WebSocketSession session, ResetGameMessage message) throws Exception {
         try {
+            // Get HTTP session ID and check authorization
+            String httpSessionId = getHttpSessionId(session);
+            
+            if (
+                !isUserAuthorized(message.getGameId(), httpSessionId) ||
+                !isValidPlayerForGame(message.getGameId(), message.getPlayerId(), httpSessionId)
+            ) {
+                sendAuthorizationError(session, "reset the game");
+                return;
+            }
+            
             // Use existing game service reset method
             gameRepository.findById(message.getGameId()).ifPresent(game -> {
                 game.setBoard(game.getBOARDINIT());
@@ -203,6 +275,9 @@ public class GameWebSocketHandler implements WebSocketHandler {
             broadcastGameStateToGame(message.getGameId());
             broadcastRestartStatusToGame(message.getGameId());
             
+        } catch (UnauthorizedResetException e) {
+            // Handle the case where reset service itself throws an authorization error
+            sendAuthorizationError(session, "reset the game");
         } catch (Exception e) {
             sendError(session, "Failed to reset game: " + e.getMessage());
         }
@@ -272,13 +347,26 @@ public class GameWebSocketHandler implements WebSocketHandler {
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) throws Exception {
+
         System.out.println("WebSocket connection closed: " + session.getId() + ", status: " + closeStatus);
         
         String gameId = sessionToGame.get(session.getId());
         String playerId = sessionToPlayer.get(session.getId());
         
         if (gameId != null && playerId != null) {
-            // Notify other players
+            // Remove from spectator sessions if applicable - use query that loads ALL collections
+            String httpSessionId = getHttpSessionId(session);
+            Game game = gameRepository.findByIdWithAllCollections(gameId).orElse(null);
+            if (game != null && game.isSpectatorSession(httpSessionId)) {
+                game.removeSpectatorSession(httpSessionId);
+                gameRepository.save(game);
+                System.out.println("Removed spectator session " + httpSessionId + " from game " + gameId);
+                
+                // Broadcast updated game state to reflect new spectator count
+                broadcastGameStateToGame(gameId);
+            }
+            
+            // Notify other players about disconnection
             broadcastToGame(gameId, new PlayerConnectionMessage("PLAYER_DISCONNECTED", playerId, gameId), session);
         }
         
@@ -287,7 +375,6 @@ public class GameWebSocketHandler implements WebSocketHandler {
 
     private void cleanup(WebSocketSession session) {
         String gameId = sessionToGame.remove(session.getId());
-        String playerId = sessionToPlayer.remove(session.getId());
         
         if (gameId != null) {
             Set<WebSocketSession> sessions = gameRooms.get(gameId);
@@ -303,5 +390,94 @@ public class GameWebSocketHandler implements WebSocketHandler {
     @Override
     public boolean supportsPartialMessages() {
         return false;
+    }
+
+    /**
+     * Extract HTTP session ID from WebSocket session
+     * In Spring WebSocket, the HTTP session ID is typically stored in the WebSocket session attributes
+     * @param webSocketSession The WebSocket session
+     * @return The HTTP session ID or null if not found
+     */
+    private String getHttpSessionId(WebSocketSession webSocketSession) {
+        System.out.println("=== GET HTTP SESSION DEBUG ===");
+        System.out.println("WebSocket attributes: " + webSocketSession.getAttributes());
+        
+        // Try to get HTTP session ID from WebSocket session attributes
+        // This depends on WebSocket configuration, but typically it's stored like this:
+        Object httpSessionId = webSocketSession.getAttributes().get("HTTP_SESSION_ID");
+        if (httpSessionId != null) {
+            System.out.println("Found HTTP_SESSION_ID: " + httpSessionId);
+            return httpSessionId.toString();
+        }
+        
+        // Alternative: try to get from session attributes directly
+        Object httpSession = webSocketSession.getAttributes().get("HTTP_SESSION");
+        if (httpSession != null && httpSession instanceof HttpSession) {
+            String sessionId = ((HttpSession) httpSession).getId();
+            System.out.println("Found HTTP_SESSION object: " + sessionId);
+            return sessionId;
+        }
+        
+        // Fallback: use WebSocket session ID
+        System.out.println("Warning: Could not extract HTTP session ID, using WebSocket session ID as fallback");
+        return webSocketSession.getId();
+    }
+
+    /**
+     * Check if a user is authorized to perform actions on a game
+     * @param gameId The game ID
+     * @param httpSessionId The HTTP session ID
+     * @return true if authorized, false if spectator
+     */
+    private boolean isUserAuthorized(String gameId, String httpSessionId) {
+        try {
+            // Usa la query con fetch join
+            Game game = gameRepository.findByIdWithAuthorizedSessions(gameId).orElse(null);
+            if (game == null) {
+                return false;
+            }
+            
+            System.out.println("DEBUG: Checking session " + httpSessionId + " against authorized: " + game.getAuthorizedSessions());
+            
+            return game.isSessionAuthorized(httpSessionId);
+        }
+        catch (Exception e) {
+            System.err.println("Error checking user authorization: " + e.getMessage());
+            return false;
+        }
+    }
+
+    private boolean isValidPlayerForGame(String gameId, String nickname, String sessionId) {
+
+        Game game = gameRepository.findByIdWithAuthorizedSessionsAndPlayers(gameId).orElse(null);
+
+        if (game == null || !game.isSessionAuthorized(sessionId)) {
+            return false;
+        }
+        
+        boolean nicknameValid = game.getPlayers().stream()
+            .anyMatch(player -> player.getNickname().equals(nickname));
+
+        if (!nicknameValid) {
+            System.out.println("WARNING: Session " + sessionId + " authorized but nickname " + nickname + " not valid for game");
+        }
+        
+        return nicknameValid;
+    }
+
+    /**
+     * Send an authorization error message to the WebSocket client
+     * @param session The WebSocket session
+     * @param action The action that was attempted
+     */
+    private void sendAuthorizationError(WebSocketSession session, String action) throws Exception {
+        ErrorMessage error = new ErrorMessage(
+            "ERROR", 
+            "You are not authorized to " + action + ". Only players can perform this action.",
+            "UNAUTHORIZED_ACTION"
+        );
+        session.sendMessage(
+            new TextMessage(objectMapper.writeValueAsString(error))
+        );
     }
 }

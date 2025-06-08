@@ -18,5 +18,6 @@ public record GameDto(
     List<Player> players,
     List<String> lastMultiCapturePath,
     List<String> cronologiaMosse,
-    String chat
+    String chat,
+    int spectatorCount
 ) {}

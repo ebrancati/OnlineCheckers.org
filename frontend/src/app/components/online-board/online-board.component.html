@@ -1,3 +1,9 @@
+<div *ngIf="isSpectator" class="alert alert-info text-center">
+  <i class="bi bi-eye me-2"></i>
+  <strong>{{ 'SPECTATOR.VIEWING_MODE' | translate }}</strong>
+  <span class="ms-2">{{ spectatorMessage || ('SPECTATOR.DEFAULT_MESSAGE' | translate) }}</span>
+</div>
+
 <!-- Connection Status Indicator -->
 <div
   *ngIf="connectionStatus !== 'connected' || showConnectionStatus"
@@ -71,8 +77,18 @@
       </div>
     </div>
 
+    <div *ngIf="spectatorCount > 0" class="spectator-counter mt-3">
+      <div class="spectator-info">
+        <i class="bi bi-eye me-2"></i>
+        <span class="spectator-text">
+          {{ spectatorCount }} {{ 'SPECTATOR.WATCHING' | translate }}
+        </span>
+      </div>
+    </div>
+
     <!-- Different view based on player's team -->
     <ng-container *ngIf="playerTeam !== 'BLACK'">
+
       <!-- Player black on top (opponent) when you are player white or a spectator -->
       <div class="player-info black-player mb-3">
         <div class="player-piece black"></div>
@@ -355,10 +371,10 @@
     <app-online-moves [moves]="moves"></app-online-moves>
 
     <app-chat
-    [gameId]="gameID"
-    [nickname]="nickname ?? ''"
-    [chatHistory]="chatHistory">
-
+      [gameId]="gameID"
+      [nickname]="nickname ?? ''"
+      [chatHistory]="chatHistory"
+      [isSpectator]="isSpectator">
     </app-chat>
   </div>
 </div>

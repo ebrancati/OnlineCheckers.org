@@ -126,5 +126,10 @@
     "RECONNECT": "Reconnect",
     "CONNECTION_ERROR": "Connection lost. Trying to reconnect...",
     "MAX_ATTEMPTS_ERROR": "Unable to connect to server. Please refresh the page."
+  },
+  "SPECTATOR": {
+    "VIEWING_MODE": "Spectator Mode",
+    "DEFAULT_MESSAGE": "You are viewing this game as a spectator. You cannot make moves or chat.",
+    "WATCHING": "spectators watching"
   }
 }
