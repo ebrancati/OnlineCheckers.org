@@ -1,40 +1,24 @@
 import { Router } from '@angular/router';
-import { NgClass, NgForOf, NgIf } from '@angular/common';
-import { OnlineMovesComponent as MovesComponent } from '../online-moves/online-moves.component';
-import { ChatComponent } from '../chat/chat.component';
-import { WebSocketService } from '../../../services/websocket.service';
-import { MoveServiceService } from '../../../services/move-service.service';
-import { GameService } from '../../../services/game.service';
-import { AudioService } from '../../../services/audio.service';
 import { ActivatedRoute } from '@angular/router';
+import { NgClass, NgForOf, NgIf } from '@angular/common';
 import { DOCUMENT } from '@angular/common';
-import { interval, Subscription } from 'rxjs';
-import { MoveP } from '../../../model/entities/MoveP';
 import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
+import { interval, Subscription } from 'rxjs';
+import { OnlineMovesComponent as MovesComponent } from '../online-moves/online-moves.component';
+import { ChatComponent } from '../chat/chat.component';
 import { RestartService, PlayerRestartStatus } from '../../../services/restart.service';
-import { GameAccessDto } from '../../../model/entities/GameAccessDto';
+import { WebSocketService } from '../../../services/websocket.service';
+import { GameService }      from '../../../services/game.service';
+import { AudioService }     from '../../../services/audio.service';
+import { GameAccessDto }    from '../../../model/entities/GameAccessDto';
+import { GameResponse }     from '../../../model/entities/GameResponse';
+import { MoveP }            from '../../../model/entities/MoveP';
 
 export interface PlayerDto {
   id: string;
   nickname: string;
   team: 'WHITE' | 'BLACK';
-}
-
-export interface GameResponse {
-  cronologiaMosse: string[];
-  chat: string;
-  id: string;
-  board: string[][];
-  turno: 'WHITE' | 'BLACK' | 'NONE';
-  pedineW: number;
-  pedineB: number;
-  damaW: number;
-  damaB: number;
-  partitaTerminata: boolean;
-  vincitore: 'WHITE' | 'BLACK' | 'NONE';
-  players: PlayerDto[];
-  lastMultiCapturePath?: string[];
 }
 
 /**
@@ -135,6 +119,7 @@ export class OnlineBoardComponent implements OnInit, OnDestroy {
   userRole: 'PLAYER' | 'SPECTATOR' = 'SPECTATOR';
   isSpectator: boolean = true;
   spectatorMessage: string | undefined = undefined;
+  spectatorCount: number = 0;
 
   // Connection status for UI
   connectionStatus: 'connected' | 'connecting' | 'disconnected' = 'disconnected';
@@ -142,7 +127,6 @@ export class OnlineBoardComponent implements OnInit, OnDestroy {
   connectionErrorMessage = '';
 
   constructor(
-    private moveService: MoveServiceService,
     private gameService: GameService,
     private route: ActivatedRoute,
     public router: Router,
@@ -300,7 +284,9 @@ export class OnlineBoardComponent implements OnInit, OnDestroy {
    * Separated from handleGameStateUpdate for clarity
    */
   private processGameStateUpdate(gameState: any, authorizedGameState?: any): void {
-    // Same logic as the old updateGameState method
+
+    this.spectatorCount = gameState.spectatorCount || 0;
+
     if (this.gameOver && !gameState.partitaTerminata) {
       this.gameOver = false;
       this.winner = null;
@@ -367,15 +353,14 @@ export class OnlineBoardComponent implements OnInit, OnDestroy {
    * Handle restart status updates from WebSocket
    */
   private handleRestartStatusUpdate(restartStatus: any): void {
-    this.restartStatus = restartStatus;
 
-    const myRestartFlag = this.playerTeam === 'WHITE' ? restartStatus.restartW : restartStatus.restartB;
-    const opponentRestartFlag = this.playerTeam === 'WHITE' ? restartStatus.restartB : restartStatus.restartW;
+    this.restartStatus = restartStatus;
     
     // Check if current player has requested restart
     if (this.playerTeam === 'WHITE' && restartStatus.restartW) {
       this.waitingForOpponentRestart = true;
-    } else if (this.playerTeam === 'BLACK' && restartStatus.restartB) {
+    }
+    else if (this.playerTeam === 'BLACK' && restartStatus.restartB) {
       this.waitingForOpponentRestart = true;
     }
 
@@ -758,11 +743,13 @@ export class OnlineBoardComponent implements OnInit, OnDestroy {
    * Updates the game state based on the response from the server
    */
   updateGameState(response: GameResponse) {
+
+    this.spectatorCount = response.spectatorCount || 0;
+
     // Reset move indicators
     this.resetMoveIndicators();
     
     // Save the previous state for comparison
-    const oldBoard = this.board ? JSON.parse(JSON.stringify(this.board)) : null;
     const oldTurn = this.currentPlayer;
 
     // Update the current shift

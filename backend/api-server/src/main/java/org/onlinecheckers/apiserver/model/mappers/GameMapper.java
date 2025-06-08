@@ -22,7 +22,8 @@ public class GameMapper {
             game.getPlayers(),
             game.getLastMultiCapturePath(),
             game.getCronologiaMosse(),
-            game.getChat()
+            game.getChat(),
+            game.getSpectatorCount()
         );
     }
 }

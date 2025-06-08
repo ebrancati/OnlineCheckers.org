@@ -35,6 +35,11 @@ public class Game extends SessionGame {
     @Column(name = "session_id")
     private Set<String> authorizedSessions = new HashSet<>();
 
+    @ElementCollection
+    @CollectionTable(name = "game_spectator_sessions", joinColumns = @JoinColumn(name = "game_id"))
+    @Column(name = "session_id")
+    private Set<String> spectatorSessions = new HashSet<>();
+
     public void addPlayer(Player p) {
         if (players.size() >= 2)
             throw new IllegalStateException("The game already has 2 players");
@@ -85,5 +90,48 @@ public class Game extends SessionGame {
      */
     public void removeAuthorizedSession(String sessionId) {
         this.authorizedSessions.remove(sessionId);
+    }
+
+    /**
+     * Add a spectator session to the game
+     * @param sessionId The HTTP session ID of the spectator
+     */
+    public void addSpectatorSession(String sessionId) {
+        if (sessionId != null && !sessionId.trim().isEmpty()) {
+            this.spectatorSessions.add(sessionId);
+        }
+    }
+
+    /**
+     * Remove a spectator session from the game
+     * @param sessionId The HTTP session ID to remove
+     */
+    public void removeSpectatorSession(String sessionId) {
+        this.spectatorSessions.remove(sessionId);
+    }
+
+    /**
+     * Get the current number of spectators watching this game
+     * @return Number of spectators
+     */
+    public int getSpectatorCount() {
+        return this.spectatorSessions.size();
+    }
+
+    /**
+     * Get all spectator session IDs
+     * @return Set of spectator session IDs
+     */
+    public Set<String> getSpectatorSessions() {
+        return new HashSet<>(this.spectatorSessions);
+    }
+
+    /**
+     * Check if a session is a spectator
+     * @param sessionId The session ID to check
+     * @return true if the session is a spectator
+     */
+    public boolean isSpectatorSession(String sessionId) {
+        return sessionId != null && this.spectatorSessions.contains(sessionId);
     }
 }

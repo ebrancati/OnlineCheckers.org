@@ -14,4 +14,5 @@ export interface GameResponse {
   players: PlayerDto[];
   cronologiaMosse: string[];
   lastMultiCapturePath?: string[];
+  spectatorCount: number;
 }

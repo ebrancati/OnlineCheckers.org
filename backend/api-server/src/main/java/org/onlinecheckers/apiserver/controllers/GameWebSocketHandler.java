@@ -111,19 +111,35 @@ public class GameWebSocketHandler implements WebSocketHandler {
         sessionToGame.put(session.getId(), gameId);
         sessionToPlayer.put(session.getId(), playerId);
         
+        // Get HTTP session ID and check authorization
+        String httpSessionId = getHttpSessionId(session);
+        boolean isAuthorized = isUserAuthorized(gameId, httpSessionId);
+        
+        // Manage spectator tracking - use query that loads ALL collections
+        Game game = gameRepository.findByIdWithAllCollections(gameId).orElse(null);
+        if (game != null) {
+            if (!isAuthorized) {
+                // User is a spectator - add to spectator sessions
+                game.addSpectatorSession(httpSessionId);
+                gameRepository.save(game);
+                System.out.println("Added spectator session " + httpSessionId + " to game " + gameId);
+            }
+        }
+        
         // Send initial game state
         sendGameStateToSession(session, gameId);
         
         // Send initial restart status
         sendRestartStatusToSession(session, gameId);
         
-        // Notify other players in the room
+        // Notify other players in the room about connection
         broadcastToGame(gameId, new PlayerConnectionMessage("PLAYER_CONNECTED", playerId, gameId), session);
 
-        // Broadcast game state to all players when someone connects
+        // Broadcast updated game state to all players (includes new spectator count)
         broadcastGameStateToGame(gameId);
         
-        System.out.println("Player " + playerId + " subscribed to game " + gameId);
+        System.out.println("Player " + playerId + " subscribed to game " + gameId + 
+                        (isAuthorized ? " as player" : " as spectator"));
     }
 
     private void handleMakeMove(WebSocketSession session, MakeMoveMessage message) throws Exception {
@@ -331,13 +347,26 @@ public class GameWebSocketHandler implements WebSocketHandler {
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) throws Exception {
+
         System.out.println("WebSocket connection closed: " + session.getId() + ", status: " + closeStatus);
         
         String gameId = sessionToGame.get(session.getId());
         String playerId = sessionToPlayer.get(session.getId());
         
         if (gameId != null && playerId != null) {
-            // Notify other players
+            // Remove from spectator sessions if applicable - use query that loads ALL collections
+            String httpSessionId = getHttpSessionId(session);
+            Game game = gameRepository.findByIdWithAllCollections(gameId).orElse(null);
+            if (game != null && game.isSpectatorSession(httpSessionId)) {
+                game.removeSpectatorSession(httpSessionId);
+                gameRepository.save(game);
+                System.out.println("Removed spectator session " + httpSessionId + " from game " + gameId);
+                
+                // Broadcast updated game state to reflect new spectator count
+                broadcastGameStateToGame(gameId);
+            }
+            
+            // Notify other players about disconnection
             broadcastToGame(gameId, new PlayerConnectionMessage("PLAYER_DISCONNECTED", playerId, gameId), session);
         }
         
@@ -420,7 +449,8 @@ public class GameWebSocketHandler implements WebSocketHandler {
 
     private boolean isValidPlayerForGame(String gameId, String nickname, String sessionId) {
 
-        Game game = gameRepository.findByIdWithAuthorizedSessions(gameId).orElse(null);
+        Game game = gameRepository.findByIdWithAuthorizedSessionsAndPlayers(gameId).orElse(null);
+
         if (game == null || !game.isSessionAuthorized(sessionId)) {
             return false;
         }
@@ -428,7 +458,6 @@ public class GameWebSocketHandler implements WebSocketHandler {
         boolean nicknameValid = game.getPlayers().stream()
             .anyMatch(player -> player.getNickname().equals(nickname));
 
-        
         if (!nicknameValid) {
             System.out.println("WARNING: Session " + sessionId + " authorized but nickname " + nickname + " not valid for game");
         }
