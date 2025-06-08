@@ -1,7 +1,7 @@
 <div *ngIf="isSpectator" class="alert alert-info text-center">
   <i class="bi bi-eye me-2"></i>
-  <strong>TEST</strong>
-  <span class="ms-2">TEST!</span>
+  <strong>{{ 'SPECTATOR.VIEWING_MODE' | translate }}</strong>
+  <span class="ms-2">{{ spectatorMessage || ('SPECTATOR.DEFAULT_MESSAGE' | translate) }}</span>
 </div>
 
 <!-- Connection Status Indicator -->

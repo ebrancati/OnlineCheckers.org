@@ -18,6 +18,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.socket.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jakarta.servlet.http.HttpSession;
+
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.Map;
@@ -129,7 +131,10 @@ public class GameWebSocketHandler implements WebSocketHandler {
             // Get HTTP session ID and check authorization
             String httpSessionId = getHttpSessionId(session);
             
-            if (!isUserAuthorized(message.getGameId(), httpSessionId)) {
+            if (
+                !isUserAuthorized(message.getGameId(), httpSessionId) ||
+                !isValidPlayerForGame(message.getGameId(), message.getPlayerId(), httpSessionId)
+            ) {
                 sendAuthorizationError(session, "make moves");
                 return;
             }
@@ -160,7 +165,10 @@ public class GameWebSocketHandler implements WebSocketHandler {
             // Get HTTP session ID and check authorization
             String httpSessionId = getHttpSessionId(session);
             
-            if (!isUserAuthorized(message.getGameId(), httpSessionId)) {
+            if (
+                !isUserAuthorized(message.getGameId(), httpSessionId) ||
+                !isValidPlayerForGame(message.getGameId(), message.getPlayerId(), httpSessionId)
+            ) {
                 sendAuthorizationError(session, "send chat messages");
                 return;
             }
@@ -194,6 +202,17 @@ public class GameWebSocketHandler implements WebSocketHandler {
             status.setNicknameB(message.getNicknameB());
             status.setRestartW(message.isRestartW());
             status.setRestartB(message.isRestartB());
+
+            // Get HTTP session ID and check authorization
+            String httpSessionId = getHttpSessionId(session);
+
+            if (
+                !isUserAuthorized(message.getGameId(), httpSessionId) ||
+                !isValidPlayerForGame(message.getGameId(), message.getPlayerId(), httpSessionId)
+            ) {
+                sendAuthorizationError(session, "update restart status");
+                return;
+            }
             
             // Use existing restart service
             restartService.updateRestartStatus(status);
@@ -211,7 +230,10 @@ public class GameWebSocketHandler implements WebSocketHandler {
             // Get HTTP session ID and check authorization
             String httpSessionId = getHttpSessionId(session);
             
-            if (!isUserAuthorized(message.getGameId(), httpSessionId)) {
+            if (
+                !isUserAuthorized(message.getGameId(), httpSessionId) ||
+                !isValidPlayerForGame(message.getGameId(), message.getPlayerId(), httpSessionId)
+            ) {
                 sendAuthorizationError(session, "reset the game");
                 return;
             }
@@ -348,20 +370,26 @@ public class GameWebSocketHandler implements WebSocketHandler {
      * @return The HTTP session ID or null if not found
      */
     private String getHttpSessionId(WebSocketSession webSocketSession) {
+        System.out.println("=== GET HTTP SESSION DEBUG ===");
+        System.out.println("WebSocket attributes: " + webSocketSession.getAttributes());
+        
         // Try to get HTTP session ID from WebSocket session attributes
         // This depends on WebSocket configuration, but typically it's stored like this:
         Object httpSessionId = webSocketSession.getAttributes().get("HTTP_SESSION_ID");
         if (httpSessionId != null) {
+            System.out.println("Found HTTP_SESSION_ID: " + httpSessionId);
             return httpSessionId.toString();
         }
         
         // Alternative: try to get from session attributes directly
         Object httpSession = webSocketSession.getAttributes().get("HTTP_SESSION");
-        if (httpSession != null) {
-            return httpSession.toString();
+        if (httpSession != null && httpSession instanceof HttpSession) {
+            String sessionId = ((HttpSession) httpSession).getId();
+            System.out.println("Found HTTP_SESSION object: " + sessionId);
+            return sessionId;
         }
         
-        // Fallback: use WebSocket session ID (not ideal but better than nothing)
+        // Fallback: use WebSocket session ID
         System.out.println("Warning: Could not extract HTTP session ID, using WebSocket session ID as fallback");
         return webSocketSession.getId();
     }
@@ -374,15 +402,38 @@ public class GameWebSocketHandler implements WebSocketHandler {
      */
     private boolean isUserAuthorized(String gameId, String httpSessionId) {
         try {
-            Game game = gameRepository.findById(gameId).orElse(null);
+            // Usa la query con fetch join
+            Game game = gameRepository.findByIdWithAuthorizedSessions(gameId).orElse(null);
             if (game == null) {
                 return false;
             }
+            
+            System.out.println("DEBUG: Checking session " + httpSessionId + " against authorized: " + game.getAuthorizedSessions());
+            
             return game.isSessionAuthorized(httpSessionId);
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             System.err.println("Error checking user authorization: " + e.getMessage());
             return false;
         }
+    }
+
+    private boolean isValidPlayerForGame(String gameId, String nickname, String sessionId) {
+
+        Game game = gameRepository.findByIdWithAuthorizedSessions(gameId).orElse(null);
+        if (game == null || !game.isSessionAuthorized(sessionId)) {
+            return false;
+        }
+        
+        boolean nicknameValid = game.getPlayers().stream()
+            .anyMatch(player -> player.getNickname().equals(nickname));
+
+        
+        if (!nicknameValid) {
+            System.out.println("WARNING: Session " + sessionId + " authorized but nickname " + nickname + " not valid for game");
+        }
+        
+        return nicknameValid;
     }
 
     /**
@@ -396,6 +447,8 @@ public class GameWebSocketHandler implements WebSocketHandler {
             "You are not authorized to " + action + ". Only players can perform this action.",
             "UNAUTHORIZED_ACTION"
         );
-        session.sendMessage(new TextMessage(objectMapper.writeValueAsString(error)));
+        session.sendMessage(
+            new TextMessage(objectMapper.writeValueAsString(error))
+        );
     }
 }

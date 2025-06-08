@@ -620,7 +620,9 @@ export class OnlineBoardComponent implements OnInit, OnDestroy {
     if (!this.gameID || this.isAnimatingCapture) return;
 
     this.gameService.getGameState(this.gameID).subscribe({
-      next: (response: GameResponse) => {
+      next: (gameAccess: GameAccessDto) => {
+
+        const response = gameAccess.gameState;
 
         if (this.gameOver && !response.partitaTerminata) {
           this.gameOver = false;
@@ -1252,25 +1254,6 @@ export class OnlineBoardComponent implements OnInit, OnDestroy {
    */
   isValidPosition(row: number, col: number): boolean {
     return row >= 0 && row < 8 && col >= 0 && col < 8;
-  }
-
-  /**
-   * Helper method to get the DOM element for a piece at the specified position
-   * @param row - Row index of the piece
-   * @param col - Column index of the piece
-   * @returns The DOM element for the piece, or null if not found
-   */
-  private getPieceElement(row: number, col: number): HTMLElement | null {
-    // Find the square element at the specified position
-    const squares = document.querySelectorAll('.square');
-    const index = row * 8 + col;
-
-    if (index >= 0 && index < squares.length) {
-      // Find the piece element within the square
-      return squares[index].querySelector('.piece') as HTMLElement;
-    }
-
-    return null;
   }
 
   /**
