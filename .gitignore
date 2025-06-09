@@ -4,49 +4,105 @@
 # BACKEND (Java/Spring Boot/Quarkus)
 #########################################
 
-# Maven
+# Maven build directories
 backend/target/
-backend/!.mvn/wrapper/maven-wrapper.jar
-backend/!**/src/main/**/target/
-backend/!**/src/test/**/target/
+backend/api-server/target/
+backend/bot-core/target/
+backend/bot-lambda/target/
+backend/.mvn/wrapper/maven-wrapper.jar
 
-# IDE Files
-backend/**/.idea/
-backend/**/*.iws
-backend/**/*.iml
-backend/**/*.ipr
+# IDE Files - IntelliJ
+backend/.idea/
+backend/api-server/.idea/
+backend/bot-core/.idea/
+backend/bot-lambda/.idea/
+backend/*.iws
+backend/*.iml
+backend/*.ipr
+backend/api-server/*.iws
+backend/api-server/*.iml
+backend/api-server/*.ipr
+backend/bot-core/*.iws
+backend/bot-core/*.iml
+backend/bot-core/*.ipr
+backend/bot-lambda/*.iws
+backend/bot-lambda/*.iml
+backend/bot-lambda/*.ipr
 
 # Eclipse
-backend/**/.apt_generated
-backend/**/.classpath
-backend/**/.factorypath
-backend/**/.project
-backend/**/.settings
-backend/**/.springBeans
-backend/**/.sts4-cache
+backend/.apt_generated
+backend/.classpath
+backend/.factorypath
+backend/.project
+backend/.settings/
+backend/.springBeans
+backend/.sts4-cache
+backend/api-server/.apt_generated
+backend/api-server/.classpath
+backend/api-server/.factorypath
+backend/api-server/.project
+backend/api-server/.settings/
+backend/api-server/.springBeans
+backend/api-server/.sts4-cache
+backend/bot-core/.apt_generated
+backend/bot-core/.classpath
+backend/bot-core/.factorypath
+backend/bot-core/.project
+backend/bot-core/.settings/
+backend/bot-core/.springBeans
+backend/bot-core/.sts4-cache
+backend/bot-lambda/.apt_generated
+backend/bot-lambda/.classpath
+backend/bot-lambda/.factorypath
+backend/bot-lambda/.project
+backend/bot-lambda/.settings/
+backend/bot-lambda/.springBeans
+backend/bot-lambda/.sts4-cache
 
 # NetBeans
-backend/**/nbproject/private/
-backend/**/nbbuild/
-backend/**/dist/
-backend/**/nbdist/
-backend/**/.nb-gradle/
-backend/**/build/
-backend/!**/src/main/**/build/
-backend/!**/src/test/**/build/
-
-# VS Code
-backend/**/.vscode/
+backend/nbproject/private/
+backend/nbbuild/
+backend/dist/
+backend/nbdist/
+backend/.nb-gradle/
+backend/build/
+backend/api-server/nbproject/private/
+backend/api-server/nbbuild/
+backend/api-server/dist/
+backend/api-server/nbdist/
+backend/api-server/.nb-gradle/
+backend/api-server/build/
+backend/bot-core/nbproject/private/
+backend/bot-core/nbbuild/
+backend/bot-core/dist/
+backend/bot-core/nbdist/
+backend/bot-core/.nb-gradle/
+backend/bot-core/build/
+backend/bot-lambda/nbproject/private/
+backend/bot-lambda/nbbuild/
+backend/bot-lambda/dist/
+backend/bot-lambda/nbdist/
+backend/bot-lambda/.nb-gradle/
+backend/bot-lambda/build/
 
 # Logs
-backend/**/*.log
+backend/*.log
+backend/api-server/*.log
+backend/bot-core/*.log
+backend/bot-lambda/*.log
 
 # Application Properties (sensitive config)
 backend/api-server/src/main/resources/application.properties
 
 # Temporary files
-backend/**/*.tmp
-backend/**/*.temp
+backend/*.tmp
+backend/*.temp
+backend/api-server/*.tmp
+backend/api-server/*.temp
+backend/bot-core/*.tmp
+backend/bot-core/*.temp
+backend/bot-lambda/*.tmp
+backend/bot-lambda/*.temp
 
 #########################################
 # FRONTEND (Angular/Node.js)
@@ -79,10 +135,10 @@ frontend/*.sublime-workspace
 
 # Visual Studio Code
 frontend/.vscode/*
-frontend/!.vscode/settings.json
-frontend/!.vscode/tasks.json
-frontend/!.vscode/launch.json
-frontend/!.vscode/extensions.json
+!frontend/.vscode/settings.json
+!frontend/.vscode/tasks.json
+!frontend/.vscode/launch.json
+!frontend/.vscode/extensions.json
 frontend/.history/*
 
 # Environment files
