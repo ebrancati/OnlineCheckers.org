@@ -41,6 +41,7 @@ interface Move {
 
 @Component({
   selector: 'app-online-board',
+  standalone: true,
   imports: [
     NgForOf,
     NgClass,
@@ -50,8 +51,7 @@ interface Move {
     TranslateModule
   ],
   templateUrl: './online-board.component.html',
-  styleUrl: './online-board.component.css',
-  standalone: true
+  styleUrl:    './online-board.component.css',
 })
 export class OnlineBoardComponent implements OnInit, OnDestroy {
   private captureChainStart: { row: number; col: number } | null = null;

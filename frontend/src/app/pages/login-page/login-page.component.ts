@@ -8,13 +8,13 @@ import { TranslateModule } from '@ngx-translate/core';
 import { NgIf } from '@angular/common';
 
 @Component({
-  selector: 'page-login',
+  selector: 'login-page',
   standalone: true,
   imports: [
     FormsModule, TranslateModule, NgIf
   ],
-  templateUrl: './login.page.html',
-  styleUrl: './login.page.css'
+  templateUrl: './login-page.component.html',
+  styleUrl:    './login-page.component.css'
 })
 export class LoginPage {
   nickname = '';

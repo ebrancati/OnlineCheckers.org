@@ -110,11 +110,11 @@
 }
 
 .email {
-  background-color: #4285F4;
+  background-color: #d79d00;
 }
 
 .dark-theme .email {
-  background-color: #5294FF;
+  background-color: #bd8b00a3;
 }
 
 @media (max-width: 768px) {

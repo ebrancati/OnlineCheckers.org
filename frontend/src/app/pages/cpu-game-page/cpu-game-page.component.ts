@@ -3,7 +3,7 @@ import { BotBoardComponent } from '../../components/bot-board/bot-board.componen
 import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
-  selector: 'page-bot-player',
+  selector: 'cpu-game-page',
   standalone: true,
   imports: [
     BotBoardComponent,
@@ -11,4 +11,4 @@ import { TranslateModule } from '@ngx-translate/core';
   ],
   template: '<app-bot-board></app-bot-board>',
 })
-export class BotPlayerPage {}
+export class CpuGamePage {}

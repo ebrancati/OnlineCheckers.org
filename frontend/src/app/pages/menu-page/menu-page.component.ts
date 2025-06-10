@@ -1,12 +1,14 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
+import { RulesComponent } from '../../components/rules/rules.component';
 
 @Component({
-  selector: 'page-menu',
-  templateUrl: './menu.page.html',
-  imports: [TranslateModule],
-  styleUrls: ['./menu.page.css']
+  selector: 'menu-page',
+  standalone: true,
+  imports: [RulesComponent ,TranslateModule],
+  templateUrl: './menu-page.component.html',
+  styleUrl:    './menu-page.component.css'
 })
 export class MenuPage {
   selectedMode: string | null = null;
@@ -21,10 +23,10 @@ export class MenuPage {
         this.router.navigate(['/login']);
         break;
       case 'local':
-        this.router.navigate(['/locale']);
+        this.router.navigate(['/play/offline']);
         break;
       case 'bot':
-        this.router.navigate(['/vs-bot']);
+        this.router.navigate(['/play/computer']);
         break;
     }
 

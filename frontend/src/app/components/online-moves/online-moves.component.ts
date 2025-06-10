@@ -26,7 +26,7 @@ interface TurnMoves {
     CommonModule, TranslateModule
   ],
   templateUrl: './online-moves.component.html',
-  styleUrl: './online-moves.component.css',
+  styleUrl:    './online-moves.component.css',
 })
 export class OnlineMovesComponent implements OnChanges {
   @Input() moves: Move[] = [];

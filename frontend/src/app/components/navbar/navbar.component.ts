@@ -8,10 +8,10 @@ import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-navbar',
-  templateUrl: './navbar.component.html',
-  styleUrl: './navbar.component.css',
   standalone: true,
-  imports: [CommonModule, TranslateModule]
+  imports: [CommonModule, TranslateModule],
+  templateUrl: './navbar.component.html',
+  styleUrl:    './navbar.component.css'
 })
 export class NavbarComponent implements OnInit, OnDestroy {
   nickname = localStorage.getItem('nickname') ?? '';

@@ -8,14 +8,14 @@ import { OfflineMovesComponent } from '../offline-moves/offline-moves.component'
 
 @Component({
   selector: 'app-bot-board',
-  templateUrl: './bot-board.component.html',
-  styleUrls: ['./bot-board.component.css'],
   standalone: true,
   imports: [
     CommonModule,
     TranslateModule,
     OfflineMovesComponent
-  ]
+  ],
+  templateUrl: './bot-board.component.html',
+  styleUrl:    './bot-board.component.css'
 })
 export class BotBoardComponent extends OfflineBoardComponent implements OnInit, OnDestroy {
   botColor: 'black' | 'white' = 'black';
@@ -23,7 +23,7 @@ export class BotBoardComponent extends OfflineBoardComponent implements OnInit, 
   difficulty: number = 2; // Default: medium difficulty
   isThinking: boolean = false;
   private thinkingTimeout: any = null; // Timer for showing thinking indicator
-  private readonly THINKING_DELAY = 3000; // Show indicator only after 3 seconds
+  private readonly THINKING_DELAY = 2000; // Show indicator only after 2 seconds
 
   // BOARD HISTORY TRACKING FOR ANTI-LOOP
   private boardHistory: string[] = []; // Complete board state history

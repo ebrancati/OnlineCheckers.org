@@ -9,7 +9,7 @@ import { switchMap, firstValueFrom } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
-  selector: 'page-join',
+  selector: 'join-page',
   standalone: true,
   imports: [
     FormsModule, 
@@ -19,7 +19,7 @@ import { TranslateModule } from '@ngx-translate/core';
     NgSwitchDefault,
     TranslateModule,
   ],
-  templateUrl: './join.page.html'
+  templateUrl: './join-page.component.html'
 })
 export class JoinPage implements OnInit {
   step = 1;

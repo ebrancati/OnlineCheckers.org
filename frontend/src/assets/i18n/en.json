@@ -29,8 +29,8 @@
     "TURN": "Turn",
     "WAITING_STATUS": "Waiting",
     "RECENT_MOVES": "Recent Moves",
-    "WHITE_TURN_ERROR": "It's White's turn!",
-    "BLACK_TURN_ERROR": "It's Black's turn!"
+    "WHITE_TURN_ERROR": "It's Player White's turn!",
+    "BLACK_TURN_ERROR": "It's Player Black's turn!"
   },
   "BOT": {
     "OPTIONS": "Bot Options",
@@ -39,8 +39,8 @@
     "MEDIUM": "Medium",
     "HARD": "Hard",
     "YOUR_COLOR": "Your Color",
-    "PLAY_WHITE": "Play as White",
-    "PLAY_BLACK": "Play as Black",
+    "PLAY_WHITE": "Play as Player White",
+    "PLAY_BLACK": "Play as Player Black",
     "NEW_GAME": "New Game",
     "THINKING": "Bot is thinking...",
     "CAPTURING": "Capturing...",
@@ -83,14 +83,13 @@
     "CHAT_TITLE": "Chat:"
   },
   "FOOTER": {
-    "COPYRIGHT": "© {{year}} OnlineCheckers.org",
+    "COPYRIGHT": "OnlineCheckers.org",
     "OUR_TEAM": "Contacts",
     "TAGLINE": "Play checkers online with friends or against the computer."
   },
   "RULES": {
     "TITLE": "English Checkers - Rules and How to Play",
     "INTRODUCTION": "English Checkers is a traditional board game played on an 8x8 board with 12 pieces per player. It is one of the most widely played variants of checkers around the world.",
-    "INTRO_TEXT": "Simple to learn but full of strategy, English Checkers has been a beloved pastime in English-speaking countries for generations.",
     "HISTORY_TITLE": "History of English Checkers",
     "HISTORY_TEXT_1": "English Checkers has a long history dating back to medieval times in England and other parts of Europe.",
     "HISTORY_TEXT_2": "The first book on the game was published in 1756 by William Payne, titled 'An Introduction to the Game of Draughts'.",
@@ -107,7 +106,7 @@
     "KINGS_TITLE": "The Kings",
     "KINGS_TEXT_1": "A piece becomes a king when it reaches the last row on the opponent's side of the board. It is usually crowned by placing a second piece on top of it.",
     "KINGS_TEXT_2": "A king can move diagonally both forward and backward, but still moves only one square at a time except when capturing.",
-    "KINGS_TEXT_3": "Kings capture in the same way as regular pieces, but can do so in all four diagonal directions. Like regular pieces, kings must make all available captures."
+    "KINGS_TEXT_3": "Kings capture in the same way as regular pieces, but can do so in all four diagonal directions. Like regular pieces, kings must make all available captures. Kings can be captured by regular pieces following the same capture rules."
   },
   "ERRORS": {
     "GAME_NOT_FOUND": "The game you're trying to join doesn't exist.",
