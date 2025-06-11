@@ -17,7 +17,7 @@
   width: 80vw;
   max-width: 520px;
   padding: 1.2rem 2rem;
-  margin-bottom: 1rem;
+  margin: 0rem 0.5rem 1rem 0.5rem;
   background: rgba(100, 100, 100, 0.1);
   border: 1px solid rgba(120, 120, 120, 0.2);
   border-radius: 1rem;
@@ -62,4 +62,41 @@
   color: #1a1a1a;
   font-weight: 600;
   border-color: #8c8c8c;
+}
+
+.menu-button-custom.highlight-animation {
+  animation: highlightPulse 1.5s ease-in-out;
+  border: 3px solid #d18b47 !important;
+  box-shadow: 0 0 20px rgba(209, 139, 71, 0.6);
+}
+
+@keyframes highlightPulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(209, 139, 71, 0.7);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px 10px rgba(209, 139, 71, 0.4);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(209, 139, 71, 0);
+  }
+}
+
+.dark-theme .menu-button-custom.highlight-animation {
+  border: 3px solid #d18b47 !important;
+  box-shadow: 0 0 25px rgba(209, 139, 71, 0.8);
+}
+
+.dark-theme .menu-button-custom {
+  background-color: rgba(80, 80, 80, 0.6);
+  color: #e0e0e0;
+  border-color: rgba(150, 150, 150, 0.3);
+}
+
+.dark-theme .menu-button-custom:hover {
+  background-color: rgba(120, 120, 120, 0.7);
+  border-color: #c0c0c0;
 }

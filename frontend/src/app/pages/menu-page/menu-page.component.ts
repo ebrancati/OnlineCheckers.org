@@ -1,19 +1,35 @@
-import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, OnInit } from '@angular/core';
+import { Router, ActivatedRoute } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { RulesComponent } from '../../components/rules/rules.component';
 
 @Component({
   selector: 'menu-page',
   standalone: true,
-  imports: [RulesComponent ,TranslateModule],
+  imports: [RulesComponent, TranslateModule],
   templateUrl: './menu-page.component.html',
   styleUrl:    './menu-page.component.css'
 })
-export class MenuPage {
+export class MenuPage implements OnInit {
   selectedMode: string | null = null;
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private route: ActivatedRoute
+  ) {}
+
+  ngOnInit(): void {
+    // If there is fragment '#rules' in the URL, scroll to rules section
+    const fragment = this.route.snapshot.fragment;
+    if (fragment === 'rules') {
+      setTimeout(() => {
+        document.getElementById('rules')?.scrollIntoView({ 
+          behavior: 'smooth',
+          block: 'start' 
+        });
+      }, 100);
+    }
+  }
 
   selectMode(mode: string): void {
     this.selectedMode = mode;
@@ -29,7 +45,5 @@ export class MenuPage {
         this.router.navigate(['/play/computer']);
         break;
     }
-
-    console.log('Selected mode:', mode);
   }
 }
