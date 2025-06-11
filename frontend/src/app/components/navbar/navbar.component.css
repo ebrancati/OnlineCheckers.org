@@ -4,6 +4,15 @@
   padding: 0.5rem 1rem;
 }
 
+#beta {
+  background-color: rgb(65, 227, 214);
+  color: black;
+  font-size: 8px;
+  border-radius: 2vw;
+  padding: 5px;
+  cursor: default;
+}
+
 a { cursor: pointer; }
 
 .navbar-brand h3 {
@@ -153,6 +162,7 @@ a { cursor: pointer; }
 }
 
 @media (max-width: 992px) {
+
   .navbar-brand h3 {
     font-size: 1.5rem;
   }
@@ -169,16 +179,8 @@ a { cursor: pointer; }
   }
 }
 
-#beta {
-  background-color: rgb(65, 227, 214);
-  color: black;
-  font-size: 8px;
-  border-radius: 2vw;
-  padding: 5px;
-  cursor: default;
-}
-
 @media (max-width: 415px) {
+  
   .navbar-brand h3 {
     font-size: 1rem;
   }

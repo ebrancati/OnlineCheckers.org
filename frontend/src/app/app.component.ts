@@ -8,7 +8,7 @@ import { FooterComponent } from './components/footer/footer.component';
   standalone: true,
   imports: [RouterOutlet, NavbarComponent, FooterComponent],
   template: `
-    <app-navbar></app-navbar>
+    <app-navbar class="sticky-top"></app-navbar>
     <main>
       <router-outlet></router-outlet>
     </main>
