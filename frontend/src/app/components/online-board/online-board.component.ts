@@ -117,7 +117,7 @@ export class OnlineBoardComponent implements OnInit, OnDestroy {
   private errorSubscription: Subscription | null = null;
 
   userRole: 'PLAYER' | 'SPECTATOR' = 'SPECTATOR';
-  isSpectator: boolean = true;
+  isSpectator: boolean = false;
   spectatorMessage: string | undefined = undefined;
   spectatorCount: number = 0;
 

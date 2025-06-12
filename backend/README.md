@@ -94,6 +94,12 @@ spring.datasource.password=your_mysql_password
 spring.jpa.hibernate.ddl-auto=update
 spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQLDialect
 
+# Session Management
+server.servlet.session.tracking-modes=cookie
+server.servlet.session.cookie.name=JSESSIONID
+server.servlet.session.cookie.http-only=true
+server.servlet.session.timeout=30m
+
 # Server
 server.port=8080
 
