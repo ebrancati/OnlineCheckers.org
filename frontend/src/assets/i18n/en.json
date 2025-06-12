@@ -78,6 +78,15 @@
     "JOIN_AS": "Join as",
     "WAITING_FOR_OPPONENT": "The game will start when another player joins."
   },
+  "NICKNAME_VALIDATION": {
+    "EMPTY_NICKNAME": "Nickname cannot be empty",
+    "TOO_SHORT": "Nickname must be at least 3 characters",
+    "TOO_LONG": "Nickname cannot exceed 20 characters", 
+    "URL_DETECTED": "URLs are not allowed in nicknames",
+    "INVALID_CONTENT": "This nickname is not allowed",
+    "SERVER_ERROR": "An error occurred while validating the nickname",
+    "MISSING_NICKNAME": "Nickname is required"
+  },
   "CHAT": {
     "PLACEHOLDER": "Write a message...",
     "CHAT_TITLE": "Chat:"
@@ -86,7 +95,8 @@
     "COPYRIGHT": "OnlineCheckers.org",
     "OUR_TEAM": "Contacts",
     "TAGLINE": "Play checkers online with friends or against the computer",
-    "JOIN_COMMUNITY": "Join Community"
+    "JOIN_COMMUNITY": "Join Community",
+    "PRIVACY_POLICY": "Privacy Policy"
   },
   "RULES": {
     "TITLE": "English Checkers - Rules and How to Play",

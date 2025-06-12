@@ -9,11 +9,19 @@
             id="nickname"
             name="nickname"
             [(ngModel)]="nickname"
+            (input)="onNicknameChange()"
             #nick="ngModel"
             required
             class="form-control form-control-lg"
+            [class.is-invalid]="showNicknameError"
             placeholder="{{ 'LOGIN.ENTER_NICKNAME' | translate }}"
           />
+          
+          <!-- Nickname validation error display -->
+          <div *ngIf="showNicknameError" class="invalid-feedback d-block">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            {{ nicknameErrorMessage }}
+          </div>
         </div>
 
         <div class="mb-4">
@@ -52,9 +60,9 @@
           <button
             type="submit"
             class="btn btn-primary btn-lg"
-            [disabled]="newGameForm.invalid"
+            [disabled]="newGameForm.invalid || isLoading"
           >
-            {{ 'LOGIN.PLAY' | translate }}
+            <span *ngIf="!isLoading">{{ 'LOGIN.PLAY' | translate }}</span>
             <span *ngIf="isLoading" class="d-flex align-items-center justify-content-center">
               <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
               {{ 'COMMON.LOADING' | translate }}

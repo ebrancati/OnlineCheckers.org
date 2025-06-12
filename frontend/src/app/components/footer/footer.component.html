@@ -6,6 +6,13 @@
                 <h5>OnlineCheckers.org</h5>
                 <p>{{ 'FOOTER.COPYRIGHT' | translate: {year: currentYear} }}</p>
                 <p class="footer-tagline">{{ 'FOOTER.TAGLINE' | translate }}</p>
+
+                <div class="footer-links mt-3">
+                    <a routerLink="/privacy-policy" class="privacy-link">
+                        <i class="bi bi-shield-check me-1"></i>
+                        {{ 'FOOTER.PRIVACY_POLICY' | translate }}
+                    </a>
+                </div>
             </div>
             
             <!-- Team Section -->

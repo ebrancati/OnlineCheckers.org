@@ -27,9 +27,11 @@
   height: 2px;
   background-color: var(--navbar-hover);
 }
-
 .footer h5.developers-title:after {
   width: 80px;
+}
+.footer h5.discord-title:after {
+  width: 155px;
 }
 
 .footer-about, .developers-grid {
@@ -40,6 +42,36 @@
   margin-top: 0.5rem;
   font-style: italic;
   opacity: 0.8;
+}
+
+.footer-links {
+  border-top: 1px solid var(--card-border);
+  padding-top: 1rem;
+}
+
+.privacy-link {
+  display: inline-flex;
+  align-items: center;
+  color: var(--link-color);
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  padding: 0.5rem 0;
+}
+
+.privacy-link:hover {
+  color: var(--navbar-hover);
+  text-decoration: underline;
+  transform: translateX(3px);
+}
+
+.privacy-link i {
+  font-size: 1rem;
+  transition: transform 0.3s ease;
+}
+
+.privacy-link:hover i {
+  transform: scale(1.1);
 }
 
 .developers-title {
@@ -138,5 +170,9 @@
 
   .social-links {
     justify-content: center;
+  }
+
+  .footer-links {
+    text-align: center;
   }
 }

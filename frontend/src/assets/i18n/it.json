@@ -78,6 +78,15 @@
     "JOIN_AS": "Unisciti come",
     "WAITING_FOR_OPPONENT": "La partita inizierà quando un altro giocatore si unirà."
   },
+  "NICKNAME_VALIDATION": {
+    "EMPTY_NICKNAME": "Il nickname non può essere vuoto",
+    "TOO_SHORT": "Il nickname deve avere almeno 3 caratteri",
+    "TOO_LONG": "Il nickname non può superare i 20 caratteri",
+    "URL_DETECTED": "Non sono ammessi URL nei nickname", 
+    "INVALID_CONTENT": "Questo nickname non è consentito",
+    "SERVER_ERROR": "Si è verificato un errore durante la validazione del nickname",
+    "MISSING_NICKNAME": "Il nickname è obbligatorio"
+  },
   "CHAT": {
     "PLACEHOLDER": "Scrivi un messaggio...",
     "CHAT_TITLE": "Chat:"
@@ -86,7 +95,8 @@
     "COPYRIGHT": "OnlineCheckers.org",
     "OUR_TEAM": "Contatti",
     "TAGLINE": "Gioca a dama online con amici o contro il computer",
-    "JOIN_COMMUNITY": "Unisciti alla Community"
+    "JOIN_COMMUNITY": "Unisciti alla Community",
+    "PRIVACY_POLICY": "Informativa sulla Privacy"
   },
   "RULES": {
     "TITLE": "Dama Inglese - Regole e Come Giocare",
