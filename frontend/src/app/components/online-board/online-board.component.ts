@@ -41,6 +41,7 @@ interface Move {
 
 @Component({
   selector: 'app-online-board',
+  standalone: true,
   imports: [
     NgForOf,
     NgClass,
@@ -50,8 +51,7 @@ interface Move {
     TranslateModule
   ],
   templateUrl: './online-board.component.html',
-  styleUrl: './online-board.component.css',
-  standalone: true
+  styleUrl:    './online-board.component.css',
 })
 export class OnlineBoardComponent implements OnInit, OnDestroy {
   private captureChainStart: { row: number; col: number } | null = null;
@@ -117,7 +117,7 @@ export class OnlineBoardComponent implements OnInit, OnDestroy {
   private errorSubscription: Subscription | null = null;
 
   userRole: 'PLAYER' | 'SPECTATOR' = 'SPECTATOR';
-  isSpectator: boolean = true;
+  isSpectator: boolean = false;
   spectatorMessage: string | undefined = undefined;
   spectatorCount: number = 0;
 

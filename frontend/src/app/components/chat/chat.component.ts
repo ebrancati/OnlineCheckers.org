@@ -9,7 +9,7 @@ import { TranslateModule } from '@ngx-translate/core';
   standalone: true,
   imports: [CommonModule, FormsModule, TranslateModule],
   templateUrl: './chat.component.html',
-  styleUrl: './chat.component.css'
+  styleUrl:    './chat.component.css'
 })
 export class ChatComponent {
   @Input() gameId!: string;

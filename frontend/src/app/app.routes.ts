@@ -1,23 +1,24 @@
 import { Routes } from '@angular/router';
 
-import { RulesContentPage } from './pages/rules-content/rules-content.page';
-import { MenuPage }         from './pages/menu/menu.page';
-import { OnlinePage }       from './pages/online/online.page';
-import { LocalePlayerPage } from './pages/locale-player/locale-player.page';
-import { BotPlayerPage }    from './pages/bot-player/bot-player.page';
-import { LoginPage }        from './pages/login/login.page';
-import { JoinPage }         from './pages/join/join.page';
+import { MenuPage }          from './pages/menu-page/menu-page.component';
+import { LoginPage }         from './pages/login-page/login-page.component';
+import { OnlineGamePage }    from './pages/online-game-page/online-game-page.component';
+import { OfflineGamePage }   from './pages/offline-game-page/offline-game-page.component';
+import { CpuGamePage }       from './pages/cpu-game-page/cpu-game-page.component';
+import { JoinPage }          from './pages/join-page/join-page.component';
+import { PrivacyPolicyPage } from './pages/privacy-policy-page/privacy-policy-page.component';
 
 export const routes: Routes = [
-  { path: '', redirectTo: '/play', pathMatch: 'full' },
+  { path: '', redirectTo: '', pathMatch: 'full' },
+ 
+  { path: '',               component: MenuPage },
+  { path: 'login',          component: LoginPage },
+  { path: 'game/:gameId',   component: OnlineGamePage },
+  { path: 'play/offline',   component: OfflineGamePage },
+  { path: 'play/computer',  component: CpuGamePage },
+  { path: 'vs-bot',         component: CpuGamePage },
+  { path: 'join/:gameId',   component: JoinPage },
+  { path: 'privacy-policy', component: PrivacyPolicyPage },
 
-  { path: 'play',         component: MenuPage },
-  { path: 'rules',        component: RulesContentPage },
-  { path: 'login',        component: LoginPage },
-  { path: 'game/:gameId', component: OnlinePage },
-  { path: 'locale',       component: LocalePlayerPage },
-  { path: 'vs-bot',       component: BotPlayerPage },
-  { path: 'join/:gameId', component: JoinPage },
-
-  { path: '**', redirectTo: '/play' },
+  { path: '**', redirectTo: '' },
 ];

@@ -29,8 +29,8 @@
     "TURN": "Turno",
     "WAITING_STATUS": "Attesa",
     "RECENT_MOVES": "Mosse Recenti",
-    "WHITE_TURN_ERROR": "È il turno del Bianco!",
-    "BLACK_TURN_ERROR": "È il turno del Nero!"
+    "WHITE_TURN_ERROR": "È il turno del Giocatore Bianco!",
+    "BLACK_TURN_ERROR": "È il turno del Giocatore Nero!"
   },
   "BOT": {
     "OPTIONS": "Opzioni Bot",
@@ -39,8 +39,8 @@
     "MEDIUM": "Medio",
     "HARD": "Difficile",
     "YOUR_COLOR": "Il Tuo Colore",
-    "PLAY_WHITE": "Gioca come Bianco",
-    "PLAY_BLACK": "Gioca come Nero",
+    "PLAY_WHITE": "Gioca come Giocatore Bianco",
+    "PLAY_BLACK": "Gioca come Giocatore Nero",
     "NEW_GAME": "Nuova Partita",
     "THINKING": "Il bot sta pensando...",
     "CAPTURING": "Catturando...",
@@ -78,19 +78,29 @@
     "JOIN_AS": "Unisciti come",
     "WAITING_FOR_OPPONENT": "La partita inizierà quando un altro giocatore si unirà."
   },
+  "NICKNAME_VALIDATION": {
+    "EMPTY_NICKNAME": "Il nickname non può essere vuoto",
+    "TOO_SHORT": "Il nickname deve avere almeno 3 caratteri",
+    "TOO_LONG": "Il nickname non può superare i 20 caratteri",
+    "URL_DETECTED": "Non sono ammessi URL nei nickname", 
+    "INVALID_CONTENT": "Questo nickname non è consentito",
+    "SERVER_ERROR": "Si è verificato un errore durante la validazione del nickname",
+    "MISSING_NICKNAME": "Il nickname è obbligatorio"
+  },
   "CHAT": {
     "PLACEHOLDER": "Scrivi un messaggio...",
     "CHAT_TITLE": "Chat:"
   },
   "FOOTER": {
-    "COPYRIGHT": "© {{year}} OnlineCheckers.org",
+    "COPYRIGHT": "OnlineCheckers.org",
     "OUR_TEAM": "Contatti",
-    "TAGLINE": "Gioca a dama online con amici o contro il computer."
+    "TAGLINE": "Gioca a dama online con amici o contro il computer",
+    "JOIN_COMMUNITY": "Unisciti alla Community",
+    "PRIVACY_POLICY": "Informativa sulla Privacy"
   },
   "RULES": {
     "TITLE": "Dama Inglese - Regole e Come Giocare",
     "INTRODUCTION": "La Dama Inglese è un gioco da tavolo tradizionale giocato su una scacchiera 8x8 con 12 pedine per giocatore. È una delle varianti di dama più diffuse al mondo.",
-    "INTRO_TEXT": "Facile da imparare ma ricca di strategie, la Dama Inglese è un passatempo amato nei paesi anglofoni da generazioni.",
     "HISTORY_TITLE": "Storia della Dama Inglese",
     "HISTORY_TEXT_1": "La Dama Inglese ha una lunga storia che risale al periodo medievale in Inghilterra e in altre parti d'Europa.",
     "HISTORY_TEXT_2": "Il primo libro sul gioco fu pubblicato nel 1756 da William Payne, intitolato 'An Introduction to the Game of Draughts'.",
@@ -107,7 +117,7 @@
     "KINGS_TITLE": "Le Dame",
     "KINGS_TEXT_1": "Una pedina diventa dama quando raggiunge l'ultima fila sul lato avversario della scacchiera. Di solito viene incoronata posizionando una seconda pedina sopra di essa.",
     "KINGS_TEXT_2": "Una dama può muoversi in diagonale sia avanti che indietro, ma si muove comunque di una sola casella alla volta tranne quando cattura.",
-    "KINGS_TEXT_3": "Le dame catturano nello stesso modo delle pedine normali, ma possono farlo in tutte e quattro le direzioni diagonali. Come le pedine normali, le dame devono effettuare tutte le catture disponibili."
+    "KINGS_TEXT_3": "Le dame catturano nello stesso modo delle pedine normali, ma possono farlo in tutte e quattro le direzioni diagonali. Come le pedine normali, le dame devono effettuare tutte le catture disponibili. Le dame possono essere catturate dalle pedine normali seguendo le stesse regole di cattura."
   },
   "ERRORS": {
     "GAME_NOT_FOUND": "La partita che stai cercando di unire non esiste.",

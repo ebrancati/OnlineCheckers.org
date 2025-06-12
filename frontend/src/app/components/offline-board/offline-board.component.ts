@@ -24,6 +24,7 @@ interface Move {
 
 @Component({
   selector: 'app-offline-board',
+  standalone: true,
   imports: [
     NgForOf,
     NgClass,
@@ -32,8 +33,7 @@ interface Move {
     TranslateModule
   ],
   templateUrl: './offline-board.component.html',
-  styleUrl: './offline-board.component.css',
-  standalone: true
+  styleUrl:    './offline-board.component.css'
 })
 export class OfflineBoardComponent implements OnInit, OnDestroy {
   board: Cell[][] = [];
