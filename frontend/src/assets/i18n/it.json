@@ -18,6 +18,7 @@
   },
   "GAME": {
     "YOUR_TURN": "È il tuo turno!",
+    "CURRENT_TURN": "Turno Corrente",
     "WAITING": "In attesa...",
     "MOVE_PIECE": "Muovi una pedina per continuare.",
     "OPPONENT_TURN": "Turno di",
@@ -140,6 +141,7 @@
   "SPECTATOR": {
     "VIEWING_MODE": "Modalità Spettatore", 
     "DEFAULT_MESSAGE": "Stai visualizzando questa partita come spettatore. Non puoi effettuare mosse o inviare messaggi.",
-    "WATCHING": "spettatori stanno guardando"
+    "WATCHING": "spettatori stanno guardando",
+    "WAITING_FOR_PLAYERS": "In attesa che i giocatori si uniscano..."
   }
 }

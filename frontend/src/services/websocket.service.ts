@@ -36,7 +36,7 @@ export class WebSocketService {
   private socket: WebSocket | null = null;
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
-  private reconnectInterval = 1000; // Start with 1 second
+  private reconnectInterval = 1000;
   private isConnecting = false;
 
   // Observables for different message types
@@ -55,6 +55,22 @@ export class WebSocketService {
   constructor() {}
 
   /**
+   * Get dynamic WebSocket URL based on current location
+   */
+  private getWebSocketUrl(): string {
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'; // Use WSS for HTTPS, WS for HTTP
+    const host = window.location.host; // Change it for production in window.location.host, for development use "localhost:8080"
+    const wsUrl = `${protocol}//${host}/ws/game`;
+    
+    console.log('WebSocket URL calculated:', wsUrl);
+    console.log('Current location:', window.location.href);
+    console.log('Protocol:', window.location.protocol);
+    console.log('Host:', host);
+    
+    return wsUrl;
+  }
+
+  /**
    * Connect to WebSocket and subscribe to a specific game
    */
   connect(gameId: string, playerId: string): void {
@@ -70,28 +86,31 @@ export class WebSocketService {
     this.isConnecting = true;
     this.connectionStatusSubject.next('connecting');
 
-    const wsUrl = `ws://localhost:8080/ws/game`; // Adjust URL for production
+    // Get dynamic WebSocket URL
+    const wsUrl = this.getWebSocketUrl();
     
     try {
+      console.log('Attempting WebSocket connection to:', wsUrl);
       this.socket = new WebSocket(wsUrl);
 
       this.socket.onopen = () => {
-        console.log('WebSocket connected');
+        console.log('WebSocket connected successfully');
         this.isConnecting = false;
         this.reconnectAttempts = 0;
         this.reconnectInterval = 1000;
         this.connectionStatusSubject.next('connected');
         
-        // Subscribe to the game immediately after connection
         this.subscribeToGame(gameId, playerId);
       };
 
       this.socket.onmessage = (event) => {
         try {
           const message: WebSocketMessage = JSON.parse(event.data);
+          console.log('WebSocket message received:', message);
           this.handleMessage(message);
         } catch (error) {
           console.error('Error parsing WebSocket message:', error);
+          console.error('Raw message:', event.data);
         }
       };
 
@@ -100,19 +119,19 @@ export class WebSocketService {
         this.isConnecting = false;
         this.connectionStatusSubject.next('disconnected');
         
-        // Attempt to reconnect if not a normal closure
         if (event.code !== 1000 && this.reconnectAttempts < this.maxReconnectAttempts) {
+          console.log('Scheduling reconnection attempt...');
           this.scheduleReconnect(gameId, playerId);
         }
       };
 
       this.socket.onerror = (error) => {
-        console.error('WebSocket error:', error);
+        console.error('WebSocket error occurred:', error);
         this.isConnecting = false;
         this.connectionStatusSubject.next('disconnected');
         this.errorSubject.next({
           type: 'ERROR',
-          message: 'Connection error occurred',
+          message: 'WebSocket connection error occurred',
           code: 'CONNECTION_ERROR'
         });
       };
@@ -124,10 +143,7 @@ export class WebSocketService {
       this.scheduleReconnect(gameId, playerId);
     }
   }
-
-  /**
-   * Handle incoming WebSocket messages
-   */
+  
   private handleMessage(message: WebSocketMessage): void {
     switch (message.type) {
       case 'GAME_STATE_UPDATE':
@@ -148,9 +164,6 @@ export class WebSocketService {
     }
   }
 
-  /**
-   * Subscribe to game updates
-   */
   private subscribeToGame(gameId: string, playerId: string): void {
     this.sendMessage({
       type: 'SUBSCRIBE_GAME',
@@ -159,9 +172,6 @@ export class WebSocketService {
     });
   }
 
-  /**
-   * Send a move
-   */
   makeMove(gameId: string, playerId: string, move: MoveP): void {
     this.sendMessage({
       type: 'MAKE_MOVE',
@@ -174,9 +184,6 @@ export class WebSocketService {
     });
   }
 
-  /**
-   * Send a chat message
-   */
   sendChatMessage(gameId: string, playerId: string, text: string): void {
     this.sendMessage({
       type: 'SEND_MESSAGE',
@@ -186,9 +193,6 @@ export class WebSocketService {
     });
   }
 
-  /**
-   * Update restart status
-   */
   updateRestartStatus(gameId: string, playerId: string, restartStatus: any): void {
     this.sendMessage({
       type: 'UPDATE_RESTART_STATUS',
@@ -201,9 +205,6 @@ export class WebSocketService {
     });
   }
 
-  /**
-   * Reset game
-   */
   resetGame(gameId: string, playerId: string): void {
     this.sendMessage({
       type: 'RESET_GAME',
@@ -212,9 +213,6 @@ export class WebSocketService {
     });
   }
 
-  /**
-   * Send a message through WebSocket
-   */
   private sendMessage(message: any): void {
     if (this.socket && this.socket.readyState === WebSocket.OPEN) {
       this.socket.send(JSON.stringify(message));
@@ -228,25 +226,18 @@ export class WebSocketService {
     }
   }
 
-  /**
-   * Schedule a reconnection attempt
-   */
   private scheduleReconnect(gameId: string, playerId: string): void {
     this.reconnectAttempts++;
     
     if (this.reconnectAttempts <= this.maxReconnectAttempts) {
-      console.log(`Attempting to reconnect in ${this.reconnectInterval}ms (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
-      
       setTimeout(() => {
         if (this.socket?.readyState !== WebSocket.OPEN) {
           this.connect(gameId, playerId);
         }
       }, this.reconnectInterval);
       
-      // Exponential backoff
-      this.reconnectInterval = Math.min(this.reconnectInterval * 2, 30000); // Max 30 seconds
+      this.reconnectInterval = Math.min(this.reconnectInterval * 2, 30000);
     } else {
-      console.error('Max reconnection attempts reached');
       this.errorSubject.next({
         type: 'ERROR',
         message: 'Unable to connect to server. Please refresh the page.',
@@ -255,9 +246,6 @@ export class WebSocketService {
     }
   }
 
-  /**
-   * Manually disconnect
-   */
   disconnect(): void {
     if (this.socket) {
       this.socket.close(1000, 'Manual disconnect');
@@ -266,9 +254,6 @@ export class WebSocketService {
     this.connectionStatusSubject.next('disconnected');
   }
 
-  /**
-   * Check if WebSocket is connected
-   */
   isConnected(): boolean {
     return this.socket !== null && this.socket.readyState === WebSocket.OPEN;
   }

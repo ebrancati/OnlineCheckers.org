@@ -66,6 +66,7 @@ backend/dist/
 backend/nbdist/
 backend/.nb-gradle/
 backend/build/
+backend/api-server/src/main/resources/static
 backend/api-server/nbproject/private/
 backend/api-server/nbbuild/
 backend/api-server/dist/

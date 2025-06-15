@@ -18,6 +18,7 @@
   },
   "GAME": {
     "YOUR_TURN": "It's your turn!",
+    "CURRENT_TURN": "Current Turn",
     "WAITING": "Waiting...",
     "MOVE_PIECE": "Move a piece to continue.",
     "OPPONENT_TURN": "Turn of",
@@ -140,6 +141,7 @@
   "SPECTATOR": {
     "VIEWING_MODE": "Spectator Mode",
     "DEFAULT_MESSAGE": "You are viewing this game as a spectator. You cannot make moves or chat.",
-    "WATCHING": "spectators watching"
+    "WATCHING": "spectators watching",
+    "WAITING_FOR_PLAYERS": "Waiting for players to join..."
   }
 }

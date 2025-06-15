@@ -12,6 +12,7 @@ import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
 import jakarta.servlet.http.HttpSession;
 import java.util.Map;
@@ -25,8 +26,9 @@ public class WebSocketConfig implements WebSocketConfigurer {
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
+        // Native WebSocket (recommended for better performance)
         registry.addHandler(gameWebSocketHandler, "/ws/game")
-                .setAllowedOrigins("*")
+                .setAllowedOriginPatterns("*") // More flexible for AWS
                 .addInterceptors(new HandshakeInterceptor() {
                     @Override
                     public boolean beforeHandshake(ServerHttpRequest request, 
@@ -34,7 +36,9 @@ public class WebSocketConfig implements WebSocketConfigurer {
                                                  WebSocketHandler wsHandler, 
                                                  Map<String, Object> attributes) throws Exception {
                         
-                        System.out.println("=== WEBSOCKET HANDSHAKE DEBUG ===");
+                        System.out.println("=== AWS WEBSOCKET HANDSHAKE DEBUG ===");
+                        System.out.println("Request URI: " + request.getURI());
+                        System.out.println("Headers: " + request.getHeaders());
                         
                         if (request instanceof ServletServerHttpRequest) {
                             ServletServerHttpRequest servletRequest = (ServletServerHttpRequest) request;
@@ -46,12 +50,15 @@ public class WebSocketConfig implements WebSocketConfigurer {
                                 attributes.put("HTTP_SESSION_ID", sessionId);
                                 attributes.put("HTTP_SESSION", httpSession);
                             } else {
-                                System.out.println("No HTTP session found");
+                                System.out.println("No HTTP session found, creating new session");
+                                httpSession = servletRequest.getServletRequest().getSession(true);
+                                attributes.put("HTTP_SESSION_ID", httpSession.getId());
+                                attributes.put("HTTP_SESSION", httpSession);
                             }
                         }
                         
                         System.out.println("WebSocket attributes: " + attributes);
-                        System.out.println("=================================");
+                        System.out.println("=====================================");
                         
                         return true;
                     }
@@ -62,7 +69,13 @@ public class WebSocketConfig implements WebSocketConfigurer {
                         ServerHttpResponse response,
                         WebSocketHandler wsHandler, 
                         Exception exception
-                    ) {}
+                    ) {
+                        if (exception != null) {
+                            System.err.println("WebSocket handshake failed: " + exception.getMessage());
+                        } else {
+                            System.out.println("WebSocket handshake completed successfully");
+                        }
+                    }
                 });
     }
 }

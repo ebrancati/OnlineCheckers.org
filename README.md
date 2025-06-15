@@ -4,7 +4,7 @@ Play Checkers online with friends or against AI opponents.
 
 ## 📚 Documentation
 
-Detailed setup instructions are in the README files in each component directory:
+Detailed setup instructions are in the respective README files:
 
 - [Frontend Documentation](./frontend/README.md)
 - [Backend Documentation](./backend/README.md)

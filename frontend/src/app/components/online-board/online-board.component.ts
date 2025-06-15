@@ -230,18 +230,10 @@ export class OnlineBoardComponent implements OnInit, OnDestroy {
    * Disconnect from WebSocket
    */
   private disconnectFromWebSocket(): void {
-    if (this.gameStateSubscription) {
-      this.gameStateSubscription.unsubscribe();
-    }
-    if (this.restartStatusSubscription) {
-      this.restartStatusSubscription.unsubscribe();
-    }
-    if (this.connectionStatusSubscription) {
-      this.connectionStatusSubscription.unsubscribe();
-    }
-    if (this.errorSubscription) {
-      this.errorSubscription.unsubscribe();
-    }
+    if (this.gameStateSubscription)        this.gameStateSubscription.unsubscribe();
+    if (this.restartStatusSubscription)    this.restartStatusSubscription.unsubscribe();
+    if (this.connectionStatusSubscription) this.connectionStatusSubscription.unsubscribe();
+    if (this.errorSubscription)            this.errorSubscription.unsubscribe();
     
     this.webSocketService.disconnect();
   }
@@ -251,7 +243,7 @@ export class OnlineBoardComponent implements OnInit, OnDestroy {
    * Replaces the old fetchGameState method
    */
   private handleGameStateUpdate(gameState: any): void {
-    // NEW: First, get the full game access info to determine user role
+    // Get the full game access info to determine user role
     this.gameService.getGameState(this.gameID).subscribe({
       next: (gameAccess: GameAccessDto) => {
         // Update user role and spectator status
@@ -259,11 +251,21 @@ export class OnlineBoardComponent implements OnInit, OnDestroy {
         this.isSpectator = gameAccess.role === 'SPECTATOR';
         this.spectatorMessage = gameAccess.message;
 
-        // Log for debugging
-        console.log('User role:', this.userRole, 'Is spectator:', this.isSpectator);
+        // If user is a spectator, don't try to determine playerTeam
+        if (this.isSpectator) {
+          this.playerTeam = null; // Ensure spectators don't have a team
+        } else {
+          // Only try to determine team for actual players
+          const nickname = localStorage.getItem('nickname');
+          if (nickname) {
+            const playerMatch = gameState.players.find((p: { nickname: string; }) => p.nickname === nickname);
+            if (playerMatch) {
+              this.playerTeam = playerMatch.team as 'WHITE' | 'BLACK';
+            }
+          }
+        }
 
-        // Use the gameState from the parameter (WebSocket data) for real-time updates
-        // but use gameAccess.gameState for role-specific logic
+        // Process the game state update
         this.processGameStateUpdate(gameState, gameAccess.gameState);
       },
       error: (error) => {
@@ -271,6 +273,7 @@ export class OnlineBoardComponent implements OnInit, OnDestroy {
         // Fallback: treat as spectator if we can't determine role
         this.userRole = 'SPECTATOR';
         this.isSpectator = true;
+        this.playerTeam = null; // Spectators don't have teams
         this.spectatorMessage = 'Unable to determine your role in this game.';
         
         // Still process the game state update

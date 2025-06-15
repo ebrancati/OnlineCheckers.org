@@ -117,6 +117,12 @@
   color: var(--text-color);
 }
 
+.developer-name {
+  display: flex;
+  flex-direction: row;
+  gap: 0.25rem;
+}
+
 .social-links {
   display: flex;
   gap: 0.75rem;
@@ -147,6 +153,21 @@
 
 .dark-theme .email {
   background-color: #bd8b00a3;
+}
+
+/* Split names for medium screens */
+@media (min-width: 768px) and (max-width: 1399px) {
+  .developer-name {
+    flex-direction: column;
+  }
+}
+
+/* Keep names on same line for mobile and large screens */
+@media (max-width: 767px), (min-width: 1400px) {
+  .developer-name {
+    flex-direction: row;
+    gap: 0.25rem;
+  }
 }
 
 @media (max-width: 768px) {

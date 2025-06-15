@@ -89,7 +89,16 @@ export class NavbarComponent implements OnInit, OnDestroy {
    * Navigate to home and scroll to rules section
    */
   navigateToRules(): void {
-    this.router.navigate(['/'], { fragment: 'rules' });
+    // Close navbar manually, whitout bootstrap
+    const navbarCollapse = document.querySelector('#navbarNav') as HTMLElement;
+
+    if (navbarCollapse && navbarCollapse.classList.contains('show'))
+      navbarCollapse.classList.remove('show');
+    
+    if (this.router.url === '/' || this.router.url === '' || this.router.url.includes('#'))
+      this.scrollToRulesSection(); // We're already on home page, just scroll directly to rules
+    else
+      this.router.navigate(['/'], { fragment: 'rules' }); // Navigate to home page with rules fragment
   }
 
   /**
@@ -146,7 +155,20 @@ export class NavbarComponent implements OnInit, OnDestroy {
           inline: 'nearest'
         });
       }
-    }, 100); // ensure DOM is ready
+    }, 300); // ensure DOM is ready
+  }
+
+  private scrollToRulesSection(): void {
+    setTimeout(() => {
+      const element = document.getElementById('rules');
+      if (element) {
+        element.scrollIntoView({ 
+          behavior: 'smooth',
+          block: 'start',
+          inline: 'nearest'
+        });
+      }
+    }, 100); // delay to let navbar close if open
   }
 
   /**
