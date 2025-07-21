@@ -1,12 +1,12 @@
 # OnlineCheckers.org - Frontend
 
-This is the frontend component of OnlineCheckers.org, a web application that allows users to play Italian Checkers online against other players or against a bot.
+This is the frontend component of OnlineCheckers.org, a web application that allows users to play English Checkers online against other players or against a bot.
 
 ## Technologies
 
-- Angular 17+ (Standalone Components)
+- Angular 19+ (Standalone Components)
 - Bootstrap 5
-- ngx-translate for internationalization
+- Angular i18n (@angular/localize) for internationalization
 
 ## Prerequisites
 
@@ -57,7 +57,8 @@ Navigate to `http://localhost:4200/`. The app will automatically reload if you c
   - Local Play (on the same device)
   - Online Play against other players
   - Play against the computer (bot with 3 difficulty levels)
-- **Game Rules**: Italian Checkers ruleset
+  - Spectator mode
+- **Game Rules**: English Checkers ruleset
 - **UI Features**:
   - Board visualization with coordinates
   - Move history

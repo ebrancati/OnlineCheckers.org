@@ -68,12 +68,31 @@ Frontend (Angular)
 
 ## 📋 API Documentation
 
-### Main Endpoints
+### Game Management
 - **POST** `/api/games/create` - Create new game
 - **POST** `/api/games/join/{id}` - Join existing game  
+- **GET** `/api/games/{id}` - Get game state
 - **POST** `/api/games/{id}/move` - Make a move
+- **POST** `/api/games/{id}/chat` - Send chat message
+- **POST** `/api/games/{id}/reset` - Reset game
+- **DELETE** `/api/games/{id}` - Delete game
+
+### Player Management
+- **POST** `/api/players/create` - Create player with nickname validation
+- **POST** `/api/players/validate-nickname` - Validate nickname without creating player
+
+### Restart System
+- **GET** `/api/restartStatus/{id}/` - Get restart status
+- **POST** `/api/restartStatus/{id}` - Update restart status
+- **POST** `/api/restartStatus/{id}/restart` - Reset restart flags
+
+### Bot System
 - **POST** `/api/bot/move` - Calculate bot move
+
+### WebSocket Real-time Communication
 - **WebSocket** `/ws/game` - Real-time game updates
+  - Message types: SUBSCRIBE_GAME, MAKE_MOVE, SEND_MESSAGE, UPDATE_RESTART_STATUS, RESET_GAME
+  - Server broadcasts: GAME_STATE_UPDATE, RESTART_STATUS_UPDATE, PLAYER_CONNECTED/DISCONNECTED, ERROR
 
 ### Bot Lambda Endpoints
 - **POST** `/bot/move` - Calculate AI move
