@@ -1,12 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
 import { RulesComponent } from '../../components/rules/rules.component';
 
 @Component({
   selector: 'menu-page',
   standalone: true,
-  imports: [RulesComponent, TranslateModule],
+  imports: [RulesComponent],
   templateUrl: './menu-page.component.html',
   styleUrl:    './menu-page.component.css'
 })

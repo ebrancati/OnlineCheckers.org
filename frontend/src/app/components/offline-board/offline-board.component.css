@@ -13,17 +13,6 @@
   position: relative;
 }
 
-.status-info {
-  margin-bottom: 15px;
-  text-align: center;
-}
-
-.current-player {
-  font-weight: bold;
-  margin-bottom: 5px;
-  text-align: left;
-}
-
 .board-with-coordinates {
   display: flex;
   flex-direction: column;
@@ -60,6 +49,7 @@
 }
 
 .piece {
+  cursor: pointer;
   width: 80%;
   height: 80%;
   border-radius: 50%;
@@ -71,7 +61,6 @@
   justify-content: center;
   align-items: center;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-  cursor: grab;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   z-index: 10;
 }
@@ -83,18 +72,10 @@
   100% { transform: scale(1); }
 }
 
-.piece.moving {
-  animation: movePiece 0.5s ease-in-out;
-}
-
 /* Animation for piece capture */
 @keyframes capturePiece {
   0% { transform: scale(1); opacity: 1; }
   100% { transform: scale(0); opacity: 0; }
-}
-
-.piece.captured {
-  animation: capturePiece 0.4s ease-in-out forwards;
 }
 
 .piece:hover {
@@ -103,7 +84,6 @@
 }
 
 .piece:active {
-  cursor: grabbing;
   transform: scale(1.1);
 }
 
@@ -213,7 +193,11 @@
   animation: crown-glow 2s infinite alternate;
 }
 
-.square.highlight::after, .square.droppable::after {
+.square.highlight {
+  cursor: pointer;
+}
+
+.square.highlight::after {
   content: '';
   position: absolute;
   top: 50%; left: 50%;
@@ -224,10 +208,7 @@
   border-radius: 50%;
   animation: pulse-highlight 2s infinite;
   box-shadow: 0 0 8px rgba(0, 255, 0, 0.5);
-}
-
-.square.droppable.drag-over {
-  background-color: rgba(0, 255, 0, 0.2);
+  cursor: pointer;
 }
 
 @keyframes pulse-highlight {
@@ -239,8 +220,22 @@
 .side-panel {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 5px;
   width: 250px;
+}
+
+#white-pieces-counter {
+  background-color: var(--card-bg);
+  color: var(--card-text);
+}
+
+#black-pieces-counter {
+  background-color: var(--card-bg);
+  color: var(--card-text);
+}
+
+.counter-text {
+  color: var(--card-text) !important;
 }
 
 /* Game over modal */
@@ -315,6 +310,7 @@ h2 {
   width: 100%;
   justify-content: center;
   padding: 0 20px;
+  margin-left: 30px;
 }
 
 .col-label {
@@ -570,6 +566,12 @@ h2 {
   .crown {
     font-size: 22px;
   }
+
+  #white-pieces-counter,
+  #black-pieces-counter {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
 }
 
 @media (max-width: 768px) {
@@ -654,7 +656,6 @@ h2 {
     font-size: 0.85rem;
   }
 
-  /* Usa l'ordine dei componenti per mobile */
   .side-panel app-moves {
     order: 2;
   }
@@ -728,10 +729,7 @@ h2 {
 }
 
 @media (max-width: 375px) {
-  .card {
-    width: 80vw;
-  }
-
+  
   .col-label {
     font-size: 0.7rem;
   }

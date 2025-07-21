@@ -1,8 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { TranslateModule } from '@ngx-translate/core';
-import { LanguageService } from '../../../services/language.service';
 import { ThemeService } from '../../../services/theme.service';
 import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
@@ -10,29 +8,22 @@ import { filter } from 'rxjs/operators';
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [CommonModule, TranslateModule],
+  imports: [CommonModule],
   templateUrl: './navbar.component.html',
   styleUrl:    './navbar.component.css'
 })
 export class NavbarComponent implements OnInit, OnDestroy {
   nickname = localStorage.getItem('nickname') ?? '';
   isAdmin: boolean = false;
-  currentLang: string = 'it';
   currentTheme: string = 'light-theme';
   isDarkTheme: boolean = false;
-  private langSubscription: Subscription;
   private themeSubscription: Subscription;
   private routerSubscription: Subscription;
 
   constructor(
     public router: Router,
-    private languageService: LanguageService,
     private themeService: ThemeService
   ) {
-    this.langSubscription = this.languageService.currentLang$.subscribe(
-      lang => this.currentLang = lang
-    );
-
     this.themeSubscription = this.themeService.theme$.subscribe(
       theme => {
         this.currentTheme = theme;
@@ -60,7 +51,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this.langSubscription)   this.langSubscription.unsubscribe();
     if (this.themeSubscription)  this.themeSubscription.unsubscribe();
     if (this.routerSubscription) this.routerSubscription.unsubscribe();
   }
@@ -70,8 +60,29 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.router.navigate(['/login']);
   }
 
-  changeLanguage(lang: string): void {
-    this.languageService.changeLanguage(lang);
+  /**
+   * Redirect to appropriate domain
+   */
+  changeLanguage(targetLang: string): void {
+    const currentPath = window.location.pathname;
+    const currentSearch = window.location.search;
+    const currentHash = window.location.hash;
+    
+    let targetUrl: string;
+    if (targetLang === 'it') {
+      targetUrl = `https://it.onlinecheckers.org${currentPath}${currentSearch}${currentHash}`;
+    } else {
+      targetUrl = `https://onlinecheckers.org${currentPath}${currentSearch}${currentHash}`;
+    }
+    
+    window.location.href = targetUrl;
+  }
+
+  /**
+   * Get current language from domain
+   */
+  getCurrentLanguage(): string {
+    return window.location.hostname === 'it.onlinecheckers.org' ? 'it' : 'en';
   }
 
   toggleTheme(): void {

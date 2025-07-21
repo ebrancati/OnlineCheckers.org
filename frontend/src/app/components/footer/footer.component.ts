@@ -1,12 +1,11 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-footer',
   standalone: true,
-  imports: [CommonModule, RouterModule, TranslateModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './footer.component.html',
   styleUrl:    './footer.component.css'
 })
@@ -34,9 +33,8 @@ export class FooterComponent {
       email: 'dodo.farano@gmail.com'
     },
     {
-      firstName: 'AnielloPio',
+      firstName: 'Aniello Pio',
       lastName: 'Pentangelo',
-      linkedin: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
       email: 'aniellopiopentangelo2@gmail.com'
     }
   ];

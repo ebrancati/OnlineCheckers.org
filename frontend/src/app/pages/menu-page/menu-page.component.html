@@ -1,26 +1,32 @@
 <div class="menu-container mt-5">
-  <h2>{{ 'MENU.SELECT_MODE' | translate }}</h2>
+  <h2 i18n="@@MENU.SELECT_MODE">Select Game Mode</h2>
 
   <div class="container">
     <div class="row justify-content-center">
       <div class="btn-group-custom d-flex flex-wrap" role="group">
         <button
+          i18n="@@MENU.ONLINE"
           class="menu-button-custom col-12 col-sm-4"
           [class.selected]="selectedMode === 'online'"
           (click)="selectMode('online')">
-          {{ 'MENU.ONLINE' | translate }} 🌐
+          Play Online
+          <i class="bi bi-globe me-2"></i>
         </button>
         <button
-          class="menu-button-custom col-12 col-sm-4"
-          [class.selected]="selectedMode === 'local'"
-          (click)="selectMode('local')">
-          {{ 'MENU.LOCAL' | translate }} 🏠
-        </button>
-        <button
+          i18n="@@MENU.VS_COMPUTER"
           class="menu-button-custom col-12 col-sm-4"
           [class.selected]="selectedMode === 'bot'"
           (click)="selectMode('bot')">
-          {{ 'MENU.VS_COMPUTER' | translate }} 👾
+          Play against Computer
+          <i class="bi bi-robot me-2"></i>
+        </button>
+        <button
+          i18n="@@MENU.LOCAL"
+          class="menu-button-custom col-12 col-sm-4"
+          [class.selected]="selectedMode === 'local'"
+          (click)="selectMode('local')">
+          Play Locally
+          <i class="bi bi-wifi-off me-2"></i>
         </button>
       </div>
     </div>

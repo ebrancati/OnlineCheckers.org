@@ -1,7 +1,30 @@
 <div class="container-fluid d-flex flex-column justify-content-center align-items-center mt-5">
+
+  <div *ngIf="showNicknameError" class="invalid-feedback d-block">
+    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+    
+    <span *ngIf="errorCode === 'EMPTY_NICKNAME'" i18n="@@NICKNAME_VALIDATION.EMPTY_NICKNAME">
+      Nickname cannot be empty
+    </span>
+    <span *ngIf="errorCode === 'TOO_SHORT'" i18n="@@NICKNAME_VALIDATION.TOO_SHORT">
+      Nickname must be at least 3 characters
+    </span>
+    <span *ngIf="errorCode === 'TOO_LONG'" i18n="@@NICKNAME_VALIDATION.TOO_LONG">
+      Nickname cannot exceed 20 characters
+    </span>
+    <span *ngIf="errorCode === 'INVALID_CONTENT'" i18n="@@NICKNAME_VALIDATION.INVALID_CONTENT">
+      This nickname is not allowed
+    </span>
+    
+    <span *ngIf="!isKnownErrorCode()" i18n="@@NICKNAME_VALIDATION.UNKNOWN">Invalid nickname. Please try another one</span>
+  </div>
+
   <div class="row justify-content-center">
     <div class="col-12 text-center">
-      <h1 class="display-4 mb-5">{{ 'LOGIN.YOUR_NICKNAME' | translate }}</h1>
+      <h1
+        i18n="@@LOGIN.YOUR_NICKNAME"
+        class="display-4 mb-5"
+      >Your Nickname:</h1>
 
       <form class="mb-5" #newGameForm="ngForm" (ngSubmit)="newGame()">
         <div class="mb-4">
@@ -14,7 +37,8 @@
             required
             class="form-control form-control-lg"
             [class.is-invalid]="showNicknameError"
-            placeholder="{{ 'LOGIN.ENTER_NICKNAME' | translate }}"
+            i18n-placeholder="@@LOGIN.ENTER_NICKNAME"
+            placeholder="Enter your nickname"
           />
           
           <!-- Nickname validation error display -->
@@ -25,8 +49,8 @@
         </div>
 
         <div class="mb-4">
-          <label class="form-label">{{ 'LOGIN.CHOOSE_TEAM' | translate }}</label>
-          <div class="d-flex flex-column flex-md-row justify-content-center gap-3">
+          <label i18n="@@LOGIN.CHOOSE_TEAM" class="form-label">Choose your team</label>
+          <div class="d-flex justify-content-center gap-4">
             <div class="form-check">
               <input
                 class="form-check-input"
@@ -36,9 +60,11 @@
                 value="WHITE"
                 [(ngModel)]="preferredTeam"
               />
-              <label class="form-check-label" for="teamWhite">
-                {{ 'GAME.WHITE_PLAYER' | translate }}
-              </label>
+              <label
+                i18n="@@GAME.WHITE_PLAYER"
+                class="form-check-label"
+                for="teamWhite"
+              >White Player</label>
             </div>
             <div class="form-check">
               <input
@@ -49,9 +75,11 @@
                 value="BLACK"
                 [(ngModel)]="preferredTeam"
               />
-              <label class="form-check-label" for="teamBlack">
-                {{ 'GAME.BLACK_PLAYER' | translate }}
-              </label>
+              <label
+                i18n="@@GAME.BLACK_PLAYER"
+                class="form-check-label"
+                for="teamBlack"
+              >Black Player</label>
             </div>
           </div>
         </div>
@@ -62,10 +90,14 @@
             class="btn btn-primary btn-lg"
             [disabled]="newGameForm.invalid || isLoading"
           >
-            <span *ngIf="!isLoading">{{ 'LOGIN.PLAY' | translate }}</span>
+            <span *ngIf="!isLoading" i18n="@@LOGIN.PLAY">Play</span>
             <span *ngIf="isLoading" class="d-flex align-items-center justify-content-center">
-              <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-              {{ 'COMMON.LOADING' | translate }}
+              <span
+                i18n="@@COMMON.LOADING"
+                class="spinner-border spinner-border-sm me-2"
+                role="status"
+                aria-hidden="true"
+              ></span>
             </span>
           </button>
         </div>

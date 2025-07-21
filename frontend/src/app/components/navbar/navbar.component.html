@@ -1,12 +1,10 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
   <div class="container-fluid">
-    <a class="navbar-brand me-4" (click)="navigateToHome()">
+    <a class="navbar-brand me-4" (click)="navigateToPlay()">
       <header>
+        <img src="/OnlineCheckers-logo.png" alt="OnlineCheckers.org Logo">
         <h3>
           <span>Online</span>Checkers<span>.org</span>
-          <span id="beta" title="OnlineCheckers.org is still under development and may have some bugs">
-            v0.3.1-beta
-          </span>
         </h3>
       </header>
     </a>
@@ -18,30 +16,40 @@
     <div class="collapse navbar-collapse order-lg-1 justify-content-end" id="navbarNav">
       <ul class="navbar-nav">
         <li class="nav-item">
-          <a class="nav-link" (click)="navigateToPlay()" 
-            data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            {{ 'COMMON.PLAY' | translate }}
+          <a
+            i18n="@@COMMON.PLAY"
+            class="nav-link"
+            (click)="navigateToPlay()" 
+          >
+            <i class="bi bi-rocket"></i>
+            Play
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" (click)="navigateToRules()">
-            {{ 'COMMON.RULES' | translate }}
+          <a
+            i18n="@@COMMON.RULES"
+            class="nav-link"
+            (click)="navigateToRules()"
+          >
+            <i class="bi bi-book"></i>
+            Rules
           </a>
         </li>
 
         <li class="nav-item theme-toggle">
-          <a class="nav-link" (click)="toggleTheme()">
+          <a i18n="@@COMMON.THEME" class="nav-link" (click)="toggleTheme()">
             <i class="bi" [ngClass]="isDarkTheme ? 'bi-sun' : 'bi-moon'"></i>
+            <span  class="theme-toggle-text">Change Theme</span>
           </a>
         </li>
 
         <li class="nav-item dropdown language-selector">
           <a class="nav-link dropdown-toggle" href="#" id="languageDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            {{ currentLang === 'en' ? 'English' : 'Italiano' }}
+            <i class="bi bi-translate"></i>{{ getCurrentLanguage() === 'en' ? 'English' : 'Italiano' }}
           </a>
           <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="languageDropdown">
-            <li><a class="dropdown-item" (click)="changeLanguage('it')" [class.active]="currentLang === 'it'">Italiano</a></li>
-            <li><a class="dropdown-item" (click)="changeLanguage('en')" [class.active]="currentLang === 'en'">English</a></li>
+            <li><a class="dropdown-item" (click)="changeLanguage('en')" [class.active]="getCurrentLanguage() === 'en'">English</a></li>
+            <li><a class="dropdown-item" (click)="changeLanguage('it')" [class.active]="getCurrentLanguage() === 'it'">Italiano</a></li>
           </ul>
         </li>
       </ul>

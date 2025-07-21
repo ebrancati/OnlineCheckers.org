@@ -1,22 +1,27 @@
 <footer class="footer">
-    <div class="container">
+    <div class="container-fluid px-3">
         <div class="row">
             <!-- About Section -->
             <div class="col-md-4 footer-about">
                 <h5>OnlineCheckers.org</h5>
-                <p class="footer-tagline">{{ 'FOOTER.TAGLINE' | translate }}</p>
+                <p i18n="@@FOOTER.TAGLINE" class="footer-tagline">Play checkers online with friends or against the computer</p>
 
-                <div class="footer-links mt-3">
-                    <a (click)="navigateToPrivacyPolicy()" class="privacy-link" style="cursor: pointer;">
+                <div class="footer-links mb-3">
+                    <a
+                        i18n="@@FOOTER.PRIVACY_POLICY"
+                        (click)="navigateToPrivacyPolicy()"
+                        class="privacy-link"
+                        style="cursor: pointer;"
+                    >
                         <i class="bi bi-shield-check me-1"></i>
-                        {{ 'FOOTER.PRIVACY_POLICY' | translate }}
+                        Privacy Policy
                     </a>
                 </div>
             </div>
             
             <!-- Team Section -->
             <div class="col-md-4">
-                <h5 class="developers-title">{{ 'FOOTER.OUR_TEAM' | translate }}</h5>
+                <h5 i18n="@@FOOTER.OUR_TEAM" class="developers-title">Contacts</h5>
                 <div class="row developers-grid">
                     <div *ngFor="let dev of developers" class="col-md-6 developer-card">
                         <div class="developer-info">
@@ -27,10 +32,10 @@
                                 </span>
                             </h6>
                             <div class="social-links">
-                                <a [href]="dev.linkedin" target="_blank" class="social-link linkedin" title="LinkedIn">
+                                <a *ngIf="dev.linkedin" [href]="dev.linkedin" target="_blank" class="social-link linkedin" title="LinkedIn">
                                     <i class="bi bi-linkedin"></i>
                                 </a>
-                                <a [href]="'mailto:' + dev.email" class="social-link email" title="Email">
+                                <a *ngIf="dev.email" [href]="'mailto:' + dev.email" class="social-link email" title="Email">
                                     <i class="bi bi-envelope"></i>
                                 </a>
                             </div>
@@ -41,7 +46,7 @@
 
             <!-- Discord Widget -->
             <div class="col-md-4">
-                <h5 class="discord-title">{{ 'FOOTER.JOIN_COMMUNITY' | translate }}</h5>
+                <h5 i18n="@@FOOTER.JOIN_COMMUNITY" class="discord-title">Join Community</h5>
                 <div class="discord-widget-container">
                     <iframe 
                         src="https://discord.com/widget?id=1367142420604780585&theme=dark" 

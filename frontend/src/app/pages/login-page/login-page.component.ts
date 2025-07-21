@@ -4,16 +4,13 @@ import { GameService } from "../../../services/game.service";
 import { PlayerService } from "../../../services/player.service";
 import { FormsModule } from '@angular/forms';
 import { switchMap, finalize, catchError } from 'rxjs';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NgIf } from '@angular/common';
 import { of } from 'rxjs';
 
 @Component({
   selector: 'login-page',
   standalone: true,
-  imports: [
-    FormsModule, TranslateModule, NgIf
-  ],
+  imports: [FormsModule, NgIf],
   templateUrl: './login-page.component.html',
   styleUrl:    './login-page.component.css'
 })
@@ -22,6 +19,7 @@ export class LoginPage {
   joinGameId = '';
   preferredTeam = 'WHITE'; // Default
   isLoading = false; // Flag to control loading status
+  errorCode: string = '';
   
   // Nickname validation error handling
   showNicknameError = false;
@@ -31,7 +29,6 @@ export class LoginPage {
     private playerSvc: PlayerService,
     private gameSvc: GameService,
     private router: Router,
-    private translate: TranslateService
   ) {}
 
   newGame() {
@@ -88,23 +85,11 @@ export class LoginPage {
    */
   private handleNicknameValidationError(errorResponse: any): void {
     this.showNicknameError = true;
-    
-    // Get translated error message based on error code
-    const errorCode = errorResponse.errorCode;
-    const translationKey = `NICKNAME_VALIDATION.${errorCode}`;
-    
-    this.translate.get(translationKey).subscribe({
-      next: (translatedMessage: string) => {
-        // If translation is found, use it; otherwise use the message from backend
-        this.nicknameErrorMessage = translatedMessage !== translationKey 
-          ? translatedMessage 
-          : errorResponse.message;
-      },
-      error: () => {
-        // Fallback to backend message if translation fails
-        this.nicknameErrorMessage = errorResponse.message;
-      }
-    });
+    this.errorCode = errorResponse.errorCode || 'UNKNOWN';
+  }
+
+  isKnownErrorCode(): boolean {
+    return ['EMPTY_NICKNAME', 'TOO_SHORT', 'TOO_LONG', 'INVALID_CONTENT'].includes(this.errorCode);
   }
 
   /**

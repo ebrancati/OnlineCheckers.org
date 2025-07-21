@@ -1,8 +1,8 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { NgClass, NgForOf, NgIf } from '@angular/common';
-import { OfflineMovesComponent as MovesComponent } from '../offline-moves/offline-moves.component';
 import { AudioService } from '../../../services/audio.service';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { OfflineMovesComponent as MovesComponent } from '../offline-moves/offline-moves.component';
+import { InfoModalComponent } from '../modal/info-modal.component';
 
 /**
  * Interface representing a cell on the checkers board
@@ -30,7 +30,7 @@ interface Move {
     NgClass,
     NgIf,
     MovesComponent,
-    TranslateModule
+    InfoModalComponent
   ],
   templateUrl: './offline-board.component.html',
   styleUrl:    './offline-board.component.css'
@@ -50,6 +50,8 @@ export class OfflineBoardComponent implements OnInit, OnDestroy {
   showErrorMessage: boolean = false;
   errorMessageTimeout: any = null;
 
+  showInfoModal: boolean = false;
+
   gameOver: boolean = false;
   showGameOverModal: boolean = false;
   winner: 'black' | 'white' | null = null;
@@ -59,12 +61,14 @@ export class OfflineBoardComponent implements OnInit, OnDestroy {
   columns: string[] = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
   rows: string[] = ['8', '7', '6', '5', '4', '3', '2', '1'];
 
-  // Drag and drop properties
-  draggedPiece: { row: number, col: number } | null = null;
-  dragOverCell: { row: number, col: number } | null = null;
-
   ngOnInit() {
+    const hasSeenOfflineInfo = localStorage.getItem('offlineIntroShown');
     this.initBoard();
+    if (!hasSeenOfflineInfo) {
+      setTimeout(() => {
+        this.showInfoModal = true;
+      }, 500);
+    }
   }
 
   ngOnDestroy() {
@@ -74,10 +78,16 @@ export class OfflineBoardComponent implements OnInit, OnDestroy {
     }
   }
 
-  constructor(
-    public audioService: AudioService,
-    public translate: TranslateService
-  ) {}
+  constructor(public audioService: AudioService) {}
+
+  onCloseModal(): void {
+    this.showInfoModal = false;
+  }
+
+  onConfirmModal(): void {
+    this.showInfoModal = false;
+    localStorage.setItem('offlineIntroShown', 'true');
+  }
 
   /**
    * Initialize the game board with pieces in starting positions
@@ -496,6 +506,9 @@ export class OfflineBoardComponent implements OnInit, OnDestroy {
    */
   resetGame(): void {
     this.initBoard();
+
+    this.whiteCount = 12;
+    this.blackCount = 12;
   }
 
   /**
@@ -518,114 +531,16 @@ export class OfflineBoardComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Handles the start of a drag operation
-   * @param event - The drag event
-   * @param row - Row index of the dragged piece
-   * @param col - Column index of the dragged piece
-   */
-  onDragStart(event: DragEvent, row: number, col: number): void {
-    if (this.gameOver) {
-      event.preventDefault();
-      return;
-    }
-
-    const cell = this.board[row][col];
-
-    // Only allow dragging the current player's pieces
-    if (!cell.hasPiece || cell.pieceColor !== this.currentPlayer) {
-      event.preventDefault();
-      return;
-    }
-
-    // Store the dragged piece position
-    this.draggedPiece = { row, col };
-
-    // Set the drag image (optional)
-    if (event.dataTransfer) {
-      event.dataTransfer.setData('text/plain', `${row},${col}`);
-      event.dataTransfer.effectAllowed = 'move';
-    }
-
-    // Select the piece and show valid moves
-    this.selectedCell = { row, col };
-    this.highlightedCells = this.getValidMoves(row, col);
-  }
-
-  /**
-   * Handles the end of a drag operation
-   * @param event - The drag event
-   */
-  onDragEnd(event: DragEvent): void {
-    // Reset drag state if no drop occurred
-    this.draggedPiece = null;
-    this.dragOverCell = null;
-  }
-
-  /**
-   * Handles dragging over a potential drop target
-   * @param event - The drag event
-   * @param row - Row index of the target cell
-   * @param col - Column index of the target cell
-   */
-  onDragOver(event: DragEvent, row: number, col: number): void {
-    // Prevent default to allow drop
-    if (this.isHighlight(row, col)) {
-      event.preventDefault();
-
-      // Add drag-over class for visual feedback
-      const element = event.currentTarget as HTMLElement;
-      element.classList.add('drag-over');
-
-      this.dragOverCell = { row, col };
-    }
-  }
-
-  /**
-   * Handles dropping a piece on a target cell
-   * @param event - The drag event
-   * @param row - Row index of the target cell
-   * @param col - Column index of the target cell
-   */
-  onDrop(event: DragEvent, row: number, col: number): void {
-    event.preventDefault();
-
-    // Remove drag-over class
-    const element = event.currentTarget as HTMLElement;
-    element.classList.remove('drag-over');
-
-    // Check if this is a valid drop target
-    if (this.draggedPiece && this.isHighlight(row, col)) {
-      // Make the move
-      this.makeMove(this.draggedPiece.row, this.draggedPiece.col, row, col);
-    }
-
-    // Reset drag state
-    this.draggedPiece = null;
-    this.dragOverCell = null;
-  }
-
-  /**
    * Metodo per mostrare il messaggio di errore quando non è il turno corretto
    */
   showTurnErrorMessage(): void {
-    // Cancella il timer precedente se esiste
-    if (this.errorMessageTimeout) {
-      clearTimeout(this.errorMessageTimeout);
-    }
+
+    if (this.errorMessageTimeout) clearTimeout(this.errorMessageTimeout);
     
-    // Usa TranslateService per ottenere il messaggio tradotto
-    const key = this.currentPlayer === 'white' ? 
-      'GAME.WHITE_TURN_ERROR' : 
-      'GAME.BLACK_TURN_ERROR';
-      
-    this.translate.get(key).subscribe((message: string) => {
-      this.errorMessage = message;
-      this.showErrorMessage = true;
-    });
+    this.showErrorMessage = true;
     
     this.errorMessageTimeout = setTimeout(() => {
       this.showErrorMessage = false;
-      this.errorMessage = null;
     }, 3000);
   }
 }

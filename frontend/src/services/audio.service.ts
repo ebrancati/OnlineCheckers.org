@@ -4,37 +4,26 @@ import { Injectable } from '@angular/core';
   providedIn: 'root'
 })
 export class AudioService {
-  private moveSound: HTMLAudioElement;
-  private captureSound: HTMLAudioElement;
-  private winSound: HTMLAudioElement;
-  private loseSound: HTMLAudioElement;
-  private kingSound: HTMLAudioElement;
 
-  constructor() {
-    this.moveSound = new Audio('assets/sounds/move.mp3');
-    this.captureSound = new Audio('assets/sounds/capture.mp3');
-    this.winSound = new Audio('assets/sounds/win.mp3');
-    this.loseSound = new Audio('assets/sounds/lose.mp3');
-    this.kingSound = new Audio('assets/sounds/king.mp3');
-  }
+  constructor() {}
 
   playMoveSound(): void {
-    this.moveSound.play();
+    new Audio('assets/sounds/move.mp3').play();
   }
 
   playCaptureSound(): void {
-    this.captureSound.play();
+    new Audio('assets/sounds/capture.mp3').play();
   }
 
   playWinSound(): void {
-    this.winSound.play();
+    new Audio('assets/sounds/win.mp3').play();
   }
 
   playLoseSound(): void {
-    this.loseSound.play();
+    new Audio('assets/sounds/lose.mp3').play();
   }
 
   playKingSound(): void {
-    this.kingSound.play();
+    new Audio('assets/sounds/king.mp3').play();
   }
 }

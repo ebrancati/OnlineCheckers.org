@@ -3,7 +3,6 @@ import { ActivatedRoute } from '@angular/router';
 import { NgClass, NgForOf, NgIf } from '@angular/common';
 import { DOCUMENT } from '@angular/common';
 import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
-import { TranslateModule } from '@ngx-translate/core';
 import { interval, Subscription } from 'rxjs';
 import { OnlineMovesComponent as MovesComponent } from '../online-moves/online-moves.component';
 import { ChatComponent } from '../chat/chat.component';
@@ -47,15 +46,13 @@ interface Move {
     NgClass,
     NgIf,
     MovesComponent,
-    ChatComponent,
-    TranslateModule
+    ChatComponent
   ],
   templateUrl: './online-board.component.html',
   styleUrl:    './online-board.component.css',
 })
 export class OnlineBoardComponent implements OnInit, OnDestroy {
   private captureChainStart: { row: number; col: number } | null = null;
-  private hasCalledReset = false;
   origin: string | undefined
   board: Cell[][] = [];
   highlightedCells: { row: number, col: number }[] = [];
@@ -82,10 +79,6 @@ export class OnlineBoardComponent implements OnInit, OnDestroy {
   rows: number[] = [1, 2, 3, 4, 5, 6, 7, 8];
   nickname: string | null = localStorage.getItem('nickname');
   capturePath: string[] = [];
-
-  // Drag and drop properties
-  draggedPiece: { row: number, col: number } | null = null;
-  dragOverCell: { row: number, col: number } | null = null;
 
   isAnimatingCapture: boolean = false;
   captureAnimationPath: { row: number, col: number }[] = [];
@@ -398,6 +391,10 @@ export class OnlineBoardComponent implements OnInit, OnDestroy {
     setTimeout(() => {
       this.isResetting = false;
     }, 1000);
+  }
+
+  get playerName(): string {
+    return this.currentPlayer === 'white' ? this.whitePlayerNickname : this.blackPlayerNickname;
   }
 
   /**
@@ -1244,103 +1241,6 @@ export class OnlineBoardComponent implements OnInit, OnDestroy {
    */
   isValidPosition(row: number, col: number): boolean {
     return row >= 0 && row < 8 && col >= 0 && col < 8;
-  }
-
-  /**
-   * Handles the start of a drag operation
-   * @param event - The drag event
-   * @param row - Row index of the dragged piece
-   * @param col - Column index of the dragged piece
-   */
-  onDragStart(event: DragEvent, row: number, col: number): void {
-
-    if (this.gameOver || !this.isPlayerTurn() || this.isSpectator) {
-      event.preventDefault();
-      return;
-    }
-
-    const cell = this.board[row][col];
-
-    // Only allow dragging the current player's pieces
-    if (!cell.hasPiece || cell.pieceColor !== this.currentPlayer) {
-      event.preventDefault();
-      return;
-    }
-
-    // Store the dragged piece position
-    this.draggedPiece = { row, col };
-
-    // Set the drag image (optional)
-    if (event.dataTransfer) {
-      event.dataTransfer.setData('text/plain', `${row},${col}`);
-      event.dataTransfer.effectAllowed = 'move';
-    }
-
-    // Select the piece and show valid moves
-    this.selectedCell = { row, col };
-    this.highlightedCells = this.getValidMoves(row, col);
-  }
-
-  /**
-   * Handles the end of a drag operation
-   * @param event - The drag event
-   */
-  onDragEnd(event: DragEvent): void {
-
-    if (this.isSpectator) return;
-    
-    // Reset drag state if no drop occurred
-    this.draggedPiece = null;
-    this.dragOverCell = null;
-  }
-
-  /**
-   * Handles dragging over a potential drop target
-   * @param event - The drag event
-   * @param row - Row index of the target cell
-   * @param col - Column index of the target cell
-   */
-  onDragOver(event: DragEvent, row: number, col: number): void {
-
-    if (this.isSpectator) return;
-
-    // Prevent default to allow drop
-    if (this.isHighlight(row, col)) {
-      event.preventDefault();
-
-      // Add drag-over class for visual feedback
-      const element = event.currentTarget as HTMLElement;
-      element.classList.add('drag-over');
-
-      this.dragOverCell = { row, col };
-    }
-  }
-
-  /**
-   * Handles dropping a piece on a target cell
-   * @param event - The drag event
-   * @param row - Row index of the target cell
-   * @param col - Column index of the target cell
-   */
-  onDrop(event: DragEvent, row: number, col: number): void {
-
-    if (this.isSpectator) return
-
-    event.preventDefault();
-
-    // Remove drag-over class
-    const element = event.currentTarget as HTMLElement;
-    element.classList.remove('drag-over');
-
-    // Check if this is a valid drop target
-    if (this.draggedPiece && this.isHighlight(row, col)) {
-      // Make the move
-      this.makeMove(this.draggedPiece.row, this.draggedPiece.col, row, col);
-    }
-
-    // Reset drag state
-    this.draggedPiece = null;
-    this.dragOverCell = null;
   }
 
   // Method to start the capture animation

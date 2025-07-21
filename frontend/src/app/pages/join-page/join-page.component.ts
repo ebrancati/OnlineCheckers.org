@@ -6,7 +6,6 @@ import { PlayerService } from '../../../services/player.service';
 import { GameService } from '../../../services/game.service';
 import { player } from '../../../model/entities/player';
 import { switchMap, firstValueFrom } from 'rxjs';
-import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'join-page',
@@ -16,8 +15,7 @@ import { TranslateModule } from '@ngx-translate/core';
     NgIf, 
     NgSwitch, 
     NgSwitchCase, 
-    NgSwitchDefault,
-    TranslateModule,
+    NgSwitchDefault
   ],
   templateUrl: './join-page.component.html'
 })
@@ -126,7 +124,7 @@ export class JoinPage implements OnInit {
   }
 
   goToLocalMode() {
-    this.router.navigate(['/locale']);
+    this.router.navigate(['/play/computer']);
   }
 
   goToNewGame() {

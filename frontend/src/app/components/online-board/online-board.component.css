@@ -1,4 +1,13 @@
 .container {
+  padding: 20px;
+}
+
+.container .share-card {
+  max-width: 650px;
+  margin: 24px auto;
+}
+
+.main-game-content {
   display: flex;
   justify-content: center;
   align-items: flex-start;
@@ -11,6 +20,7 @@
   flex-direction: column;
   align-items: center;
   position: relative;
+  width: 100%;
 }
 
 .status-info {
@@ -63,6 +73,7 @@
 .black-cell { background: var(--board-dark); }
 
 .piece {
+  cursor: pointer;
   width: 80%;
   height: 80%;
   border-radius: 50%;
@@ -74,7 +85,6 @@
   justify-content: center;
   align-items: center;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-  cursor: grab;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   z-index: 10;
 }
@@ -85,7 +95,6 @@
 }
 
 .piece:active {
-  cursor: grabbing;
   transform: scale(1.1);
 }
 
@@ -96,18 +105,10 @@
   100% { transform: scale(1); }
 }
 
-.piece.moving {
-  animation: movePiece 0.5s ease-in-out;
-}
-
 /* Animation for piece capture */
 @keyframes capturePiece {
   0% { transform: scale(1); opacity: 1; }
   100% { transform: scale(0); opacity: 0; }
-}
-
-.piece.captured {
-  animation: capturePiece 0.4s ease-in-out forwards;
 }
 
 .black {
@@ -216,7 +217,11 @@
   to { text-shadow: 0 0 8px gold, 0 0 15px rgba(255, 215, 0, 0.9), 0 0 2px var(--piece-black); }
 }
 
-.square.highlight::after, .square.droppable::after {
+.square.highlight {
+  cursor: pointer;
+}
+
+.square.highlight::after {
   content: '';
   position: absolute;
   top: 50%; left: 50%;
@@ -227,10 +232,6 @@
   border-radius: 50%;
   animation: pulse-highlight 2s infinite;
   box-shadow: 0 0 8px rgba(0, 255, 0, 0.5);
-}
-
-.square.droppable.drag-over {
-  background-color: rgba(0, 255, 0, 0.2);
 }
 
 @keyframes pulse-highlight {
@@ -362,6 +363,7 @@ h2 {
   border-radius: 8px;
   margin: 10px 0;
   width: 100%;
+  max-width: 600px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   transition: all 0.3s ease;
 }
@@ -704,6 +706,23 @@ h2 {
   border-bottom-color: #f44336;
 }
 
+@media (min-width: 1400px) {
+  .centered-content {
+    display: flex;
+    justify-content: flex-start;
+    padding-right: 270px;
+  }
+  
+  .container .share-card {
+    width: 1000px;
+    margin: 24px auto;
+  }
+
+  .container .spectator-counter {
+    margin: 0px auto;
+  }
+}
+
 @media (max-width: 992px) {
   .board {
     grid-template-columns: repeat(8, 45px);
@@ -735,6 +754,16 @@ h2 {
     padding: 10px;
   }
 
+  .main-game-content {
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+  }
+
+  .share-card-container {
+    max-width: 100%;
+  }
+  
   .spectator-info {
     font-size: 0.8rem;
     padding: 6px 12px;

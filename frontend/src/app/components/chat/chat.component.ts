@@ -2,12 +2,11 @@ import { Component, Input, OnInit, Output, EventEmitter } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { WebSocketService } from '../../../services/websocket.service';
-import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-chat',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslateModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './chat.component.html',
   styleUrl:    './chat.component.css'
 })

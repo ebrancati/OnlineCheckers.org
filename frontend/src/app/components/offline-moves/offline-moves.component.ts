@@ -1,6 +1,5 @@
 import { Component, Input, OnChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { TranslateModule } from '@ngx-translate/core';
 
 interface Move {
   from: { row: number, col: number };
@@ -22,9 +21,7 @@ interface TurnMoves {
 @Component({
   selector: 'app-offline-moves',
   standalone: true,
-  imports: [
-    CommonModule, TranslateModule
-  ],
+  imports: [CommonModule],
   templateUrl: './offline-moves.component.html',
   styleUrl:    './offline-moves.component.css',
 })

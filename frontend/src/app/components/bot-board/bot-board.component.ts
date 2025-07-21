@@ -2,7 +2,6 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { OfflineBoardComponent } from '../offline-board/offline-board.component';
 import { BotService } from '../../../services/bot.service';
 import { AudioService } from '../../../services/audio.service';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { CommonModule } from '@angular/common';
 import { OfflineMovesComponent } from '../offline-moves/offline-moves.component';
 
@@ -11,7 +10,6 @@ import { OfflineMovesComponent } from '../offline-moves/offline-moves.component'
   standalone: true,
   imports: [
     CommonModule,
-    TranslateModule,
     OfflineMovesComponent
   ],
   templateUrl: './bot-board.component.html',
@@ -35,16 +33,8 @@ export class BotBoardComponent extends OfflineBoardComponent implements OnInit, 
   captureAnimationStep: number = 0;
   captureAnimationInterval: any = null;
 
-  // Drag and drop properties
-  override draggedPiece: { row: number, col: number } | null = null;
-  override dragOverCell: { row: number, col: number } | null = null;
-
-  constructor(
-    private botService: BotService,
-    audioService: AudioService,
-    translate: TranslateService
-  ) {
-    super(audioService, translate);
+  constructor(private botService: BotService, audioService: AudioService) {
+    super(audioService);
   }
 
   override ngOnInit() {
@@ -451,76 +441,13 @@ export class BotBoardComponent extends OfflineBoardComponent implements OnInit, 
   }
 
   /**
-   * Handle drag start with animation and bot turn checks
-   */
-  override onDragStart(event: DragEvent, row: number, col: number): void {
-    // If animation is running, bot is thinking, or it's bot's turn, prevent drag
-    if (this.isAnimatingCapture || this.isThinking || this.currentPlayer === this.botColor || this.gameOver) {
-      event.preventDefault();
-      return;
-    }
-
-    // Otherwise proceed normally
-    super.onDragStart(event, row, col);
-  }
-
-  /**
-   * Handle drag over with animation and bot turn checks
-   */
-  override onDragOver(event: DragEvent, row: number, col: number): void {
-    // If animation is running, bot is thinking, or it's bot's turn, ignore drag over
-    if (this.isAnimatingCapture || this.isThinking || this.currentPlayer === this.botColor || this.gameOver) {
-      return;
-    }
-
-    // Otherwise proceed normally
-    super.onDragOver(event, row, col);
-  }
-
-  /**
-   * Handle drop with animation and bot turn checks
-   */
-  override onDrop(event: DragEvent, row: number, col: number): void {
-    // If animation is running, bot is thinking, or it's bot's turn, ignore drop
-    if (this.isAnimatingCapture || this.isThinking || this.currentPlayer === this.botColor || this.gameOver) {
-      return;
-    }
-
-    // Otherwise proceed normally
-    super.onDrop(event, row, col);
-  }
-
-  /**
-   * Handle drag end with animation and bot turn checks
-   */
-  override onDragEnd(event: DragEvent): void {
-    // If animation is running, bot is thinking, or it's bot's turn, ignore drag end
-    if (this.isAnimatingCapture || this.isThinking || this.currentPlayer === this.botColor || this.gameOver) {
-      return;
-    }
-
-    // Otherwise proceed normally
-    super.onDragEnd(event);
-  }
-
-  /**
    * Show custom error message for bot game mode
    */
   override showTurnErrorMessage(): void {
-    // Clear previous timer if exists
-    if (this.errorMessageTimeout) {
-      clearTimeout(this.errorMessageTimeout);
-    }
     
-    // Use bot-specific translation keys
-    const key = this.currentPlayer === this.playerColor ? 
-      'BOT.YOUR_TURN_ERROR' : 
-      'BOT.BOT_TURN_ERROR';
-      
-    this.translate.get(key).subscribe((message: string) => {
-      this.errorMessage = message;
-      this.showErrorMessage = true;
-    });
+    if (this.errorMessageTimeout) clearTimeout(this.errorMessageTimeout);
+
+    this.showErrorMessage = true;
     
     this.errorMessageTimeout = setTimeout(() => {
       this.showErrorMessage = false;

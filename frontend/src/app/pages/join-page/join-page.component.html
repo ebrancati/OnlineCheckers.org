@@ -1,5 +1,8 @@
 <div class="card p-4 mx-auto mt-5 mb-5" style="max-width:360px">
-  <h4 class="mb-3">{{ 'JOIN.JOIN_GAME' | translate }}</h4>
+  <h4
+    i18n="@@JOIN.JOIN_GAME"
+    class="mb-3"
+  >Join Game</h4>
 
   <!-- Error messages -->
   <div *ngIf="showError" class="alert alert-danger mb-3 position-relative">
@@ -8,32 +11,38 @@
     </button>
     <div class="p-2 m-3">
       <div [ngSwitch]="errorCode">
-        <p *ngSwitchCase="'GAME_NOT_FOUND'">
-          {{ 'ERRORS.GAME_NOT_FOUND' | translate }}
+        <p *ngSwitchCase="'GAME_NOT_FOUND'" i18n="@@ERRORS.GAME_NOT_FOUND">
+          The game you're trying to join doesn't exist.
         </p>
-        <p *ngSwitchCase="'GAME_FULL'">
-          {{ 'ERRORS.GAME_FULL' | translate }}
+        <p *ngSwitchCase="'GAME_FULL'"      i18n="@@ERRORS.GAME_FULL">
+          This game already has two players and cannot accept more participants.
         </p>
-        <p *ngSwitchCase="'SELF_PLAY'">
-          {{ 'ERRORS.SELF_PLAY_NOT_ALLOWED' | translate }}
+        <p *ngSwitchCase="'SELF_PLAY'"      i18n="@@ERRORS.SELF_PLAY_NOT_ALLOWED">
+          You cannot play against yourself in online mode. Please use the 'Play Locally' option from the main menu.
         </p>
-        <p *ngSwitchCase="'SERVER_ERROR'">
-          {{ 'ERRORS.SERVER_ERROR' | translate }}
+        <p *ngSwitchCase="'SERVER_ERROR'"   i18n="@@ERRORS.SERVER_ERROR">
+          An error occurred while connecting to the server. Please try again later.
         </p>
-        <p *ngSwitchCase="'JOIN_FAILED'">
-          {{ 'ERRORS.JOIN_FAILED' | translate }}
+        <p *ngSwitchCase="'JOIN_FAILED'"    i18n="@@ERRORS.JOIN_FAILED">
+          Failed to join the game. Please try again.
         </p>
-        <p *ngSwitchDefault>
-          {{ 'ERRORS.UNKNOWN_ERROR' | translate }}
+        <p *ngSwitchDefault                 i18n="@@ERRORS.UNKNOWN_ERROR">
+          An unknown error occurred. Please try again later.
         </p>
       </div>
       <div class="mt-2">
-        <button *ngIf="errorCode === 'SELF_PLAY'" class="btn btn-primary btn-sm" (click)="goToLocalMode()">
-          {{ 'ERRORS.GO_TO_LOCAL_MODE' | translate }}
-        </button>
-        <button *ngIf="errorCode === 'GAME_FULL'" class="btn btn-primary btn-sm" (click)="goToNewGame()">
-          {{ 'ERRORS.CREATE_NEW_GAME' | translate }}
-        </button>
+        <button
+          *ngIf="errorCode === 'SELF_PLAY'"
+          i18n="@@GO_TO_CPU_MODE"
+          class="btn btn-primary btn-sm"
+          (click)="goToLocalMode()"
+        >Play against CPU</button>
+        <button
+          *ngIf="errorCode === 'GAME_FULL'"
+          i18n="@@ERRORS.CREATE_NEW_GAME"
+          class="btn btn-primary btn-sm"
+          (click)="goToNewGame()"
+        >Create New Game</button>
       </div>
     </div>
   </div>
@@ -41,10 +50,12 @@
   <!-- 1) Choose nickname -->
   <form *ngIf="step===1" #nickForm="ngForm" (ngSubmit)="onNickname()">
     <div class="mb-3">
-        <label class="form-label">{{ 'JOIN.NICKNAME' | translate }}</label>
-        <input name="nick" class="form-control"
-            required minlength="3"
-            [(ngModel)]="nickname" #nick="ngModel"
+        <label i18n="@@JOIN.NICKNAME" class="form-label">Your nickname</label>
+        <input
+          name="nick"
+          class="form-control"
+          required minlength="3"
+          [(ngModel)]="nickname" #nick="ngModel"
         />
 
         <div *ngIf="nick.invalid && nick.touched" class="text-danger">
@@ -52,20 +63,23 @@
           {{ nick.errors?.['minlength'] ? "{{ 'JOIN.MIN_LENGTH' | translate }}" : "" }}
         </div>
     </div>
-    <button class="btn btn-primary" [disabled]="nickForm.invalid">
-      {{ 'JOIN.NEXT' | translate }}
-    </button>
+    <button
+      i18n="@@JOIN.NEXT"
+      class="btn btn-primary"
+      [disabled]="nickForm.invalid"
+    >Next</button>
   </form>
 
   <!-- 2) Confirm Game ID and join -->
   <form *ngIf="step===2" #joinForm="ngForm" (ngSubmit)="onJoin()">
     <div class="mb-3">
-      <label class="form-label">{{ 'JOIN.GAME_ID' | translate }}</label>
-      <input name="gameId" class="form-control"
-             [value]="gameId" readonly>
+      <label i18n="@@JOIN.GAME_ID" class="form-label">Game ID</label>
+      <input
+        name="gameId"
+        class="form-control"
+        [value]="gameId" readonly
+      />
     </div>
-    <button class="btn btn-success">
-      {{ 'JOIN.JOIN_AS' | translate }} {{ nickname }}
-    </button>
+    <button i18n="@@JOIN.JOIN_AS" class="btn btn-success">Join as</button>
   </form>
 </div>

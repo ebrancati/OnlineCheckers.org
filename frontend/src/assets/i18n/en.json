@@ -1,7 +1,8 @@
 {
   "COMMON": {
-    "PLAY": "🎮 Play",
-    "RULES": "📖 Rules",
+    "PLAY": "Play",
+    "RULES": "Rules",
+    "THEME": "Change Theme",
     "LOGIN": "Login",
     "WELCOME": "Welcome",
     "COPY": "Copy",
@@ -9,6 +10,13 @@
     "SHARE_GAME": "Share this game",
     "SHARE_LINK": "Share this link with your opponent:",
     "LOADING": "Loading..."
+  },
+  "INFO_MODAL": {
+    "GOT_IT": "Got it!",
+    "OFFLINE_MODE_TITLE": "Local Game",
+    "OFFLINE_MODE_PARAGRAPHS_1": "Play on the same device with someone next to you, without needing internet.",
+    "OFFLINE_MODE_PARAGRAPHS_2": "White pieces start first, then players alternate turns.", 
+    "OFFLINE_MODE_PARAGRAPHS_3": "Click on your pieces to see available moves, then click where you want to move."
   },
   "LOGIN": {
     "YOUR_NICKNAME": "Your Nickname:",
@@ -86,7 +94,8 @@
     "URL_DETECTED": "URLs are not allowed in nicknames",
     "INVALID_CONTENT": "This nickname is not allowed",
     "SERVER_ERROR": "An error occurred while validating the nickname",
-    "MISSING_NICKNAME": "Nickname is required"
+    "MISSING_NICKNAME": "Nickname is required",
+    "UNKNOWN": "Invalid nickname. Please try another one"
   },
   "CHAT": {
     "PLACEHOLDER": "Write a message...",
@@ -127,13 +136,13 @@
     "SERVER_ERROR": "An error occurred while connecting to the server. Please try again later.",
     "JOIN_FAILED": "Failed to join the game. Please try again.",
     "UNKNOWN_ERROR": "An unknown error occurred. Please try again later.",
-    "GO_TO_LOCAL_MODE": "Go to Local Mode",
+    "GO_TO_CPU_MODE": "Play against CPU",
     "CREATE_NEW_GAME": "Create New Game"
   },
   "WEBSOCKET": {
-    "CONNECTED": "🟢 Connected",
-    "CONNECTING": "🟡 Connecting...",
-    "DISCONNECTED": "🔴 Disconnected",
+    "CONNECTED": "Connected",
+    "CONNECTING": "Connecting...",
+    "DISCONNECTED": "Disconnected",
     "RECONNECT": "Reconnect",
     "CONNECTION_ERROR": "Connection lost. Trying to reconnect...",
     "MAX_ATTEMPTS_ERROR": "Unable to connect to server. Please refresh the page."
