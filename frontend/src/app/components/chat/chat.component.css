@@ -6,7 +6,6 @@
   border: 1px solid var(--card-border);
   border-radius: 5px;
   color: var(--text-color);
-  margin-top: 20px;
 }
 
 .chat-header {

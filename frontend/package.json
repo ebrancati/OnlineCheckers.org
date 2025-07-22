@@ -21,9 +21,17 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve --proxy-config proxy.conf.json",
+    "start:en": "ng serve --configuration development-en --proxy-config proxy.conf.json",
+    "start:it": "ng serve --configuration development-it --proxy-config proxy.conf.json",
     "build": "ng build",
+    "build:en": "ng build --configuration production-en",
+    "build:it": "ng build --configuration production-it",
+    "build:all": "npm run build:en && npm run build:it",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "extract-i18n": "ng extract-i18n --output-path src/locale",
+    "convert-translations": "node convert-json-to-xlf.js", 
+    "i18n:extract-and-convert": "npm run extract-i18n && npm run convert-translations"
   },
   "private": true,
   "dependencies": {
