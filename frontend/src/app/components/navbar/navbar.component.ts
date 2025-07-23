@@ -61,28 +61,44 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Redirect to appropriate domain
+   * Get current language from domain or port
+   * @returns 'it' for Italian, 'en' for English
+   */
+  getCurrentLanguage(): string {
+    const hostname = window.location.hostname;
+    const port = window.location.port;
+    
+    if (hostname === 'it.onlinecheckers.org' || port === '4201') return 'it';
+    
+    return 'en';
+  }
+
+  /**
+   * Redirect to appropriate domain or port based on target language
+   * @param targetLang - Target language ('en' or 'it')
    */
   changeLanguage(targetLang: string): void {
     const currentPath = window.location.pathname;
     const currentSearch = window.location.search;
     const currentHash = window.location.hash;
+    const isLocalhost = window.location.hostname === 'localhost';
     
     let targetUrl: string;
-    if (targetLang === 'it') {
-      targetUrl = `https://it.onlinecheckers.org${currentPath}${currentSearch}${currentHash}`;
+    
+    if (isLocalhost) {
+      // Development environment
+      const targetPort = targetLang === 'it' ? '4201' : '4200';
+      targetUrl = `http://localhost:${targetPort}${currentPath}${currentSearch}${currentHash}`;
     } else {
-      targetUrl = `https://onlinecheckers.org${currentPath}${currentSearch}${currentHash}`;
+      // Production environment
+      if (targetLang === 'it') {
+        targetUrl = `https://it.onlinecheckers.org${currentPath}${currentSearch}${currentHash}`;
+      } else {
+        targetUrl = `https://onlinecheckers.org${currentPath}${currentSearch}${currentHash}`;
+      }
     }
     
     window.location.href = targetUrl;
-  }
-
-  /**
-   * Get current language from domain
-   */
-  getCurrentLanguage(): string {
-    return window.location.hostname === 'it.onlinecheckers.org' ? 'it' : 'en';
   }
 
   toggleTheme(): void {

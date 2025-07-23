@@ -28,7 +28,7 @@ import { CommonModule } from '@angular/common';
           </div>
           <div class="modal-footer">
             <button 
-              type="button" 
+              i18n="@@INFO_MODAL.GOT_IT"
               class="btn btn-primary" 
               (click)="onCloseGotIt()">
                 Got it!

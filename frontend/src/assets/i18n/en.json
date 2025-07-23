@@ -38,6 +38,8 @@
     "TURN": "Turn",
     "WAITING_STATUS": "Waiting",
     "RECENT_MOVES": "Recent Moves",
+    "WHITE_PLAYER_TURN": "White player's turn",
+    "BLACK_PLAYER_TURN": "Black player's turn",
     "WHITE_TURN_ERROR": "It's Player White's turn!",
     "BLACK_TURN_ERROR": "It's Player Black's turn!"
   },
@@ -99,7 +101,7 @@
   },
   "CHAT": {
     "PLACEHOLDER": "Write a message...",
-    "CHAT_TITLE": "Chat:"
+    "CHAT_TITLE": "Chat"
   },
   "FOOTER": {
     "COPYRIGHT": "OnlineCheckers.org",

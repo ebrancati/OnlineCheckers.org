@@ -83,7 +83,7 @@ export class BotBoardComponent extends OfflineBoardComponent implements OnInit, 
         // Add small delay to give illusion that bot is "thinking"
         setTimeout(() => {
           this.getBotMove();
-        }, 900)
+        }, 600)
       }
     }, 100);
   }
@@ -162,7 +162,6 @@ export class BotBoardComponent extends OfflineBoardComponent implements OnInit, 
         } else {
           // Simple move
           super.makeMove(fromRow, fromCol, toRow, toCol);
-          this.audioService.playMoveSound();
         }
 
         // Add the new board state after bot's move to history

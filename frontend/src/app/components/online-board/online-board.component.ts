@@ -797,7 +797,10 @@ export class OnlineBoardComponent implements OnInit, OnDestroy {
         this.audioService.playLoseSound();
       }
 
-      // Always show the end game modal, regardless of who won
+      // Initialize restart status if not present
+      this.initializeRestartStatusIfNeeded();
+
+      // Always show the modal - restart status will be updated via WebSocket
       this.showGameOverModal = true;
 
       // If polling is active, we stop it at the end of the game
@@ -806,6 +809,30 @@ export class OnlineBoardComponent implements OnInit, OnDestroy {
         this.pollingSubscription = null;
       }
     }
+  }
+
+  /**
+   * Initialize restart status with default values if not present
+   * This ensures both players see the same initial state
+   */
+  private initializeRestartStatusIfNeeded(): void {
+    if (!this.restartStatus && this.gameID) {
+      // Create default restart status
+      this.restartStatus = {
+        gameID: this.gameID,
+        nicknameW: this.whitePlayerNickname,
+        nicknameB: this.blackPlayerNickname,
+        restartW: false,
+        restartB: false
+      };
+      
+      console.log('Initialized default restart status:', this.restartStatus);
+    }
+    
+    // Reset any previous restart state flags
+    this.waitingForOpponentRestart = false;
+    this.showRestartRequestedMessage = false;
+    this.hasClickedRestart = false;
   }
 
   /**

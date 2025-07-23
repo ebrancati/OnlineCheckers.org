@@ -33,9 +33,9 @@
       <div class="mt-2">
         <button
           *ngIf="errorCode === 'SELF_PLAY'"
-          i18n="@@GO_TO_CPU_MODE"
+          i18n="@@ERRORS.GO_TO_CPU_MODE"
           class="btn btn-primary btn-sm"
-          (click)="goToLocalMode()"
+          (click)="goToCPUMode()"
         >Play against CPU</button>
         <button
           *ngIf="errorCode === 'GAME_FULL'"

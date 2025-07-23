@@ -282,8 +282,8 @@
               </svg>
             </div>
             <div class="turn-text">
-              <h4 i18n="GAME.YOUR_TURN">It's your turn!</h4>
-              <p i18n="GAME.MOVE_PIECE">Move a piece to continue.</p>
+              <h4 i18n="@@GAME.YOUR_TURN">It's your turn!</h4>
+              <p i18n="@@GAME.MOVE_PIECE">Move a piece to continue.</p>
             </div>
           </div>
 
@@ -297,7 +297,8 @@
             </div>
             <div class="turn-text">
               <h4 i18n="@@GAME.WAITING">Waiting...</h4>
-              <p i18n="@@GAME.PLAYER_TURN">{{playerName}}'s turn</p>
+                <p *ngIf="currentPlayer === 'white'" i18n="@@GAME.WHITE_PLAYER_TURN">White player's turn</p>
+                <p *ngIf="currentPlayer === 'black'" i18n="@@GAME.BLACK_PLAYER_TURN">Black player's turn</p>
             </div>
           </div>
         </div>

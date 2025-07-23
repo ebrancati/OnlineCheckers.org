@@ -1,6 +1,6 @@
 {
   "name": "frontend",
-  "version": "0.3.1-beta",
+  "version": "0.3.2-beta",
   "license": "MIT",
   "author": "Enzo Brancati <enzo.brancati04@gmail.com>",
   "contributors": [
@@ -21,7 +21,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve --proxy-config proxy.conf.json",
-    "start:en": "ng serve --configuration development-en --proxy-config proxy.conf.json",
+    "start:en": "ng serve --configuration development --proxy-config proxy.conf.json",
     "start:it": "ng serve --configuration development-it --proxy-config proxy.conf.json",
     "build": "ng build",
     "build:en": "ng build --configuration production-en",

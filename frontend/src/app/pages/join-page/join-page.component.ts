@@ -123,7 +123,7 @@ export class JoinPage implements OnInit {
     });
   }
 
-  goToLocalMode() {
+  goToCPUMode() {
     this.router.navigate(['/play/computer']);
   }
 

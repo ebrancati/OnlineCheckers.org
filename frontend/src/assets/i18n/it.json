@@ -14,9 +14,9 @@
   "INFO_MODAL": {
     "GOT_IT": "Capito!",
     "OFFLINE_MODE_TITLE": "Gioco Locale",
-    "OFFLINE_MODE_PARAGRAPHS_1": "Gioca sullo stesso dispositivo con qualcuno accanto a te, senza bisogno di internet.",
-    "OFFLINE_MODE_PARAGRAPHS_2": "Le pedine bianche iniziano per prime, poi i giocatori si alternano.",
-    "OFFLINE_MODE_PARAGRAPHS_3": "Clicca sulle tue pedine per vedere le mosse disponibili, poi clicca dove vuoi muoverti."
+    "OFFLINE_MODE_PARAGRAPH_1": "Gioca sullo stesso dispositivo con qualcuno accanto a te, senza bisogno di internet.",
+    "OFFLINE_MODE_PARAGRAPH_2": "Le pedine bianche iniziano per prime, poi i giocatori si alternano.",
+    "OFFLINE_MODE_PARAGRAPH_3": "Clicca sulle tue pedine per vedere le mosse disponibili, poi clicca dove vuoi muoverti."
   },
   "LOGIN": {
     "YOUR_NICKNAME": "Il tuo Nickname:",
@@ -38,6 +38,8 @@
     "TURN": "Turno",
     "WAITING_STATUS": "Attesa",
     "RECENT_MOVES": "Mosse Recenti",
+    "WHITE_PLAYER_TURN": "Turno giocatore bianco",
+    "BLACK_PLAYER_TURN": "Turno giocatore nero",
     "WHITE_TURN_ERROR": "È il turno del Giocatore Bianco!",
     "BLACK_TURN_ERROR": "È il turno del Giocatore Nero!"
   },
@@ -99,7 +101,7 @@
   },
   "CHAT": {
     "PLACEHOLDER": "Scrivi un messaggio...",
-    "CHAT_TITLE": "Chat:"
+    "CHAT_TITLE": "Messaggi"
   },
   "FOOTER": {
     "COPYRIGHT": "OnlineCheckers.org",

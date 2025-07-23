@@ -628,13 +628,11 @@ h2 {
 
 .player-restart-status.white-player {
   background-color: var(--player-white-bg);
-  border: 1px solid var(--player-white-border);
 }
 
 .player-restart-status.black-player {
   background-color: var(--player-black-bg);
   color: var(--player-text-color);
-  border: 1px solid var(--player-black-border);
 }
 
 .player-name {

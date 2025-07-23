@@ -1,5 +1,5 @@
 <div class="container">
-  <div class="game-container">
+  <div class="board-container">
 
     <div *ngIf="showErrorMessage" class="error-message">
       <div class="error-content">
@@ -9,45 +9,35 @@
       </div>
     </div>
 
-    <!-- Wrong turn error message -->
-    <div *ngIf="showErrorMessage" class="error-message">
-      <div class="error-content">
-        <i class="bi bi-exclamation-triangle-fill me-2"></i>
-        {{ errorMessage }}
+    <!-- Game over modal -->
+    <div *ngIf="showGameOverModal" class="game-over-modal">
+      <div class="modal-content">
+        <div class="close-button" (click)="hideGameOverModal()">✕</div>
+        <h2 i18n="@@GAME_OVER.TITLE">Game Over!</h2>
+        <p>
+          <span *ngIf="winner === playerColor" i18n="@@BOT.YOU_WON">You won the game!</span>
+          <span *ngIf="winner === botColor" i18n="@@BOT.BOT_WON">The bot won the game!</span>
+        </p>
+        <button
+          i18n="@@GAME_OVER.NEW_GAME"
+          class="new-game-button"
+          (click)="resetGame()"
+        >New Game</button>
       </div>
     </div>
 
-    <div class="board-container">
+    <div *ngIf="isAnimatingCapture" class="capture-animation-indicator">
+      <p i18n="@@BOT.CAPTURING">Capturing...</p>
+    </div>
 
-      <!-- Game over modal -->
-      <div *ngIf="showGameOverModal" class="game-over-modal">
-        <div class="modal-content">
-          <div class="close-button" (click)="hideGameOverModal()">✕</div>
-          <h2 i18n="@@GAME_OVER.TITLE">Game Over!</h2>
-          <p>
-            <span *ngIf="winner === playerColor" i18n="@@BOT.YOU_WON">You won the game!</span>
-            <span *ngIf="winner === botColor" i18n="@@BOT.BOT_WON">The bot won the game!</span>
-          </p>
-          <button
-            i18n="@@GAME_OVER.NEW_GAME"
-            class="new-game-button"
-            (click)="resetGame()"
-          >New Game</button>
-        </div>
+    <div *ngIf="isThinking" class="bot-thinking-indicator">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
       </div>
+      <p i18n="@@BOT.THINKING">Bot is thinking...</p>
+    </div>
 
-      <div *ngIf="isAnimatingCapture" class="capture-animation-indicator">
-        <p i18n="@@BOT.CAPTURING">Capturing...</p>
-      </div>
-
-      <div *ngIf="isThinking" class="bot-thinking-indicator">
-        <div class="spinner-border text-primary" role="status">
-          <span class="visually-hidden">Loading...</span>
-        </div>
-        <p i18n="@@BOT.THINKING">Bot is thinking...</p>
-      </div>
-
-      <div class="board-with-coordinates">
+    <div class="board-with-coordinates">
         <!-- Letter coordinates (columns) -->
         <div class="column-labels">
           <div class="corner-spacer"></div>
@@ -85,7 +75,6 @@
             </div>
           </div>
         </div>
-      </div>
     </div>
   </div>
 
