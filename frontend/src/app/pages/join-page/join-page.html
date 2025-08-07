@@ -1,0 +1,95 @@
+<div class="card p-4 mx-auto mt-5 mb-5" style="max-width:360px">
+  <h4
+    i18n="@@JOIN.JOIN_GAME"
+    class="mb-3"
+  >Join Game</h4>
+
+  <!-- Error messages -->
+  @if (showError) {
+    <div class="alert alert-danger mb-3 position-relative">
+      <button class="btn btn-secondary btn-sm position-absolute top-0 end-0 m-2" (click)="closeError()">
+        ✖
+      </button>
+      <div class="p-2 m-3">
+        @switch (errorCode) {
+          @case ('GAME_NOT_FOUND') {
+            <p i18n="@@ERRORS.GAME_NOT_FOUND">The game you're trying to join doesn't exist.</p>
+          }
+          @case ('GAME_FULL') {
+            <p i18n="@@ERRORS.GAME_FULL">This game already has two players and cannot accept more participants.</p>
+          }
+          @case ('SELF_PLAY') {
+            <p i18n="@@ERRORS.SELF_PLAY_NOT_ALLOWED">You cannot play against yourself in online mode. Please use the 'Play Locally' option from the main menu.</p>
+          }
+          @case ('SERVER_ERROR') {
+            <p i18n="@@ERRORS.SERVER_ERROR">An error occurred while connecting to the server. Please try again later.</p>
+          }
+          @case ('JOIN_FAILED') {
+            <p i18n="@@ERRORS.JOIN_FAILED">Failed to join the game. Please try again.</p>
+          }
+          @default {
+            <p i18n="@@ERRORS.UNKNOWN_ERROR">An unknown error occurred. Please try again later.</p>
+          }
+        }
+        <div class="mt-2">
+          @if (errorCode === 'SELF_PLAY') {
+            <button
+              i18n="@@ERRORS.GO_TO_CPU_MODE"
+              class="btn btn-primary btn-sm"
+              (click)="goToCPUMode()"
+            >Play against CPU</button>
+          }
+          @if (errorCode === 'GAME_FULL') {
+            <button
+              i18n="@@ERRORS.CREATE_NEW_GAME"
+              class="btn btn-primary btn-sm"
+              (click)="goToNewGame()"
+            >Create New Game</button>
+          }
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- 1) Choose nickname -->
+  @if (step === 1) {
+    <form #nickForm="ngForm" (ngSubmit)="onNickname()">
+      <div class="mb-3">
+          <label i18n="@@JOIN.NICKNAME" class="form-label">Your nickname</label>
+          <input
+            name="nick"
+            class="form-control"
+            required minlength="3"
+            [(ngModel)]="nickname" #nick="ngModel"
+          />
+
+          @if (nick.invalid && nick.touched) { 
+            <div class="text-danger">
+              {{ nick.errors?.['required']  ? "{{ 'JOIN.REQUIRED'   | translate }}" : "" }}
+              {{ nick.errors?.['minlength'] ? "{{ 'JOIN.MIN_LENGTH' | translate }}" : "" }}
+            </div>
+          }
+      </div>
+      <button
+        i18n="@@JOIN.NEXT"
+        class="btn btn-primary"
+        [disabled]="nickForm.invalid"
+      >Next</button>
+    </form>
+  }
+
+  <!-- 2) Confirm Game ID and join -->
+  @if (step === 2) {
+    <form #joinForm="ngForm" (ngSubmit)="onJoin()">
+      <div class="mb-3">
+        <label i18n="@@JOIN.GAME_ID" class="form-label">Game ID</label>
+        <input
+          name="gameId"
+          class="form-control"
+          [value]="gameId" readonly
+        />
+      </div>
+      <button class="btn btn-success"><span i18n="@@JOIN.JOIN_AS">Join as </span>{{ nickname }}</button>
+    </form>
+  }
+</div>

@@ -1,0 +1,148 @@
+<div class="container">
+  <div class="board-container">
+
+    @if (showErrorMessage) { 
+      <div class="error-message">
+        <div class="error-content">
+          <i class="bi bi-exclamation-triangle-fill me-2"></i>
+          @if (currentPlayer === 'white') { <span i18n="@@GAME.WHITE_TURN_ERROR">It's Player White's turn!</span> }
+          @if (currentPlayer === 'black') { <span i18n="@@GAME.BLACK_TURN_ERROR">It's Player Black's turn!</span> }
+        </div>
+      </div>
+    }
+
+    <!-- Game over modal -->
+    @if (showGameOverModal) {
+      <div class="game-over-modal">
+        <div class="modal-content">
+          <div class="close-button" (click)="hideGameOverModal()">✕</div>
+          <h2 i18n="@@GAME_OVER.TITLE">Game Over!</h2>
+          <p>
+            <span i18n="@@GAME_OVER.WINNER">The winner is </span> 
+            <span class="winner-text">
+              @if (currentPlayer === 'white') { <span i18n="@@GAME.WHITE_PLAYER">White Player</span> }
+              @if (currentPlayer === 'black') { <span i18n="@@GAME.BLACK_PLAYER">Black Player</span> }
+            </span>
+          </p>
+          <button
+            i18n="@@GAME_OVER.NEW_GAME"
+            class="new-game-button"
+            (click)="resetGame()"
+          >New Game</button>
+        </div>
+      </div>
+    }
+
+    <div class="board-with-coordinates">
+      <!-- Letter coordinates (columns) -->
+      <div class="column-labels">
+        @for (col of columns; track col) {
+          <div class="col-label">{{ col }}</div>
+        }
+      </div>
+      <div class="board-with-row-labels">
+        <!-- Coordinate numbers (rows) -->
+        <div class="row-labels">
+          @for (row of rows; track row) {
+            <div class="row-label">{{ row }}</div>
+          }
+        </div>
+
+        <div class="board">
+          @for (row of board; track $index; let r = $index) {
+            <div class="row">
+              @for (cell of row; track $index; let c = $index) {
+                <div 
+                  class="square"
+                  [ngClass]="{
+                    'light': isLight(r, c),
+                    'dark': !isLight(r, c),
+                    'highlight': isHighlight(r, c),
+                    'selected': isSelected(r, c),
+                    'has-moves': hasAvailableMoves(r, c),
+                    'no-moves': hasNoAvailableMoves(r, c),
+                  }"
+                  (click)="onCellClick(r, c)"
+                >
+                  @if (cell.hasPiece) {
+                    <div 
+                      class="piece"
+                      [ngClass]="[cell.pieceColor || '', cell.isKing ? 'king' : '']"
+                    >
+                      @if (cell.isKing) { <div class="crown">♛</div> }
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="side-panel">
+    <div class="status-cards-container">
+      <div class="card shadow-sm border-0 mb-3">
+        <div class="card-body p-0">
+      
+        <!-- Current Turn Header -->
+        <div class="px-3 py-3 border-bottom" style="background-color: var(--card-bg); color: var(--card-text);">
+          <div class="d-flex align-items-center">
+            <div class="me-3">
+              <div class="rounded-circle" 
+                  [ngClass]="currentPlayer === 'white' ? 'bg-white border border-2 border-secondary' : 'bg-dark border border-2 border-light'"
+                  style="width: 36px; height: 36px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);">
+              </div>
+            </div>
+            <div>
+              <h6 class="mb-0 fw-semibold" i18n="@@GAME.TURN">Turn</h6>
+              <small>
+                @if (currentPlayer === 'white') { <span i18n="@@GAME_OVER.WHITE">White</span> }
+                @if (currentPlayer === 'black') { <span i18n="@@GAME_OVER.BLACK">Black</span> }
+              </small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Players Counts Row -->
+        <div class="d-flex" style="background-color: var(--card-bg);">
+          <!-- White Player -->
+          <div class="col-6">
+            <div class="counter-card px-3 py-3 text-center border-end" id="white-pieces-counter">
+              <div class="d-flex justify-content-center mb-2">
+                <div class="rounded-circle bg-white border border-2 border-secondary" 
+                    style="width: 28px; height: 28px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);">
+                </div>
+              </div>
+              <h6 class="mb-1 fw-semibold" i18n="@@GAME_OVER.WHITE">White</h6>
+              <div class="fs-1 fw-bold lh-1" style="color: var(--navbar-hover);">{{whiteCount}}<span class="counter-text fs-4">/12</span></div>
+            </div>
+          </div>
+
+          <!-- Black Player -->
+          <div class="col-6">
+            <div class="counter-card px-3 py-3 text-center" id="black-pieces-counter">
+              <div class="d-flex justify-content-center mb-2">
+                <div class="rounded-circle bg-dark border border-2 border-light" 
+                    style="width: 28px; height: 28px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);">
+                </div>
+              </div>
+              <h6 class="mb-1 fw-semibold" i18n="@@GAME_OVER.BLACK">Black</h6>
+              <div class="fs-1 fw-bold lh-1" style="color: var(--navbar-hover);">{{blackCount}}<span class="counter-text fs-4">/12</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <app-offline-moves [moves]="moves"></app-offline-moves>
+  </div>
+</div>
+
+<app-info-modal
+  [show]="showInfoModal"
+  [gameMode]="'local'"
+  (closeX)="onCloseModal()"
+  (closeGotIt)="onConfirmModal()">
+</app-info-modal>

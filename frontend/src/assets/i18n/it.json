@@ -1,7 +1,8 @@
 {
   "COMMON": {
-    "PLAY": "🎮 Gioca",
-    "RULES": "📖 Regole",
+    "PLAY": "Gioca",
+    "RULES": "Regole",
+    "THEME": "Cambia Tema",
     "LOGIN": "Accedi",
     "WELCOME": "Benvenuto",
     "COPY": "Copia",
@@ -9,6 +10,17 @@
     "SHARE_GAME": "Condividi questa partita",
     "SHARE_LINK": "Condividi questo link con il tuo avversario:",
     "LOADING": "Caricamento..."
+  },
+  "INFO_MODAL": {
+    "GOT_IT": "Capito!",
+    "OFFLINE_MODE_TITLE": "Gioco Locale",
+    "OFFLINE_MODE_PARAGRAPH_1": "Gioca sullo stesso dispositivo con qualcuno accanto a te, senza bisogno di internet.",
+    "OFFLINE_MODE_PARAGRAPH_2": "Le pedine bianche iniziano per prime, poi i giocatori si alternano.",
+    "OFFLINE_MODE_PARAGRAPH_3": "Clicca sulle tue pedine per vedere le mosse disponibili, poi clicca dove vuoi muoverti.",
+    "BOT_MODE_TITLE": "Sfida il Computer",
+    "BOT_MODE_PARAGRAPH_1": "Gioca contro un'intelligenza artificiale con livelli di difficoltà regolabili.",
+    "BOT_MODE_PARAGRAPH_2": "Scegli la difficoltà: Facile, Medio o Difficile per adattarla al tuo livello di abilità.",
+    "BOT_MODE_PARAGRAPH_3": "Il bot analizzerà la scacchiera e farà mosse strategiche. Prenditi il tempo per pianificare la tua strategia!"
   },
   "LOGIN": {
     "YOUR_NICKNAME": "Il tuo Nickname:",
@@ -30,6 +42,8 @@
     "TURN": "Turno",
     "WAITING_STATUS": "Attesa",
     "RECENT_MOVES": "Mosse Recenti",
+    "WHITE_PLAYER_TURN": "Turno giocatore bianco",
+    "BLACK_PLAYER_TURN": "Turno giocatore nero",
     "WHITE_TURN_ERROR": "È il turno del Giocatore Bianco!",
     "BLACK_TURN_ERROR": "È il turno del Giocatore Nero!"
   },
@@ -86,11 +100,12 @@
     "URL_DETECTED": "Non sono ammessi URL nei nickname", 
     "INVALID_CONTENT": "Questo nickname non è consentito",
     "SERVER_ERROR": "Si è verificato un errore durante la validazione del nickname",
-    "MISSING_NICKNAME": "Il nickname è obbligatorio"
+    "MISSING_NICKNAME": "Il nickname è obbligatorio",
+    "UNKNOWN": "Nome utente non valido. Prova ad inserirne un altro"
   },
   "CHAT": {
     "PLACEHOLDER": "Scrivi un messaggio...",
-    "CHAT_TITLE": "Chat:"
+    "CHAT_TITLE": "Messaggi"
   },
   "FOOTER": {
     "COPYRIGHT": "OnlineCheckers.org",
@@ -127,13 +142,13 @@
     "SERVER_ERROR": "Si è verificato un errore durante la connessione al server. Riprova più tardi.",
     "JOIN_FAILED": "Impossibile unirsi alla partita. Riprova.",
     "UNKNOWN_ERROR": "Si è verificato un errore sconosciuto. Riprova più tardi.",
-    "GO_TO_LOCAL_MODE": "Vai alla Modalità Locale",
+    "GO_TO_CPU_MODE": "Gioca contro la CPU",
     "CREATE_NEW_GAME": "Crea Nuova Partita"
   },
   "WEBSOCKET": {
-    "CONNECTED": "🟢 Connesso",
-    "CONNECTING": "🟡 Connessione...",
-    "DISCONNECTED": "🔴 Disconnesso", 
+    "CONNECTED": "Connesso",
+    "CONNECTING": "Connessione...",
+    "DISCONNECTED": "Disconnesso", 
     "RECONNECT": "Riconnetti",
     "CONNECTION_ERROR": "Connessione persa. Tentativo di riconnessione...",
     "MAX_ATTEMPTS_ERROR": "Impossibile connettersi al server. Ricarica la pagina."

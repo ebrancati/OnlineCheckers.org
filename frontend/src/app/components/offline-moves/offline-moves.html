@@ -1,0 +1,46 @@
+<div class="moves">
+  <h4 i18n="@@GAME.RECENT_MOVES">Recent Moves</h4>
+  <table class="moves-table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th i18n="@@GAME_OVER.WHITE">White</th>
+        <th i18n="@@GAME_OVER.BLACK">Black</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (turn of displayMoves; track turn.number) {
+        <!-- First line of the turn (turn number + first move of each color) -->
+        <tr>
+          <td class="turn-number" [attr.rowspan]="getRowSpan(turn)">{{ turn.number }}.</td>
+          <td class="move-cell">{{ turn.white.length > 0 ? turn.white[0].notation : '' }}</td>
+          <td class="move-cell">{{ turn.black.length > 0 ? turn.black[0].notation : '' }}</td>
+        </tr>
+
+        <!-- Additional lines for multiple captures (white) -->
+        @if (turn.white.length > 1) {
+          @for (move of turn.white | slice:1; track move.notation) {
+            <tr>
+              <td class="move-cell move-continuation">{{ move.notation }}</td>
+              @if (turn.black.length <= 1) {
+                <td></td>
+              }
+            </tr>
+          }
+        }
+
+        <!-- Additional lines for multiple captures (black) -->
+        @if (turn.black.length > 1) {
+          @for (move of turn.black | slice:1; track move.notation) {
+            <tr>
+              @if (turn.white.length <= 1) {
+                <td></td>
+              }
+              <td class="move-cell move-continuation">{{ move.notation }}</td>
+            </tr>
+          }
+        }
+      }
+    </tbody>
+  </table>
+</div>

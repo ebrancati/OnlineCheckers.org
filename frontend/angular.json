@@ -1,4 +1,3 @@
-
 {
   "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
   "version": 1,
@@ -10,6 +9,12 @@
       "root": "",
       "sourceRoot": "src",
       "prefix": "app",
+      "i18n": {
+        "sourceLocale": "en",
+        "locales": {
+          "it": "src/locale/messages.it.xlf"
+        }
+      },
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-angular:application",
@@ -18,7 +23,8 @@
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": [
-              "zone.js"
+              "zone.js",
+              "@angular/localize/init"
             ],
             "tsConfig": "tsconfig.app.json",
             "assets": [
@@ -30,6 +36,21 @@
               {
                 "glob": "**/*",
                 "input": "public"
+              },
+              {
+                "glob": "favicon.ico",
+                "input": "public",
+                "output": "/"
+              },
+              {
+                "glob": "*.png",
+                "input": "public",
+                "output": "/"
+              },
+              {
+                "glob": "site.webmanifest",
+                "input": "public",
+                "output": "/"
               }
             ],
             "styles": [
@@ -38,7 +59,12 @@
             ],
             "scripts": [
               "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"
-            ]
+            ],
+            "server": "src/main.server.ts",
+            "outputMode": "server",
+            "ssr": {
+              "entry": "src/server.ts"
+            }
           },
           "configurations": {
             "production": {
@@ -54,16 +80,104 @@
                   "maximumError": "800kB"
                 }
               ],
-              "outputHashing": "all"
+              "outputHashing": "all",
+              "localize": true
+            },
+            "production-en": {
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "50000kB",
+                  "maximumError": "100MB"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "400kB",
+                  "maximumError": "800kB"
+                }
+              ],
+              "outputHashing": "all",
+              "outputPath": "dist/en",
+              "baseHref": "/"
+            },
+            "production-it": {
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "50000kB",
+                  "maximumError": "100MB"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "400kB",
+                  "maximumError": "800kB"
+                }
+              ],
+              "outputHashing": "all",
+              "localize": ["it"],
+              "outputPath": "dist/it",
+              "baseHref": "/it/"
             },
             "development": {
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true
+            },
+            "development-it": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "localize": ["it"],
+              "baseHref": "/it/"
             }
           },
           "defaultConfiguration": "production"
         },
+
+        "server": {
+          "builder": "@angular-devkit/build-angular:server",
+          "options": {
+            "outputPath": "dist/server",
+            "main": "src/main.server.ts",
+            "tsConfig": "tsconfig.server.json"
+          },
+          "configurations": {
+            "production": {
+              "optimization": true,
+              "sourceMap": false,
+              "extractLicenses": true
+            },
+            "production-en": {
+              "optimization": true,
+              "sourceMap": false,
+              "extractLicenses": true
+            },
+            "production-it": {
+              "optimization": true,
+              "sourceMap": false,
+              "extractLicenses": true,
+              "localize": ["it"]
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+
+        "prerenderEn": {
+          "builder": "@angular-devkit/build-angular:prerender",
+          "options": {
+            "browserTarget": "frontend:build:production-en",
+            "serverTarget": "frontend:server:production-en",
+            "routes": [
+              "/",
+              "/login",
+              "/play/offline",
+              "/play/computer",
+              "/vs-bot",
+              "/privacy-policy"
+            ]
+          }
+        },
+
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
@@ -72,19 +186,26 @@
             },
             "development": {
               "buildTarget": "frontend:build:development"
+            },
+            "development-it": {
+              "buildTarget": "frontend:build:development-it",
+              "port": 4201
             }
           },
           "defaultConfiguration": "development"
         },
+
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n"
         },
+
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
             "polyfills": [
               "zone.js",
-              "zone.js/testing"
+              "zone.js/testing",
+              "@angular/localize/init"
             ],
             "tsConfig": "tsconfig.spec.json",
             "assets": [
