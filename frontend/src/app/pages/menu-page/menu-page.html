@@ -1,0 +1,50 @@
+<div class="menu-container mt-5">
+  <h2 i18n="@@MENU.SELECT_MODE">Select Game Mode</h2>
+
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="btn-group-custom d-flex flex-wrap" role="group">
+        <button
+          i18n="@@MENU.ONLINE"
+          class="menu-button-custom col-12 col-sm-4"
+          [class.selected]="selectedMode === 'online'"
+          (click)="selectMode('online')"
+        >
+          <div class="button-background"></div>
+          <span class="button-text">
+            Play Online
+            <i class="bi bi-globe me-2"></i>
+          </span>
+        </button>
+        <button
+          i18n="@@MENU.VS_COMPUTER"
+          class="menu-button-custom col-12 col-sm-4"
+          [class.selected]="selectedMode === 'bot'"
+          (click)="selectMode('bot')"
+        >
+          <div class="button-background"></div>
+          <span class="button-text">
+            Play against Computer
+            <i class="bi bi-robot me-2"></i>
+          </span>
+        </button>
+        <button
+          i18n="@@MENU.LOCAL"
+          class="menu-button-custom col-12 col-sm-4"
+          [class.selected]="selectedMode === 'local'"
+          (click)="selectMode('local')"
+        >
+          <div class="button-background"></div>
+          <span class="button-text">
+            Play Locally
+            <i class="bi bi-wifi-off me-2"></i>
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="rules">
+  <app-rules></app-rules>
+</div>

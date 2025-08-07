@@ -59,7 +59,12 @@
             ],
             "scripts": [
               "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"
-            ]
+            ],
+            "server": "src/main.server.ts",
+            "outputMode": "server",
+            "ssr": {
+              "entry": "src/server.ts"
+            }
           },
           "configurations": {
             "production": {
@@ -92,7 +97,6 @@
                 }
               ],
               "outputHashing": "all",
-              "localize": ["en"],
               "outputPath": "dist/en",
               "baseHref": "/"
             },
@@ -112,7 +116,7 @@
               "outputHashing": "all",
               "localize": ["it"],
               "outputPath": "dist/it",
-              "baseHref": "/"
+              "baseHref": "/it/"
             },
             "development": {
               "optimization": false,
@@ -123,11 +127,57 @@
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true,
+              "localize": ["it"],
+              "baseHref": "/it/"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+
+        "server": {
+          "builder": "@angular-devkit/build-angular:server",
+          "options": {
+            "outputPath": "dist/server",
+            "main": "src/main.server.ts",
+            "tsConfig": "tsconfig.server.json"
+          },
+          "configurations": {
+            "production": {
+              "optimization": true,
+              "sourceMap": false,
+              "extractLicenses": true
+            },
+            "production-en": {
+              "optimization": true,
+              "sourceMap": false,
+              "extractLicenses": true
+            },
+            "production-it": {
+              "optimization": true,
+              "sourceMap": false,
+              "extractLicenses": true,
               "localize": ["it"]
             }
           },
           "defaultConfiguration": "production"
         },
+
+        "prerenderEn": {
+          "builder": "@angular-devkit/build-angular:prerender",
+          "options": {
+            "browserTarget": "frontend:build:production-en",
+            "serverTarget": "frontend:server:production-en",
+            "routes": [
+              "/",
+              "/login",
+              "/play/offline",
+              "/play/computer",
+              "/vs-bot",
+              "/privacy-policy"
+            ]
+          }
+        },
+
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
@@ -144,9 +194,11 @@
           },
           "defaultConfiguration": "development"
         },
+
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n"
         },
+
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {

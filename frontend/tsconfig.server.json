@@ -1,0 +1,20 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./out-tsc/server",
+    "target": "ES2022",
+    "useDefineForClassFields": false,
+    "types": ["node"],
+    "module": "es2022",
+    "moduleResolution": "node",
+    "lib": ["es2020", "dom", "dom.iterable"],
+    "skipLibCheck": true
+  },
+  "include": [
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "src/test.ts",
+    "**/*.spec.ts"
+  ]
+}

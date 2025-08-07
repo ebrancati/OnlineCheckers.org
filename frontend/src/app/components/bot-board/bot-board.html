@@ -1,0 +1,149 @@
+<div class="container">
+  <div class="board-container">
+
+    @if (showErrorMessage) {
+      <div class="error-message">
+        <div class="error-content">
+          <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            @if (currentPlayer === playerColor) { <span i18n="@@BOT.YOUR_TURN_ERROR">It's your turn!</span>                                 }
+            @if (currentPlayer !== playerColor) { <span i18n="@@BOT.BOT_TURN_ERROR">It's the bot's turn! Please wait for its move...</span> }
+        </div>
+      </div>
+    }
+
+    @if (showGameOverModal) {
+      <div class="game-over-modal">
+        <div class="modal-content">
+          <div class="close-button" (click)="hideGameOverModal()">✕</div>
+          <h2 i18n="@@GAME_OVER.TITLE">Game Over!</h2>
+          <p>
+            @if (winner === playerColor) { <span i18n="@@BOT.YOU_WON">You won the game!</span>    }
+            @if (winner === botColor)    { <span i18n="@@BOT.BOT_WON">The bot won the game!</span>}
+          </p>
+          <button
+            i18n="@@GAME_OVER.NEW_GAME"
+            class="new-game-button"
+            (click)="resetGame()"
+          >New Game</button>
+        </div>
+      </div>
+    }
+
+    @if (isAnimatingCapture) {
+      <div class="capture-animation-indicator">
+        <p i18n="@@BOT.CAPTURING">Capturing...</p>
+      </div>
+    }
+
+    @if (isThinking) {
+      <div class="bot-thinking-indicator">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <p i18n="@@BOT.THINKING">Bot is thinking...</p>
+      </div>
+    }
+
+    <div class="board-with-coordinates">
+        <!-- Letter coordinates (columns) -->
+        <div class="column-labels">
+          @for (col of columns; track col) {
+            <div class="col-label">{{ col }}</div>
+          }
+        </div>
+
+        <div class="board-with-row-labels">
+          <!-- Coordinate numbers (rows) -->
+          <div class="row-labels">
+            @for (row of rows; track row) {
+              <div class="row-label">{{ row }}</div>
+            }
+          </div>
+
+          <div class="board">
+            @for (row of board; track $index; let r = $index) {
+              <div class="row">
+                @for (cell of row; track $index; let c = $index) {
+                  <div 
+                    class="square"
+                    [ngClass]="{
+                      'light': isLight(r, c),
+                      'dark': !isLight(r, c),
+                      'highlight': isHighlight(r, c),
+                      'selected': isSelected(r, c),
+                      'has-moves': hasAvailableMoves(r, c),
+                      'no-moves': hasNoAvailableMoves(r, c)
+                    }"
+                    (click)="onCellClick(r, c)"
+                  >
+                    @if (cell.hasPiece) {
+                      <div 
+                        class="piece"
+                        [ngClass]="[cell.pieceColor || '', cell.isKing ? 'king' : '']"
+                      >
+                        @if (cell.isKing) {<div class="crown">♛</div>}
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+    </div>
+  </div>
+
+  <div class="side-panel">
+    <!-- Bot Options Panel -->
+    <div class="bot-options card">
+      <div class="card-header">
+        <h4 i18n="@@BOT.OPTIONS">Bot Options</h4>
+      </div>
+      <div class="card-body">
+        <!-- Choose difficulty -->
+        <div class="mb-3">
+          <label i18n="@@BOT.DIFFICULTY" class="form-label">Difficulty Level</label>
+          <div class="difficulty-buttons w-100">
+            <button
+              (click)="setDifficulty(1)"
+              [class.active]="difficulty === 1"
+              class="btn btn-difficulty easy">
+              <div class="difficulty-icon">🙂</div>
+              <div i18n="@@BOT.EASY" class="difficulty-text">Easy</div>
+            </button>
+            <button
+              (click)="setDifficulty(2)"
+              [class.active]="difficulty === 2"
+              class="btn btn-difficulty medium">
+              <div class="difficulty-icon">😐</div>
+              <div i18n="@@BOT.MEDIUM" class="difficulty-text">Medium</div>
+            </button>
+            <button
+              (click)="setDifficulty(3)"
+              [class.active]="difficulty === 3"
+              class="btn btn-difficulty hard">
+              <div class="difficulty-icon">😈</div>
+              <div i18n="@@BOT.HARD" class="difficulty-text">Hard</div>
+            </button>
+          </div>
+        </div>
+
+        <!-- New game button -->
+        <button
+          i18n="@@BOT.NEW_GAME"
+          (click)="resetGame()"
+          class="btn-new-game w-100"
+        >New Game</button>
+      </div>
+    </div>
+
+    <app-offline-moves [moves]="moves"></app-offline-moves>
+  </div>
+</div>
+
+<app-info-modal
+  [show]="showInfoModal"
+  [gameMode]="'bot'"
+  (closeX)="onCloseModal()"
+  (closeGotIt)="onConfirmModal()">
+</app-info-modal>

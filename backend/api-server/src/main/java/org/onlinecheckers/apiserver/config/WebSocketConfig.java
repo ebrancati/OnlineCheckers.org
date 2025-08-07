@@ -26,9 +26,9 @@ public class WebSocketConfig implements WebSocketConfigurer {
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-
+        // Native WebSocket (recommended for better performance)
         registry.addHandler(gameWebSocketHandler, "/ws/game")
-                .setAllowedOriginPatterns("https://onlinecheckers.org","https://it.onlinecheckers.org")
+                .setAllowedOriginPatterns("*")
                 .addInterceptors(new HandshakeInterceptor() {
                     @Override
                     public boolean beforeHandshake(ServerHttpRequest request, 

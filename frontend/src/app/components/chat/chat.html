@@ -1,0 +1,24 @@
+<div class="chat">
+  <div class="chat-header">
+    <h5 i18n="@@CHAT.CHAT_TITLE">Chat</h5>
+  </div>
+  <div class="chat-messages" #chatMessages>
+    <div *ngFor="let line of chatHistory.split('\n')">
+      <div [innerHTML]="line"></div>
+    </div>
+  </div>
+  <div class="chat-input">
+    <input
+      [(ngModel)]="messageInput"
+      [disabled]="!canSendMessage()"
+      [placeholder]="canSendMessage() ? 'Write a message...' : (isSpectator ? 'Spectators cannot chat' : 'Waiting for opponent...')"
+      i18n-placeholder="@@CHAT.PLACEHOLDER"
+      (keydown)="onKeyDown($event)"
+    />
+    <button
+      (click)="sendMessage()"
+      [disabled]="!canSendMessage()"
+      [class.disabled]="!canSendMessage()"
+    >➥</button>
+  </div>
+</div>

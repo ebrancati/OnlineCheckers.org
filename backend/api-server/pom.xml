@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.onlinecheckers</groupId>
         <artifactId>backend-parent</artifactId>
-        <version>0.3.2-beta</version>
+        <version>0.4.0-beta</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     

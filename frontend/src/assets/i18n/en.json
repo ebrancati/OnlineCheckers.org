@@ -16,7 +16,11 @@
     "OFFLINE_MODE_TITLE": "Local Game",
     "OFFLINE_MODE_PARAGRAPHS_1": "Play on the same device with someone next to you, without needing internet.",
     "OFFLINE_MODE_PARAGRAPHS_2": "White pieces start first, then players alternate turns.", 
-    "OFFLINE_MODE_PARAGRAPHS_3": "Click on your pieces to see available moves, then click where you want to move."
+    "OFFLINE_MODE_PARAGRAPHS_3": "Click on your pieces to see available moves, then click where you want to move.",
+    "BOT_MODE_TITLE": "Computer Opponent",
+    "BOT_MODE_PARAGRAPHS_1": "Play on the same device with someone next to you, without needing internet.",
+    "BOT_MODE_PARAGRAPHS_2": "White pieces start first, then players alternate turns.", 
+    "BOT_MODE_PARAGRAPHS_3": "Click on your pieces to see available moves, then click where you want to move."
   },
   "LOGIN": {
     "YOUR_NICKNAME": "Your Nickname:",
@@ -111,15 +115,15 @@
     "PRIVACY_POLICY": "Privacy Policy"
   },
   "RULES": {
-    "TITLE": "English Checkers - Rules and How to Play",
-    "INTRODUCTION": "English Checkers is a traditional board game played on an 8x8 board with 12 pieces per player. It is one of the most widely played variants of checkers around the world.",
-    "HISTORY_TITLE": "History of English Checkers",
-    "HISTORY_TEXT_1": "English Checkers has a long history dating back to medieval times in England and other parts of Europe.",
+    "TITLE": "Checkers - Rules and How to Play",
+    "INTRODUCTION": "Checkers is a traditional board game played on an 8x8 board with 12 pieces per player. It is one of the most widely played variants of checkers around the world.",
+    "HISTORY_TITLE": "History of Checkers",
+    "HISTORY_TEXT_1": "Checkers has a long history dating back to medieval times in England and other parts of Europe.",
     "HISTORY_TEXT_2": "The first book on the game was published in 1756 by William Payne, titled 'An Introduction to the Game of Draughts'.",
     "HISTORY_TEXT_3": "The game's popularity spread throughout the British Empire and became particularly established in the United States, where it is commonly known as 'Checkers'.",
     "HISTORY_TEXT_4": "In 1847, the first world championship of checkers was held, establishing the game as a serious competitive pursuit.",
     "BOARD_TITLE": "The Board",
-    "BOARD_TEXT_1": "English Checkers is played on a standard 8x8 chessboard with 64 squares, using only the 32 dark squares.",
+    "BOARD_TEXT_1": "Checkers is played on a standard 8x8 chessboard with 64 squares, using only the 32 dark squares.",
     "BOARD_TEXT_2": "Each player begins with 12 pieces placed on the dark squares of the first three rows closest to them.",
     "MOVEMENT_TITLE": "Movement and Capture",
     "MOVEMENT_TEXT_1": "Pieces move diagonally forward one square at a time. They cannot move backward until they become kings.",
